@@ -37,8 +37,35 @@ interface AgentState {
   pending_progress: boolean;
 }
 
+function CustomInput({ inProgress, onSend }: { inProgress: boolean; onSend: (text: string) => void }) {
+  const { agent } = useAgent({ agentId: "sample_agent" });
+  const [text, setText] = useState("");
+  return (
+    <div className="p-2">
+      <Textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Ask me anything about the current project"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && !inProgress && text.trim()) {
+            e.preventDefault();
+            onSend(text);
+            setText("");
+          }
+        }}
+      />
+      <div className="flex items-center justify-between">
+        <Button disabled={inProgress || !text.trim()} onClick={() => { onSend(text); setText(""); }}>Send</Button>
+        {agent.isRunning && <StepProgress status="InProgress" state={agent.state} />}
+      </div>
+    </div>
+  );
+}
+
 function ConjecturalRequirementsInner() {
 
+  const { user } = useAuth();
+  const { settings } = useSettings();
   const { selectedProject, selectProjectById, projects, isLoading: isLoadingProjects } = useProject();
   const {
     requirements,
@@ -49,6 +76,30 @@ function ConjecturalRequirementsInner() {
     deleteRequirement,
     clearRequirements
   } = useRequirements();
+
+  useCopilotReadable({
+    description: "CurrentUser",
+    value: user,
+  }, [user]);
+
+  useCopilotReadable({
+    description: "CurrentProjectId",
+    value: selectedProject?.id,
+  }, [selectedProject?.id]);
+
+  useCopilotReadable({
+    description: "CurrentUserSettings",
+    value: settings,
+  }, [settings]);
+
+  useLangGraphInterrupt({
+      render: ({ event, resolve }) => (
+          <InterruptForm
+            inputCount={settings.quantity_req_batch}
+            onSubmit={resolve}
+          />
+      )
+  }, [settings.quantity_req_batch]);
 
   const searchParams = useSearchParams();
   const projectIdFromQuery = searchParams.get('projectId');
@@ -231,59 +282,6 @@ function ConjecturalRequirementsInner() {
 }
 
 export default function ConjecturalRequirementsPage() {
-  const { user } = useAuth();
-  const { settings } = useSettings();
-  const { selectedProject } = useProject();
-
-  useCopilotReadable({
-    description: "CurrentUser",
-    value: user,
-  }, [user]);
-
-  useCopilotReadable({
-    description: "CurrentProjectId",
-    value: selectedProject?.id,
-  }, [selectedProject?.id]);
-
-  useCopilotReadable({
-    description: "CurrentUserSettings",
-    value: settings,
-  }, [settings]);
-
-  useLangGraphInterrupt({
-      render: ({ event, resolve }) => (
-          <InterruptForm
-            inputCount={settings.quantity_req_batch}
-            onSubmit={resolve}
-          />
-      )
-  }, [settings.quantity_req_batch]);
-
-  function CustomInput({ inProgress, onSend }: { inProgress: boolean; onSend: (text: string) => void }) {
-    const { agent } = useAgent({ agentId: "sample_agent" });
-    const [text, setText] = useState("");
-    return (
-      <div className="p-2">
-        <Textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Ask me anything about the current project"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey && !inProgress && text.trim()) {
-              e.preventDefault();
-              onSend(text);
-              setText("");
-            }
-          }}
-        />
-        <div className="flex items-center justify-between">
-          <Button disabled={inProgress || !text.trim()} onClick={() => { onSend(text); setText(""); }}>Send</Button>
-          {agent.isRunning && <StepProgress status="InProgress" state={agent.state} />}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <CopilotSidebar
       Input={CustomInput}
