@@ -156,6 +156,95 @@ def _extract_entities_sync(text: str, language: str = "pt") -> list[str]:
     return _normalize_and_deduplicate(all_entities)
 
 
+def _find_matching_entity(span_text: str, entity_lookup: dict[str, str]) -> str | None:
+    """Find a known entity that matches the span (case-insensitive substring)."""
+    span_lower = span_text.lower().strip()
+    if not span_lower:
+        return None
+
+    # Exact match first
+    if span_lower in entity_lookup:
+        return entity_lookup[span_lower]
+
+    # Substring match: check if any entity is contained in the span or vice-versa
+    for key, original in entity_lookup.items():
+        if key in span_lower or span_lower in key:
+            return original
+
+    return None
+
+
+def _extract_relations_sync(
+    text: str,
+    entity_names: set[str],
+    language: str = "pt",
+) -> list[dict[str, str]]:
+    """Extract relations between known entities using textacy SVO triples.
+
+    Uses textacy's subject_verb_object_triples for robust extraction that
+    handles passive voice, compound subjects/objects, and subordinate clauses.
+    Matches extracted subjects and objects against known domain entities.
+
+    Returns list of {"source": ..., "target": ..., "relation": ...}.
+    """
+    import textacy.extract.triples
+
+    nlp = _load_spacy_model(language)
+    doc = nlp(text)
+
+    # Build lowercase lookup: lowercase -> original name
+    entity_lookup: dict[str, str] = {name.lower(): name for name in entity_names}
+
+    seen_relations: set[tuple[str, str, str]] = set()
+    relations: list[dict[str, str]] = []
+
+    for triple in textacy.extract.triples.subject_verb_object_triples(doc):
+        # Each triple has .subject, .verb, .object as lists of spaCy tokens
+        subj_text = " ".join(t.text for t in triple.subject).strip()
+        verb_text = " ".join(t.lemma_.lower() for t in triple.verb).strip()
+        obj_text = " ".join(t.text for t in triple.object).strip()
+
+        source_entity = _find_matching_entity(subj_text, entity_lookup)
+        target_entity = _find_matching_entity(obj_text, entity_lookup)
+
+        if not source_entity or not target_entity or source_entity == target_entity:
+            continue
+
+        key = (source_entity, target_entity, verb_text)
+        if key not in seen_relations:
+            seen_relations.add(key)
+            relations.append({
+                "source": source_entity,
+                "target": target_entity,
+                "relation": verb_text,
+            })
+
+    return relations
+
+
+async def extract_entity_relations(
+    text: Optional[str],
+    entity_names: set[str],
+    language: str = "pt",
+) -> list[dict[str, str]]:
+    """Extract relations between domain entities using spaCy dependency parsing.
+
+    Runs in a separate thread to avoid blocking the async event loop.
+
+    Args:
+        text: The project vision or requirements text.
+        entity_names: Set of known entity names to match against.
+        language: Language code ("pt" for Portuguese, "en" for English).
+
+    Returns:
+        List of {"source": ..., "target": ..., "relation": ...} dicts.
+    """
+    if not text or not text.strip() or len(entity_names) < 2:
+        return []
+
+    return await asyncio.to_thread(_extract_relations_sync, text, entity_names, language)
+
+
 async def extract_domain_entities(text: Optional[str], language: str = "pt") -> list[str]:
     """Extract domain entities from project vision text using NLP.
 

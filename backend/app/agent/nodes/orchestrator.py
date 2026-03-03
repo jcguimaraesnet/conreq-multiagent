@@ -14,8 +14,8 @@ from typing import Optional
 from urllib import response
 
 from langchain_core.runnables.config import RunnableConfig
-from langchain_core.messages import SystemMessage
-from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
+from app.agent.llm_config import get_model
 from copilotkit.langgraph import (
   copilotkit_emit_message, 
   copilotkit_emit_state,
@@ -121,7 +121,7 @@ async def classify_intent(user_input: str, config: Optional[RunnableConfig] = No
             reasoning="Empty or whitespace-only message"
         )
     
-    model = ChatOpenAI(model="gpt-4o")
+    model = get_model()
     
     # Use structured output for reliable classification
     structured_model = model.with_structured_output(IntentClassification)
@@ -130,7 +130,8 @@ async def classify_intent(user_input: str, config: Optional[RunnableConfig] = No
 
     try:
         result = await structured_model.ainvoke([
-            SystemMessage(content=prompt)
+            SystemMessage(content=prompt),
+            HumanMessage(content=user_input),
         ], config_internal)
         return IntentClassification(**dict(result))
     

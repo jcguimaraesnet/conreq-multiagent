@@ -72,6 +72,10 @@ class WorkflowState(CopilotKitState):
     # NLP extracted data
     domain_entities: List[str]
 
+    # Domain knowledge graph: entities (nodes), relations (edges), stakeholder, domain
+    # Serialized from KnowledgeGraph Pydantic model via kg_to_state()
+    knowledge_graph: Dict[str, Any]
+
     # Existing functional and non-functional requirements for the current project
     existing_requirements: List[Dict[str, Any]]
 

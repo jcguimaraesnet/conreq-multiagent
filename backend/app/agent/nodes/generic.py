@@ -8,8 +8,8 @@ informational queries that don't require the full requirement generation workflo
 from typing import Optional
 
 from langchain_core.runnables.config import RunnableConfig
-from langchain_core.messages import SystemMessage, AIMessage
-from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from app.agent.llm_config import get_model, extract_text
 from langgraph.graph import END
 from langgraph.types import Command
 from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_message
@@ -41,7 +41,7 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
     print(f"Last message from chat: {last_message}")
 
     # Initialize the model
-    model = ChatOpenAI(model="gpt-4o")
+    model = get_model()
 
     # Build requirements context from fetched data
     functional = [r for r in existing_requirements if r.get("type") == "functional"]
@@ -54,21 +54,25 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
         for r in existing_requirements
     ) if existing_requirements else "No requirements registered yet."
 
-    conversation = [SystemMessage(content=GENERIC_RESPONSE_PROMPT.format(
-        message=last_message,
-        vision_extracted_text=vision_extracted_text or "No vision document available.",
-        requirements_summary=requirements_summary,
-        requirements_list=requirements_list,
-    ))]
+    conversation = [
+        SystemMessage(content=GENERIC_RESPONSE_PROMPT.format(
+            vision_extracted_text=vision_extracted_text or "No vision document available.",
+            requirements_summary=requirements_summary,
+            requirements_list=requirements_list,
+        )),
+        HumanMessage(content=last_message),
+    ]
 
     try:
         response = await model.ainvoke(conversation, config_internal)
-        print(f"Generic response: {response.content[:100]}...")
+        print(f"Generic response: {extract_text(response.content)[:100]}...")
 
     except Exception as e:
         print(f"Generic node error: {e}")
         msg_exception = "I'm sorry, I encountered an error processing your request. How can I help you with requirements engineering today?"
         response = AIMessage(content=msg_exception)
+
+    response.content = extract_text(response.content)
 
     return Command(
         update={
@@ -89,9 +93,6 @@ If the user asks about matters unrelated to the software project and its require
 politely reply that you cannot answer because the question is outside your scope.
 
 Respond in the same language the user is using (English or Portuguese).
-
-The user's question is as follows:
-{message}
 
 Provide a clear and concise answer based on the information available about the project and its requirements.
 
