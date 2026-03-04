@@ -1420,7 +1420,7 @@ wheels = [
 
 [[package]]
 name = "langgraph-api"
-version = "0.7.61"
+version = "0.7.63"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
@@ -1451,9 +1451,9 @@ dependencies = [
     { name = "uvicorn" },
     { name = "watchfiles" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/62/fb/a09722ae7165f3f8c04cc49dd409e015deca2fedf33f39d306265d877a71/langgraph_api-0.7.61.tar.gz", hash = "sha256:893a6b8f6a4c87399f22472e0b0acc28d8845314e20d9c1976e26d0f4c9a26d6", size = 622534, upload-time = "2026-03-02T23:17:46.81Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/06/8e79e433c3aebadcecef55d9f4f7714ebb791615f1af7555b3090a695861/langgraph_api-0.7.63.tar.gz", hash = "sha256:bfdceab1fc4d52673334e94062a1dae39d4662faaac0beca2d4a0c1ff56762e4", size = 624998, upload-time = "2026-03-04T05:13:24.179Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/a3/4f95cf839c5c52d5cecd56f991bc7b271d3136ddb98c4334dce2e87cc3c1/langgraph_api-0.7.61-py3-none-any.whl", hash = "sha256:a7b30af1631a9d112eee03c52f1346a8541340649f54b1dc7e7e34b4142e03f2", size = 524941, upload-time = "2026-03-02T23:17:45.158Z" },
+    { url = "https://files.pythonhosted.org/packages/36/f0/b53c79ff985c2f3003cdafd5ee8535d4f41cfa35515aacbde06af25ae027/langgraph_api-0.7.63-py3-none-any.whl", hash = "sha256:f09d852de06291149a68e534a45ec2305acc9fd3e0dc6c81d1831921abbf23bd", size = 527837, upload-time = "2026-03-04T05:13:22.942Z" },
 ]
 
 [[package]]
