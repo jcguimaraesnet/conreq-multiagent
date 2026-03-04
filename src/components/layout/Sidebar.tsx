@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { LayoutDashboard, Settings, Bot, ChevronDown, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, Settings, Bot, ChevronDown, FolderKanban, BotMessageSquare } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AI_MODELS } from '@/constants';
@@ -17,8 +17,8 @@ export default function Sidebar() {
     <aside className="w-64 bg-surface-light dark:bg-surface-dark flex flex-col border-r border-border-light dark:border-border-dark flex-shrink-0 transition-colors duration-200">
       <div className="h-16 flex items-center px-6 border-b border-border-light dark:border-border-dark">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-black font-bold text-lg">C</div>
-          <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">Conjectural Assist</span>
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-black"><BotMessageSquare className="w-5 h-5" /></div>
+          <span className="font-bold text-1xl tracking-tight text-gray-900 dark:text-white">CONREQ Multi-Agent</span>
         </div>
       </div>
 
