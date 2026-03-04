@@ -26,7 +26,7 @@ export default function SettingsPanel() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                Require brief description to generate requirement
+                A brief description of the business need or desired positive impact
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 When enabled, a description must be provided before generating requirements
