@@ -83,6 +83,9 @@ class WorkflowState(CopilotKitState):
     # Existing functional and non-functional requirements for the current project
     existing_requirements: List[Dict[str, Any]]
 
+    # Canvas resources: strings emitted to the frontend via useCoAgent
+    canvas_resources: List[str]
+
     pending_progress: bool
     step1_elicitation: bool
     step2_analysis: bool

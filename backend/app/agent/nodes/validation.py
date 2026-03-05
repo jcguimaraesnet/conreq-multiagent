@@ -6,6 +6,8 @@ node, scoring each one from 1 to 10 based on quality criteria.
 """
 
 import asyncio
+import random
+import string
 from typing import Optional, List, Dict, Any
 
 from langchain_core.runnables.config import RunnableConfig
@@ -138,6 +140,16 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
 
     messages = messages + [response]
 
+    # --- Generate random canvas resources and emit them incrementally ---
+    state["canvas_resources"] = state.get("canvas_resources", [])
+    num_resources = random.randint(3, 6)
+    for i in range(num_resources):
+        random_str = "Resource-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        state["canvas_resources"].append(random_str)
+        print(f"[Validation] Canvas resource added: {random_str}")
+        await copilotkit_emit_state(config, state)
+        await asyncio.sleep(0.5)
+
     state["step4_validation"] = True
     await copilotkit_emit_state(config, state)
     await asyncio.sleep(2)
@@ -145,6 +157,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     return Command(
         update={
             "messages": messages,
+            "canvas_resources": state.get("canvas_resources", []),
             "step1_elicitation": True,
             "step2_analysis": True,
             "step3_specification": True,
