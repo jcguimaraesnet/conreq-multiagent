@@ -21,7 +21,7 @@ LLMProvider = Literal["openai", "gemini"]
 
 DEFAULT_LLM_PROVIDER: LLMProvider = "gemini"
 DEFAULT_OPENAI_MODEL = "gpt-4o"
-DEFAULT_GEMINI_MODEL = "gemini-3-flash-preview"
+DEFAULT_GEMINI_MODEL = "gemini-3-pro-preview"
 
 
 # ---------------------------------------------------------------------------

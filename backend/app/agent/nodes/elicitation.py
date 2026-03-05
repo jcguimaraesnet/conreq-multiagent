@@ -71,15 +71,21 @@ Analyze the following project vision document and existing requirements to extra
 1. **PRIMARY STAKEHOLDER**: the most important user role or stakeholder mentioned in the documents. Look for roles like "administrator", "manager", "operator", "end user", "customer", etc.
 2. **PROJECT DOMAIN**: the business or technical domain of the project (e.g., "healthcare", "e-commerce", "education", "financial services", "logistics", etc.).
 3. **PROJECT SUMMARY**: a comprehensive summary of up to 500 characters that integrates the context from the project vision document with the main capabilities described in the existing requirements. Preserve the understanding of each requirement while adding the broader project context from the vision. This summary will be used as the sole context for all downstream analysis, so maximize information density within the character limit.
+4. **BUSINESS OBJECTIVE**: the main business goal or value proposition the project aims to achieve (e.g., "reduce operational costs by automating X", "increase customer retention through Y", "enable Z for end users"). Up to 200 characters. Focus on the "why" behind the project, not the "what".
+5. **BUSINESS NEEDS**: identify exactly {quantity_req_batch} business needs derived from the project vision and existing requirements. Each business need should represent a high-level capability or necessity that the system must address to fulfill stakeholder goals. Each need should be a concise statement (up to 150 characters) describing what the business requires from the system.
 
 You MUST return ONLY a valid JSON object (no markdown, no explanation) with:
 - "stakeholder": the primary stakeholder role identified (string)
 - "domain": the project domain identified (string)
 - "summary": the concise project summary (string)
+- "business_objective": the main business objective identified (string)
+- "business_needs": an array of exactly {quantity_req_batch} strings, each representing a business need
 
 If you cannot identify a clear stakeholder, use "end user".
 If you cannot identify a clear domain, use "general software".
 If no documents are provided, set summary to "No project documentation available.".
+If no business objective is identifiable, use "No business objective identified.".
+If you cannot identify enough business needs, generate plausible ones based on the project context.
 
 Project vision document:
 {vision_text}
@@ -133,15 +139,17 @@ def _strip_markdown_fences(raw: str) -> str:
 async def extract_project_context(
     vision_extracted_text: Optional[str],
     existing_requirements: List[Dict[str, Any]],
-) -> Dict[str, str]:
+    quantity_req_batch: int = 1,
+) -> Dict[str, Any]:
     """
-    Extract stakeholder, domain, and a concise project summary in a single LLM call.
-    The summary replaces the raw vision document in all downstream prompts.
-    Falls back to defaults if extraction fails.
+    Extract stakeholder, domain, business objective, business needs, and a concise
+    project summary in a single LLM call. The summary replaces the raw vision
+    document in all downstream prompts. Falls back to defaults if extraction fails.
     """
     prompt = CONTEXT_EXTRACTION_SYSTEM_PROMPT.format(
         vision_text=vision_extracted_text or "No vision document available.",
         requirements=_format_requirements(existing_requirements),
+        quantity_req_batch=quantity_req_batch,
     )
 
     model = get_model(temperature=0)
@@ -154,6 +162,8 @@ async def extract_project_context(
             "stakeholder": result.get("stakeholder", "end user"),
             "domain": result.get("domain", "general software"),
             "summary": result.get("summary", "No vision document available."),
+            "business_objective": result.get("business_objective", "No business objective identified."),
+            "business_needs": result.get("business_needs", []),
         }
 
     except (json.JSONDecodeError, Exception) as e:
@@ -162,6 +172,8 @@ async def extract_project_context(
             "stakeholder": "end user",
             "domain": "general software",
             "summary": "No vision document available.",
+            "business_objective": "No business objective identified.",
+            "business_needs": [],
         }
 
 
@@ -283,6 +295,8 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
     context = extract_copilotkit_context(state)
     require_brief_description = context['require_brief_description']
     current_project_id = context['current_project_id']
+    batch_mode = context['batch_mode']
+    quantity_req_batch = 1 if batch_mode == False else context['quantity_req_batch']
 
     # Fetch vision document text and existing requirements from Supabase
     vision_extracted_text, existing_requirements = await fetch_project_context(
@@ -290,16 +304,20 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
         requirement_types=["functional", "non_functional"],
     )
 
-    # Step 1: Extract stakeholder, domain, and project summary (single LLM call)
+    # Step 1: Extract stakeholder, domain, project summary, and business needs (single LLM call)
     # After this step, the raw vision document is no longer used in LLM prompts.
     project_context = await extract_project_context(
-        vision_extracted_text, existing_requirements
+        vision_extracted_text, existing_requirements, quantity_req_batch
     )
-    stakeholder = project_context["stakeholder"]
-    domain = project_context["domain"]
     project_summary = project_context["summary"]
-    print(f"[Context] Stakeholder: {stakeholder} | Domain: {domain}")
+    domain = project_context["domain"]
+    stakeholder = project_context["stakeholder"]
+    business_objective = project_context["business_objective"]
+    business_needs = project_context["business_needs"]
     print(f"[Context] Project summary ({len(project_summary)} chars): {project_summary[:120]}...")
+    print(f"[Context] Stakeholder: {stakeholder} | Domain: {domain}")
+    print(f"[Context] Business objective: {business_objective}")
+    print(f"[Context] Business needs ({len(business_needs)}): {business_needs}")
 
     # Step 2: Extract domain entities from project summary using NLP (spaCy NER + TF-IDF)
     domain_entities = await extract_domain_entities(project_summary, language="pt")
@@ -385,6 +403,9 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
         edges=relations,
         stakeholder=stakeholder,
         domain=domain,
+        project_summary=project_summary,
+        business_objective=business_objective,
+        business_needs=business_needs,
     )
 
     # Validate with NetworkX (in-memory)
