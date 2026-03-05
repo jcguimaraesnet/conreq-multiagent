@@ -10,9 +10,8 @@ import { useProject } from '@/contexts/ProjectContext';
 import { useRequirements } from '@/contexts/RequirementsContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { CopilotSidebar } from "@copilotkit/react-ui";
-import { useCopilotReadable, useLangGraphInterrupt, useCoAgent } from "@copilotkit/react-core";
+import { useCopilotReadable, useLangGraphInterrupt } from "@copilotkit/react-core";
 import { useAgent } from "@copilotkit/react-core/v2";
-import ResourceCanvas from '@/components/conjectural-requirements/ResourceCanvas';
 import StepProgress from '@/components/requirements/StepProgress';
 import InterruptForm from '@/components/requirements/InterruptForm';
 import Spinner from "@/components/ui/Spinner";
@@ -31,7 +30,6 @@ interface AgentState {
   require_brief_description: boolean;
   batch_mode: boolean;
   quantity_req_batch: number;
-  canvas_resources: string[];
   step1_elicitation: boolean;
   step2_analysis: boolean;
   step3_specification: boolean;
@@ -65,14 +63,6 @@ function CustomInput({ inProgress, onSend }: { inProgress: boolean; onSend: (tex
 }
 
 function ConjecturalRequirementsInner() {
-  const { state } = useCoAgent<AgentState>({
-    name: "sample_agent",
-    initialState: {
-      canvas_resources: [],
-    } as AgentState,
-  });
-
-  const canvasResources: string[] = state.canvas_resources || [];
 
   const { user } = useAuth();
   const { settings } = useSettings();
@@ -287,8 +277,6 @@ function ConjecturalRequirementsInner() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
-
-      <ResourceCanvas resources={canvasResources} />
     </>
   );
 }
