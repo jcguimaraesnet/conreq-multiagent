@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { LayoutDashboard, Settings, Bot, ChevronDown, FolderKanban, BotMessageSquare } from 'lucide-react';
+import { LayoutDashboard, Bot, ChevronDown, FolderKanban, BotMessageSquare } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AI_MODELS } from '@/constants';
@@ -30,10 +30,6 @@ export default function Sidebar() {
         <Link id="sidebar-projects" className={isActive('/projects') ? activeClass : inactiveClass} href="/projects">
           <FolderKanban className={isActive('/projects') ? "w-5 h-5 text-primary dark:text-orange-400" : "w-5 h-5 group-hover:text-primary transition-colors"} />
           <span className="font-medium">Projects</span>
-        </Link>
-        <Link id="sidebar-settings" className={isActive('/settings') ? activeClass : inactiveClass} href="/settings">
-          <Settings className={isActive('/settings') ? "w-5 h-5 text-primary dark:text-orange-400" : "w-5 h-5 group-hover:text-primary transition-colors"} />
-          <span className="font-medium">Settings</span>
         </Link>
       </nav>
 

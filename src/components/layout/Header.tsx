@@ -2,10 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Folder, ChevronDown, Moon, Sun, LogOut } from 'lucide-react';
+import { Folder, ChevronDown, Moon, Sun, LogOut, Settings } from 'lucide-react';
+import { useOnborda } from 'onborda';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
+import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
+import SettingsModal from '@/components/settings/SettingsModal';
 
 export default function Header() {
   const pathname = usePathname();
@@ -15,8 +18,19 @@ export default function Header() {
   const { isDarkMode, toggleTheme, mounted } = useTheme();
   const { user } = useAuth();
   const { selectedProject, isLoading: isLoadingProjects } = useProject();
+  const { startOnborda } = useOnborda();
+  const { stageCompleted } = useOnboardingStatus();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Start settings-tour when modal opens and stage2 onboarding is pending
+  useEffect(() => {
+    if (isSettingsOpen && !stageCompleted.stage2) {
+      const timer = setTimeout(() => startOnborda('settings-tour'), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isSettingsOpen, stageCompleted.stage2, startOnborda]);
 
   // Only show project label if we have a projectId in URL and the project is loaded
   const hasValidProject = isRequirementsPage && projectIdFromQuery && selectedProject;
@@ -67,6 +81,7 @@ export default function Header() {
   };
 
   return (
+    <>
     <header className="h-16 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark flex items-center justify-between px-8 flex-shrink-0 transition-colors duration-200">
       <div className="w-64 sm:w-96">
         {hasValidProject ? (
@@ -93,6 +108,15 @@ export default function Header() {
         >
           <Sun className="w-5 h-5 hidden dark:block" />
           <Moon className="w-5 h-5 block dark:hidden" />
+        </button>
+
+        <button
+          id="header-settings"
+          onClick={() => setIsSettingsOpen(true)}
+          className="p-2 text-gray-500 hover:text-primary rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          title="Settings"
+        >
+          <Settings className="w-5 h-5" />
         </button>
 
         <div className="relative" ref={profileMenuRef}>
@@ -134,5 +158,8 @@ export default function Header() {
         </div>
       </div>
     </header>
+
+    <SettingsModal open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+    </>
   );
 }

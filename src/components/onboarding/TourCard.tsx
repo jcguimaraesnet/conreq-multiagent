@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useOnboardingStatus, type OnboardingStage } from '@/hooks/useOnboardingStatus';
 
 const NEXT_ROUTE_MAP: Record<string, string> = {
-  'home-tour': '/settings',
+  'settings-tour': '/projects',
 };
 
 const TOUR_STAGE_MAP: Record<string, OnboardingStage> = {
@@ -47,10 +47,15 @@ export default function TourCard({
       closeOnborda();
     } else if (isLastStepOfIntermediateTour) {
       completeCurrentStage();
-      const nextRoute = currentTour ? NEXT_ROUTE_MAP[currentTour] : null;
       closeOnborda();
-      if (nextRoute) {
-        router.push(nextRoute);
+
+      if (currentTour === 'home-tour') {
+        // Open settings modal by clicking the gear icon
+        const settingsBtn = document.querySelector('#header-settings') as HTMLButtonElement;
+        if (settingsBtn) settingsBtn.click();
+      } else {
+        const nextRoute = currentTour ? NEXT_ROUTE_MAP[currentTour] : null;
+        if (nextRoute) router.push(nextRoute);
       }
     } else {
       nextStep();
@@ -63,7 +68,8 @@ export default function TourCard({
   };
 
   const BUTTON_LABEL_MAP: Record<string, string> = {
-    'home-tour': 'Go to Settings',
+    'home-tour': 'Open Settings',
+    'settings-tour': 'Go to Projects',
   };
 
   const getNextButtonLabel = () => {

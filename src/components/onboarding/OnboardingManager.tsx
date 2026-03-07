@@ -8,13 +8,11 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const TOUR_MAP: Record<string, { tour: string; stage: OnboardingStage }> = {
   '/': { tour: 'home-tour', stage: 'stage1' },
-  '/settings': { tour: 'settings-tour', stage: 'stage2' },
   '/projects': { tour: 'projects-tour', stage: 'stage3' },
 };
 
 const FIRST_SELECTOR: Record<string, string> = {
-  'home-tour': '#sidebar-settings',
-  'settings-tour': '#setting-require-description',
+  'home-tour': '#header-settings',
   'projects-tour': '#btn-add-project',
 };
 

@@ -1,5 +1,5 @@
 import type { OnbordaProps } from 'onborda';
-import { Settings, FolderKanban, CheckCircle, Layers, Hash, PlusCircle, ArrowRightCircle } from 'lucide-react';
+import { Settings, CheckCircle, Layers, Hash, PlusCircle, ArrowRightCircle } from 'lucide-react';
 
 export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] {
   const projectActionsSelector = hasProjects
@@ -35,8 +35,8 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
             are generated.
           </>
         ),
-        selector: '#sidebar-settings',
-        side: 'right',
+        selector: '#header-settings',
+        side: 'bottom',
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
@@ -90,22 +90,6 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
         ),
         selector: '#setting-batch-quantity',
         side: 'top',
-        showControls: true,
-        pointerPadding: 10,
-        pointerRadius: 10,
-      },
-      {
-        icon: <FolderKanban className="w-5 h-5" />,
-        title: 'Go to Projects',
-        content: (
-          <>
-            Now that your settings are configured, click on{' '}
-            <strong>Projects</strong> in the sidebar to continue setting up your
-            workspace.
-          </>
-        ),
-        selector: '#sidebar-projects',
-        side: 'right',
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
