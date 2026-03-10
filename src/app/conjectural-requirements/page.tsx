@@ -337,7 +337,7 @@ function RequirementApprovalForm({ requirements, onResolve }: { requirements: Re
 }
 
 function CustomInput({ inProgress, onSend }: { inProgress: boolean; onSend: (text: string) => void }) {
-  const { agent } = useAgent({ agentId: "sample_agent" });
+  const { agent } = useAgent({ agentId: "conjec-req-agent" });
   const [text, setText] = useState("");
   return (
     <div className="p-2">

@@ -4,7 +4,7 @@
   "dependencies": ["."],
   "package_manager": "uv",
   "graphs": {
-    "sample_agent": "./app/agent/graph.py:graph"
+    "conjec-req-agent": "./app/agent/graph.py:graph"
   },
   "env": ".env"
 }

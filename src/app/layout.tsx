@@ -36,7 +36,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <CopilotKit runtimeUrl="/api/copilotkit" 
-                    agent="sample_agent" 
+                    agent="conjec-req-agent" 
                     showDevConsole={false}
                     properties={{
                       user_id_test: "123",
