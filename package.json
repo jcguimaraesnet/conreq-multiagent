@@ -14,9 +14,9 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@copilotkit/react-core": "1.51.4",
-    "@copilotkit/react-ui": "1.51.4",
-    "@copilotkit/runtime": "1.51.4",
+    "@copilotkit/react-core": "1.53.0",
+    "@copilotkit/react-ui": "1.53.0",
+    "@copilotkit/runtime": "1.53.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "clsx": "^2.1.1",
@@ -32,10 +32,10 @@
   },
   "pnpm": {
     "overrides": {
-      "@ag-ui/client": "0.0.43"
+      "@ag-ui/client": "0.0.47"
     },
     "patchedDependencies": {
-      "@copilotkit/runtime@1.51.4": "patches/@copilotkit__runtime@1.51.4.patch"
+      "@copilotkit/runtime@1.53.0": "patches/@copilotkit__runtime@1.53.0.patch"
     }
   },
   "devDependencies": {

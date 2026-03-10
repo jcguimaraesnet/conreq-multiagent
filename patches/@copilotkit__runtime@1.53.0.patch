@@ -1,0 +1,36 @@
+diff --git a/dist/lib/runtime/agent-integrations/langgraph/agent.cjs b/dist/lib/runtime/agent-integrations/langgraph/agent.cjs
+index 122c615513a364b8e378cb4bcd6cec3188edf855..d9b1e8955e44905d17694a7cf7a86395ed230161 100644
+--- a/dist/lib/runtime/agent-integrations/langgraph/agent.cjs
++++ b/dist/lib/runtime/agent-integrations/langgraph/agent.cjs
+@@ -84,7 +84,12 @@ var LangGraphAgent = class extends _ag_ui_langgraph.LangGraphAgent {
+ 			if (rawEvent.metadata["copilotkit:emit-tool-calls"] === false && isToolEvent) return false;
+ 		}
+ 		if ("copilotkit:emit-messages" in (rawEvent.metadata || {})) {
+-			if (rawEvent.metadata["copilotkit:emit-messages"] === false && isMessageEvent) return false;
++			if (rawEvent.metadata["copilotkit:emit-messages"] === false && isMessageEvent) {
++				if (this.activeRun?.id) {
++					this.messagesInProcess[this.activeRun.id] = null;
++				}
++				return false;
++			}
+ 		}
+ 		this.subscriber.next(event);
+ 		return true;
+diff --git a/dist/lib/runtime/agent-integrations/langgraph/agent.mjs b/dist/lib/runtime/agent-integrations/langgraph/agent.mjs
+index 2d599883e0d836d781b6fbe865dfb835eca85fc4..e86df9c71fa52ec84acf8f5b48217b92bd1672fc 100644
+--- a/dist/lib/runtime/agent-integrations/langgraph/agent.mjs
++++ b/dist/lib/runtime/agent-integrations/langgraph/agent.mjs
+@@ -83,7 +83,12 @@ var LangGraphAgent$1 = class extends LangGraphAgent {
+ 			if (rawEvent.metadata["copilotkit:emit-tool-calls"] === false && isToolEvent) return false;
+ 		}
+ 		if ("copilotkit:emit-messages" in (rawEvent.metadata || {})) {
+-			if (rawEvent.metadata["copilotkit:emit-messages"] === false && isMessageEvent) return false;
++			if (rawEvent.metadata["copilotkit:emit-messages"] === false && isMessageEvent) {
++				if (this.activeRun?.id) {
++					this.messagesInProcess[this.activeRun.id] = null;
++				}
++				return false;
++			}
+ 		}
+ 		this.subscriber.next(event);
+ 		return true;
