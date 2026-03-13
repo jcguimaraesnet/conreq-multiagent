@@ -76,8 +76,9 @@ def get_model(
             ),
             azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
             api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
-            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
+            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-03-01-preview"),
             temperature=temperature,
+            use_responses_api=True,
         )
 
     if provider == "llama_azure":
