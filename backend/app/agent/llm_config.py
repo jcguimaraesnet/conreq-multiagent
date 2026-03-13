@@ -10,7 +10,7 @@ import os
 from contextvars import ContextVar
 from typing import Any, Literal, Optional
 
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.genai.types import AutomaticFunctionCallingConfig
 
@@ -18,11 +18,13 @@ from google.genai.types import AutomaticFunctionCallingConfig
 # Provider / model constants
 # ---------------------------------------------------------------------------
 
-LLMProvider = Literal["gpt", "gemini"]
+LLMProvider = Literal["gpt", "gemini", "gpt_azure", "llama_azure"]
 
 DEFAULT_LLM_PROVIDER: LLMProvider = "gemini"
 DEFAULT_OPENAI_MODEL = "gpt-4o"
 DEFAULT_GEMINI_MODEL = "gemini-3-pro-preview"
+DEFAULT_AZURE_OPENAI_MODEL = "gpt-4o"
+DEFAULT_AZURE_AI_MODEL = "Llama-3.3-70B-Instruct"
 
 # ---------------------------------------------------------------------------
 # Per-request provider (set once in orchestrator, read by all nodes)
@@ -51,7 +53,7 @@ def get_model(
 
     Parameters
     ----------
-    provider : "gpt" | "gemini" | None
+    provider : "gpt" | "gemini" | "gpt_azure" | "llama_azure" | None
         Which LLM backend to use.  Defaults to the per-request provider
         set via ``set_model_provider()``, or ``DEFAULT_LLM_PROVIDER``.
     model : str | None
@@ -64,6 +66,25 @@ def get_model(
     if provider == "gpt":
         return ChatOpenAI(
             model=model or DEFAULT_OPENAI_MODEL,
+            temperature=temperature,
+        )
+
+    if provider == "gpt_azure":
+        return AzureChatOpenAI(
+            azure_deployment=os.environ.get(
+                "AZURE_OPENAI_DEPLOYMENT_NAME", model or DEFAULT_AZURE_OPENAI_MODEL
+            ),
+            azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+            api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
+            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
+            temperature=temperature,
+        )
+
+    if provider == "llama_azure":
+        return ChatOpenAI(
+            model=model or DEFAULT_AZURE_AI_MODEL,
+            base_url=os.environ["AZURE_AI_ENDPOINT"],
+            api_key=os.environ.get("AZURE_AI_API_KEY"),
             temperature=temperature,
         )
 

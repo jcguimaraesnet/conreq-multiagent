@@ -294,8 +294,10 @@ export default function SettingsPanel() {
             onChange={(e) => updateSetting('model', e.target.value)}
             className="px-3 py-2 text-xs font-medium rounded-lg border border-border-light dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
-            <option value="gemini">Gemini 3 family</option>
-            <option value="gpt">GPT 5 family</option>
+            <option value="gemini">Gemini 3 Family</option>
+            <option value="gpt">GPT 5 Family</option>
+            <option value="gpt_azure">GPT 5 Family (Azure)</option>
+            <option value="llama_azure">Llama 70B (Azure)</option>
           </select>
         </div>
       </div>
