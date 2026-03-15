@@ -80,15 +80,15 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
       },
       {
         icon: <ShieldCheck className="w-5 h-5" />,
-        title: 'Approve Requirements',
+        title: 'Evaluate Requirements',
         content: (
           <>
             When enabled, each conjectural requirement generated must be
-            explicitly <strong>approved</strong> or <strong>rejected</strong>{' '}
-            before being finalized.
+            <strong> evaluated</strong> by the user using quality criteria
+            before proceeding.
           </>
         ),
-        selector: '#setting-require-approve',
+        selector: '#setting-require-evaluation',
         side: 'bottom',
         showControls: true,
         pointerPadding: 10,

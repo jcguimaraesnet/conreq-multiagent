@@ -31,7 +31,7 @@ def extract_copilotkit_context(state: WorkflowState) -> dict:
         "current_user_first_name": current_user.get("user_metadata", {}).get("first_name") if current_user else None,
         "current_project_id": current_project_id,
         "require_brief_description": current_user_settings.get("require_brief_description"),
-        "require_approve": current_user_settings.get("require_approve"),
+        "require_evaluation": current_user_settings.get("require_evaluation"),
         "batch_mode": batch_mode,
         "quantity_req_batch": quantity_req_batch,
         "model": current_user_settings.get("model"),

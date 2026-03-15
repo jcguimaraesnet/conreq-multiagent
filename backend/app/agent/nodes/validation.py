@@ -103,10 +103,10 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     messages = state.get("messages", [])
 
     context = extract_copilotkit_context(state)
-    require_approve = context['require_approve']
+    require_evaluation = context['require_evaluation']
 
     # --- Step 1: Human evaluation (interrupt) ---
-    if require_approve:
+    if require_evaluation:
         # Build requirements list for frontend interrupt
         requirements_list = []
         for i, cd in enumerate(data_context.conjectural_data):
@@ -155,7 +155,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
             print(f"[Validation] Error parsing human evaluation response: {e}")
             print(f"[Validation] Raw response: {human_evaluation_response}")
 
-    elif not require_approve:
+    elif not require_evaluation:
         print("[Validation] Human evaluation not required — skipping interrupt.")
     else:
         print("[Validation] Resuming after interrupt — human evaluation already completed.")

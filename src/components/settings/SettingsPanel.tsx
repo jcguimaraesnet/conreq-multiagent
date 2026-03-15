@@ -8,12 +8,12 @@ import { useSettings } from '@/contexts/SettingsContext';
 export default function SettingsPanel() {
   const { settings, isLoading, updateSetting, updateSettings } = useSettings();
 
-  const isHumanInTheLoopEnabled = settings.require_brief_description || settings.require_approve;
+  const isHumanInTheLoopEnabled = settings.require_brief_description || settings.require_evaluation;
 
   const handleHumanInTheLoopToggle = (value: boolean) => {
     updateSettings({
       require_brief_description: value,
-      require_approve: value,
+      require_evaluation: value,
     });
   };
 
@@ -178,21 +178,21 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Sub-setting 2: Require Approve */}
-      <div id="setting-require-approve" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
+      {/* Sub-setting 2: Require Evaluation */}
+      <div id="setting-require-evaluation" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
-              <span className="font-semibold text-primary">Human-in-the-Loop</span> for approve conjectural requirements
+              <span className="font-semibold text-primary">Human-in-the-Loop</span> for evaluating conjectural requirements
             </h3>
             <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
-              When enabled, conjectural requirements must be explicitly approved or rejected.
+              When enabled, conjectural requirements must be evaluated by the user before proceeding.
             </p>
           </div>
           <Toggle
             size="sm"
-            checked={settings.require_approve}
-            onChange={(value) => updateSetting('require_approve', value)}
+            checked={settings.require_evaluation}
+            onChange={(value) => updateSetting('require_evaluation', value)}
           />
         </div>
       </div>
