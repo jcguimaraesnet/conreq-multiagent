@@ -42,7 +42,7 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
     print(f"Last message from chat: {last_message}")
 
     # Initialize the model
-    model = get_model(provider=model_provider)
+    model = get_model(provider=model_provider, temperature=1.0)
 
     # Build requirements context from fetched data
     functional = [r for r in existing_requirements if r.get("type") == "functional"]

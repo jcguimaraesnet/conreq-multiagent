@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import Spinner from "@/components/ui/Spinner";
+import { createPortal } from "react-dom";
+import { Settings, Check } from "lucide-react";
 
 interface StepState {
   step1_elicitation: boolean;
@@ -31,6 +32,17 @@ const CHECK_DISPLAY_MS = 300;
 // Even phase (0,2,4,6) = spinner for step at index phase/2
 // Odd phase (1,3,5,7) = check for step at index (phase-1)/2
 // Phase 8 = all done
+
+function OverlayCard({ children }: { children: React.ReactNode }) {
+  return createPortal(
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/30 dark:bg-black/50">
+      <div className="flex flex-col items-center gap-6 rounded-2xl bg-white/90 dark:bg-surface-dark/95 p-10 shadow-2xl backdrop-blur-sm border border-border-light dark:border-border-dark min-w-[340px]">
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 export default function StepProgress({ state }: StepProgressProps) {
   const [phase, setPhase] = useState(0);
@@ -80,28 +92,58 @@ export default function StepProgress({ state }: StepProgressProps) {
   }, [phase, s1, s2, s3, s4, pending, advance]);
 
   const stepIndex = Math.floor(phase / 2);
-  const isCheckPhase = phase % 2 === 1;
   const currentStep = stepIndex < steps.length ? steps[stepIndex] : null;
 
   if (!state.pending_progress) {
     return (
-      <div className="flex items-center gap-2">
-        <Spinner size="sm" />
-        <span className="text-gray-700 dark:text-gray-300">Processing request...</span>
-      </div>
+      <OverlayCard>
+        <Settings
+          className="h-12 w-12 text-orange-500 dark:text-orange-400 animate-spin"
+          style={{ animationDuration: "3s" }}
+        />
+        <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
+          Processing request...
+        </span>
+      </OverlayCard>
     );
   }
 
-  if (!currentStep) return null;
+  if (!currentStep) {
+    return (
+      <OverlayCard>
+        <Check className="h-12 w-12 text-green-500" />
+        <span className="text-lg font-medium text-green-600 dark:text-green-400">
+          Complete!
+        </span>
+        <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+          <div className="h-full rounded-full bg-green-500 w-full" />
+        </div>
+      </OverlayCard>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-2">
-      {isCheckPhase ? (
-        <span className="text-green-600">✅</span>
-      ) : (
-        <Spinner size="sm" />
-      )}
-      <span className="text-gray-700 dark:text-gray-300">{currentStep.label}</span>
-    </div>
+    <OverlayCard>
+      <Settings
+        className="h-12 w-12 text-orange-500 dark:text-orange-400 animate-spin"
+        style={{ animationDuration: "3s" }}
+      />
+
+      <div className="flex items-center gap-3">
+        <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+          {currentStep.label}
+        </span>
+        <span className="text-sm text-orange-500 dark:text-orange-400 animate-pulse">
+          processing...
+        </span>
+      </div>
+
+      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+        <div
+          className="h-full rounded-full bg-orange-500 transition-all duration-500 ease-out"
+          style={{ width: `${(phase / (steps.length * 2)) * 100}%` }}
+        />
+      </div>
+    </OverlayCard>
   );
 }
