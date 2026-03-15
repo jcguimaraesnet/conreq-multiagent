@@ -15,35 +15,14 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from app.agent.llm_config import get_model, extract_text
 from langgraph.types import Command
 from copilotkit.langgraph import copilotkit_emit_state, copilotkit_customize_config
-from pydantic import BaseModel, Field
 
 from app.agent.state import WorkflowState
 from app.agent.utils.context_utils import extract_copilotkit_context
-from app.agent.models.data_context import DataContext
+from app.agent.models.data_context import DataContext, ConjecturalRequirement
 from app.agent.models.knowledge_graph import (
     KnowledgeGraph,
     kg_from_state,
 )
-
-
-class FERC(BaseModel):
-    """Writing Format for Conjectural Requirements."""
-    desired_behavior: str = Field(description="The desired system behavior")
-    positive_impact: str = Field(description="The need or positive impact of the desired attribute")
-    uncertainties: List[str] = Field(description="Uncertainties associated with this requirement")
-
-
-class QESS(BaseModel):
-    """Solution Assumption Experimentation Framework."""
-    solution_assumption: str = Field(description="Description of the solution assumption being tested")
-    uncertainty_evaluated: str = Field(description="The single uncertainty that will be evaluated")
-    observation_analysis: str = Field(description="Observation and analysis that will update the uncertainty")
-
-
-class ConjecturalRequirement(BaseModel):
-    """A conjectural software requirement specified using FERC and QESS."""
-    ferc: FERC
-    qess: QESS
 
 
 CONJECTURAL_SPECIFICATION_PROMPT = """You are an expert in software requirements specification with uncertainties.
@@ -62,21 +41,21 @@ here called a "conjectural requirement."
 
 **Business Objective:** {business_objective}
 
-## Positive Business Impacts, Uncertainties, and Solution Hypotheses
+## Positive Business Impact, Uncertainty, and Solution Hypothesis
 
-Each conjectural requirement MUST be based on one of the following positive impacts, its associated uncertainty, and the proposed solution hypothesis:
+Generate exactly ONE conjectural requirement specification for the following input:
 
-{conjectural_raw_text}
+- **Positive Impact:** {positive_impact}
+- **Uncertainty:** {uncertainty}
+- **Solution Hypothesis:** {supposition_solution}
 
 ## Instruction
 
-For each positive impact, uncertainty, and hypothesis listed above, generate exactly ONE conjectural requirement specification following the FERC writing format and the QESS framework described below.
+Generate exactly ONE conjectural requirement specification following the FERC writing format and the QESS framework described below.
 
 The FERC's "desired behavior" should address the positive impact, the "positive impact" should relate to the business objective, and the "uncertainties" MUST include the associated uncertainty identified above (you may add additional uncertainties if relevant).
 
 The QESS's "solution assumption" should be based on the proposed hypothesis, and the experiment should aim to resolve the associated uncertainty.
-
-Generate exactly {count} conjectural requirement(s) in total.
 
 ---
 
@@ -145,7 +124,7 @@ QESS:
 
 ---
 
-You MUST return ONLY a valid JSON array with exactly {count} element(s) (no markdown, no explanation) where each element has:
+You MUST return ONLY a valid JSON object (no markdown, no explanation) with:
 - "ferc": an object with:
   - "desired_behavior": the [desired behavior] part of the FERC (string)
   - "positive_impact": the [need or positive impact] part of the FERC (string)
@@ -199,43 +178,41 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
     domain = data_context.domain
     project_summary = data_context.project_summary
     business_objective = data_context.business_objective
-    positive_impacts = data_context.positive_impacts
-    uncertainties = data_context.uncertainties
-    suppositions = data_context.suppositions_solution
     print(f"[Specification] Stakeholder: {stakeholder} | Domain: {domain}")
     print(f"[Specification] Project summary ({len(project_summary)} chars): {project_summary[:120]}...")
     print(f"[Specification] Business objective: {business_objective}")
-    print(f"[Specification] Conjectural descriptions ({len(suppositions)}):")
-    for impact, uncertainty, hypothesis in zip(positive_impacts, uncertainties, suppositions):
-        print(f"  [Impact] {impact[:60]} → [Uncertainty] {uncertainty[:60]} → [Hypothesis] {hypothesis[:80]}")
+    print(f"[Specification] Conjectural descriptions ({len(data_context.conjectural_data)}):")
+    for cd in data_context.conjectural_data:
+        print(f"  [Impact] {cd.positive_impact[:60]} → [Uncertainty] {cd.uncertainty[:60]} → [Hypothesis] {cd.supposition_solution[:80]}")
 
-    # --- Step 3: Call LLM to generate conjectural requirements ---
-    conjectural_raw_text = "\n".join(
-        f"- **Positive Impact:** {impact}\n  **Uncertainty:** {uncertainty}\n  **Solution Hypothesis:** {hypothesis}"
-        for impact, uncertainty, hypothesis in zip(positive_impacts, uncertainties, suppositions)
-    )
-    prompt = CONJECTURAL_SPECIFICATION_PROMPT.format(
-        project_summary=project_summary,
-        domain=domain,
-        stakeholder=stakeholder,
-        business_objective=business_objective,
-        conjectural_raw_text=conjectural_raw_text,
-        count=quantity_req_batch,
-    )
-
+    # --- Step 3: Call LLM to generate conjectural requirements (one per ConjecturalData) ---
     model = get_model(temperature=0)
 
-    conjectural_requirements: List[ConjecturalRequirement] = []
+    print(f"[Specification] Generating {quantity_req_batch} conjectural requirement(s)...")
 
-    try:
-        response = await model.ainvoke([HumanMessage(content=prompt)])
-        raw_content = _strip_markdown_fences(extract_text(response.content).strip())
-        raw_list: List[Dict[str, Any]] = json.loads(raw_content)
-        conjectural_requirements = [ConjecturalRequirement.model_validate(item) for item in raw_list]
-        print(f"[Specification] Conjectural requirements generated: {len(conjectural_requirements)}")
+    for i, cd in enumerate(data_context.conjectural_data[:quantity_req_batch]):
+        req_num = i + 1
+        print(f"[Specification] Generating requirement #{req_num}...")
 
-        for i, cr in enumerate(conjectural_requirements, start=1):
-            print(f"  --- Conjectural Requirement #{i} ---")
+        prompt = CONJECTURAL_SPECIFICATION_PROMPT.format(
+            project_summary=project_summary,
+            domain=domain,
+            stakeholder=stakeholder,
+            business_objective=business_objective,
+            positive_impact=cd.positive_impact,
+            uncertainty=cd.uncertainty,
+            supposition_solution=cd.supposition_solution,
+        )
+
+        try:
+            response = await model.ainvoke([HumanMessage(content=prompt)])
+            raw_content = _strip_markdown_fences(extract_text(response.content).strip())
+            raw_dict: Dict[str, Any] = json.loads(raw_content)
+            cr = ConjecturalRequirement.model_validate(raw_dict)
+            cr.attempt = len(cd.conjectural_requirements) + 1
+            cd.conjectural_requirements.append(cr)
+
+            print(f"  --- Conjectural Requirement #{req_num} (attempt {cr.attempt}) ---")
             print(f"  [FERC] Desired behavior: {cr.ferc.desired_behavior}")
             print(f"  [FERC] Positive impact: {cr.ferc.positive_impact}")
             for j, uncertainty in enumerate(cr.ferc.uncertainties, start=1):
@@ -244,12 +221,10 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
             print(f"  [QESS] Uncertainty evaluated: {cr.qess.uncertainty_evaluated}")
             print(f"  [QESS] Observation & analysis: {cr.qess.observation_analysis}")
 
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"[Specification] Error generating conjectural requirements: {e}")
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"[Specification] Error generating requirement #{req_num}: {e}")
 
-    # --- Store conjectural requirements inside DataContext ---
-    data_context.conjectural_requirements = [cr.model_dump() for cr in conjectural_requirements]
-    print(f"[Specification] Generated {len(data_context.conjectural_requirements)} conjectural requirement(s).")
+    print(f"[Specification] Finished generating conjectural requirements.")
 
     messages = state.get("messages", [])
 

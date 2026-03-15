@@ -93,5 +93,6 @@ class WorkflowState(CopilotKitState):
     step3_specification: bool
     step4_validation: bool
 
-    # Flag to skip LLM re-evaluation on interrupt resume
-    validation_evaluated: bool
+    # Flags to track evaluation completion (avoid re-evaluation on resume)
+    human_evaluated: bool
+    llm_evaluated: bool

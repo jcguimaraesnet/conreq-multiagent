@@ -54,7 +54,52 @@ interface RequirementItem {
   observation_analysis: string;
 }
 
-function SingleCard({ req, allRequirements, onShiftClick }: { req: RequirementItem; allRequirements: RequirementItem[]; onShiftClick?: () => void }) {
+const QUALITY_CRITERIA = [
+  { key: "unambiguous", label: "Unambiguous" },
+  { key: "completeness", label: "Completeness" },
+  { key: "atomicity", label: "Atomicity" },
+  { key: "verifiable", label: "Verifiable" },
+  { key: "conforming", label: "Conforming" },
+] as const;
+
+const LIKERT_LABELS: Record<number, string> = {
+  1: "Very Poor",
+  2: "Poor",
+  3: "Regular",
+  4: "Good",
+  5: "Very Good",
+};
+
+interface EvaluationData {
+  scores: Partial<Record<string, number>>;
+  justifications: Partial<Record<string, string>>;
+}
+
+type Evaluations = Record<number, EvaluationData>;
+
+function isRequirementEvaluated(evalData?: EvaluationData): boolean {
+  if (!evalData) return false;
+  return QUALITY_CRITERIA.every(({ key }) => {
+    const score = evalData.scores[key];
+    if (score == null) return false;
+    if (score < 5 && !evalData.justifications[key]?.trim()) return false;
+    return true;
+  });
+}
+
+function SingleCard({
+  req,
+  allRequirements,
+  evaluations,
+  onUpdateScore,
+  onUpdateJustification,
+}: {
+  req: RequirementItem;
+  allRequirements: RequirementItem[];
+  evaluations: Evaluations;
+  onUpdateScore: (reqNumber: number, criterion: string, score: number) => void;
+  onUpdateJustification: (reqNumber: number, criterion: string, text: string) => void;
+}) {
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"ferc" | "qess">("ferc");
   const [modalIndex, setModalIndex] = useState(0);
@@ -92,13 +137,31 @@ function SingleCard({ req, allRequirements, onShiftClick }: { req: RequirementIt
   return (
     <>
       <div
-        onClick={(e) => { if (e.shiftKey && onShiftClick) { e.preventDefault(); window.getSelection()?.removeAllRanges(); onShiftClick(); } else { openModal(); } }}
-        className="rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/20 p-3 mt-6 mb-2 relative w-62 shrink-0 h-65 overflow-hidden transition-colors cursor-pointer hover:border-orange-300 dark:hover:border-orange-600">
+        onClick={openModal}
+        className="group rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/20 p-3 mt-6 mb-2 relative w-62 shrink-0 h-65 overflow-hidden transition-colors cursor-pointer hover:border-orange-300 dark:hover:border-orange-600">
         <div className="absolute top-0.5 right-2 p-0.5 text-orange-400">
           <Maximize2 className="w-3.5 h-3.5" />
         </div>
+        {/* Hover overlay */}
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+          <span className="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg shadow-lg">
+            Evaluate
+          </span>
+        </div>
+        {/* Status badge */}
+        <div className="absolute top-2 left-2 z-10">
+          {isRequirementEvaluated(evaluations[req.requirement_number]) ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+              Evaluated
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">
+              Pending
+            </span>
+          )}
+        </div>
         <div className="flex flex-col items-center h-full">
-          <div className="font-bold text-orange-600 dark:text-orange-400 text-lg mt-3 mb-4 text-center">
+          <div className="font-bold text-orange-600 dark:text-orange-400 text-lg mt-7 mb-4 text-center">
             Conjectural Req #{req.requirement_number}
           </div>
           <p className="text-lg text-gray-700 dark:text-gray-200 line-clamp-11 text-center">
@@ -110,14 +173,12 @@ function SingleCard({ req, allRequirements, onShiftClick }: { req: RequirementIt
 
       {showModal && createPortal(
         <div className="fixed inset-0 z-9999 flex items-start justify-center bg-black/60 p-4 pt-[15vh]" onClick={() => setShowModal(false)}>
-          <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-4xl rounded-2xl bg-white dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-border-light dark:border-border-dark px-6 py-4">
               <div className="flex items-center gap-3">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Conjectural Requirement #{current.requirement_number}
-                  </h2>
-                </div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Conjectural Requirement #{current.requirement_number}
+                </h2>
               </div>
               <div className="flex items-center gap-1">
                 <button
@@ -169,7 +230,7 @@ function SingleCard({ req, allRequirements, onShiftClick }: { req: RequirementIt
               </button>
             </div>
 
-            <div className="px-6 py-6 h-[45vh] overflow-y-auto">
+            <div className="px-6 py-6 max-h-[60vh] overflow-y-auto">
               {activeTab === "ferc" ? (
                 <div className="space-y-6">
                   <div className="rounded-xl border border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-900/40 p-5">
@@ -225,6 +286,77 @@ function SingleCard({ req, allRequirements, onShiftClick }: { req: RequirementIt
                   </div>
                 </div>
               )}
+
+              {/* Evaluation Form */}
+              <div className="border-t border-border-light dark:border-border-dark mt-6 pt-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">Evaluation</h3>
+                  {isRequirementEvaluated(evaluations[current.requirement_number]) ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                      Evaluated
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">
+                      Pending
+                    </span>
+                  )}
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-gray-800">
+                      <th className="text-left text-xs font-medium text-gray-400 dark:text-gray-500 pb-2 w-[140px]">Criterion</th>
+                      <th className="text-center text-xs font-medium text-gray-400 dark:text-gray-500 pb-2 w-[180px]">Score</th>
+                      <th className="text-left text-xs font-medium text-gray-400 dark:text-gray-500 pb-2 pl-7">Justification</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {QUALITY_CRITERIA.map(({ key, label }) => {
+                      const evalData = evaluations[current.requirement_number];
+                      const score = evalData?.scores[key];
+                      const justification = evalData?.justifications[key] ?? "";
+                      const needsJustification = score != null && score < 5;
+
+                      return (
+                        <tr key={key} className="border-b border-gray-50 dark:border-gray-800/50">
+                          <td className="py-2 pr-3">
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                          </td>
+                          <td className="py-2 px-3">
+                            <div className="flex gap-1 justify-center">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  title={LIKERT_LABELS[value]}
+                                  onClick={() => onUpdateScore(current.requirement_number, key, value)}
+                                  className={`w-7 h-7 rounded-full text-xs font-semibold transition-colors ${
+                                    score === value
+                                      ? "bg-orange-500 text-white shadow-sm"
+                                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400"
+                                  }`}
+                                >
+                                  {value}
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-2 pl-7">
+                            {needsJustification && (
+                              <input
+                                type="text"
+                                value={justification}
+                                onChange={(e) => onUpdateJustification(current.requirement_number, key, e.target.value)}
+                                placeholder={`Justify your ${label.toLowerCase()} score...`}
+                                className="w-full rounded border border-gray-200 dark:border-gray-700 bg-transparent px-2 py-1 text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500/40"
+                              />
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <div className="flex justify-end border-t border-border-light dark:border-border-dark mt-2 px-6 py-2">
@@ -243,23 +375,24 @@ function SingleCard({ req, allRequirements, onShiftClick }: { req: RequirementIt
   );
 }
 
-const INTRO_TEXT = "Conjectural requirements have been generated based on the provided data. Select the ones you want to approve and store in the system.";
-const TYPEWRITER_SPEED_MS = 18;
+const INTRO_TEXT = "Conjectural requirements have been generated. Click on each card to evaluate the requirement, then submit your evaluations.";
+const TYPEWRITER_SPEED_MS = 80;
+const INTRO_WORDS = INTRO_TEXT.split(" ");
 const CARD_REVEAL_DELAY_MS = 300;
 
 function RequirementApprovalForm({ requirements, onResolve }: { requirements: RequirementItem[]; onResolve: (response: string) => void }) {
-  const [selected, setSelected] = useState<Set<number>>(() => new Set(requirements.map(r => r.requirement_number)));
-  const [displayedChars, setDisplayedChars] = useState(0);
+  const [evaluations, setEvaluations] = useState<Evaluations>({});
+  const [displayedWords, setDisplayedWords] = useState(0);
   const [visibleCards, setVisibleCards] = useState(0);
-  const textDone = displayedChars >= INTRO_TEXT.length;
+  const textDone = displayedWords >= INTRO_WORDS.length;
   const allCardsVisible = visibleCards >= requirements.length;
 
-  // Typewriter effect for intro text
+  // Typewriter effect for intro text (word by word)
   useEffect(() => {
-    if (displayedChars >= INTRO_TEXT.length) return;
-    const timer = setTimeout(() => setDisplayedChars(c => c + 1), TYPEWRITER_SPEED_MS);
+    if (displayedWords >= INTRO_WORDS.length) return;
+    const timer = setTimeout(() => setDisplayedWords(w => w + 1), TYPEWRITER_SPEED_MS);
     return () => clearTimeout(timer);
-  }, [displayedChars]);
+  }, [displayedWords]);
 
   // Reveal cards one by one after text finishes
   useEffect(() => {
@@ -268,33 +401,47 @@ function RequirementApprovalForm({ requirements, onResolve }: { requirements: Re
     return () => clearTimeout(timer);
   }, [textDone, visibleCards, requirements.length]);
 
-  const toggleSelection = (reqNumber: number) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(reqNumber)) {
-        next.delete(reqNumber);
-      } else {
-        next.add(reqNumber);
+  const handleUpdateScore = useCallback((reqNumber: number, criterion: string, score: number) => {
+    setEvaluations(prev => {
+      const existing = prev[reqNumber] || { scores: {}, justifications: {} };
+      const updatedJustifications = { ...existing.justifications };
+      // Clear justification when score is 5 (not required)
+      if (score === 5) {
+        delete updatedJustifications[criterion];
       }
-      return next;
+      return {
+        ...prev,
+        [reqNumber]: {
+          scores: { ...existing.scores, [criterion]: score },
+          justifications: updatedJustifications,
+        },
+      };
     });
-  };
+  }, []);
 
-  const handleApprove = () => {
-    const approved = requirements
-      .filter(r => selected.has(r.requirement_number))
-      .map(r => r.requirement_number);
-    onResolve(JSON.stringify({ action: "approve", requirement_numbers: approved }));
-  };
+  const handleUpdateJustification = useCallback((reqNumber: number, criterion: string, text: string) => {
+    setEvaluations(prev => {
+      const existing = prev[reqNumber] || { scores: {}, justifications: {} };
+      return {
+        ...prev,
+        [reqNumber]: {
+          ...existing,
+          justifications: { ...existing.justifications, [criterion]: text },
+        },
+      };
+    });
+  }, []);
 
-  const handleReject = () => {
-    onResolve(JSON.stringify({ action: "reject", requirement_numbers: [] }));
+  const allEvaluated = requirements.every(r => isRequirementEvaluated(evaluations[r.requirement_number]));
+
+  const handleSubmit = () => {
+    onResolve(JSON.stringify({ action: "evaluate", evaluations }));
   };
 
   return (
     <div className="mt-4 mb-2">
       <p className="text-base text-gray-800 dark:text-gray-200 mb-3">
-        {INTRO_TEXT.slice(0, displayedChars)}
+        {INTRO_WORDS.slice(0, displayedWords).join(" ")}
         {!textDone && <span className="inline-block w-0.5 h-4 bg-gray-800 dark:bg-gray-200 align-text-bottom animate-pulse" />}
       </p>
       {textDone && (
@@ -304,36 +451,25 @@ function RequirementApprovalForm({ requirements, onResolve }: { requirements: Re
               key={req.requirement_number}
               className="relative shrink-0 animate-[fadeSlideIn_0.35s_ease-out_forwards]"
             >
-              <div
-                className="absolute top-8 left-2 z-10"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.has(req.requirement_number)}
-                  onChange={() => toggleSelection(req.requirement_number)}
-                  className="w-4 h-4 accent-orange-500 cursor-pointer"
-                />
-              </div>
-              <SingleCard req={req} allRequirements={requirements} onShiftClick={() => toggleSelection(req.requirement_number)} />
+              <SingleCard
+                req={req}
+                allRequirements={requirements}
+                evaluations={evaluations}
+                onUpdateScore={handleUpdateScore}
+                onUpdateJustification={handleUpdateJustification}
+              />
             </div>
           ))}
         </div>
       )}
       {allCardsVisible && (
-        <div className="flex gap-2 mt-3 animate-[fadeSlideIn_0.35s_ease-out_forwards]">
+        <div className="mt-3 animate-[fadeSlideIn_0.35s_ease-out_forwards]">
           <button
-            onClick={handleApprove}
-            disabled={selected.size === 0}
+            onClick={handleSubmit}
+            disabled={!allEvaluated}
             className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
-            Approve ({selected.size})
-          </button>
-          <button
-            onClick={handleReject}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-400 hover:bg-red-500 rounded-lg transition-colors"
-          >
-            Reject All
+            Submit Evaluations
           </button>
         </div>
       )}

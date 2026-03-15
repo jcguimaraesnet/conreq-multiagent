@@ -93,7 +93,7 @@ async def _detect_impact_uncertainties(
     data_context: DataContext,
 ) -> List[str]:
     """Call the LLM to identify one uncertainty per positive business impact. Returns list of uncertainty strings (index-aligned)."""
-    impacts = data_context.positive_impacts
+    impacts = [cd.positive_impact for cd in data_context.conjectural_data]
     if not impacts:
         return []
 
@@ -124,8 +124,8 @@ async def _generate_conjectural_hypotheses(
     data_context: DataContext,
 ) -> List[str]:
     """Call the LLM to generate a verifiable experiment hypothesis per impact+uncertainty pair. Returns list of hypothesis strings (index-aligned)."""
-    impacts = data_context.positive_impacts
-    uncertainties = data_context.uncertainties
+    impacts = [cd.positive_impact for cd in data_context.conjectural_data]
+    uncertainties = [cd.uncertainty for cd in data_context.conjectural_data]
     if not impacts or not uncertainties:
         return []
 
@@ -206,19 +206,21 @@ async def analysis_node(state: WorkflowState, config: Optional[RunnableConfig] =
 
     # Recover elicitation context from state
     data_context = DataContext.model_validate(state.get("data_context", {}))
-    print(f"[Analysis] Elicitation context loaded — {len(data_context.positive_impacts)} positive impact(s)")
+    print(f"[Analysis] Elicitation context loaded — {len(data_context.conjectural_data)} positive impact(s)")
 
-    # Step A: Detect one uncertainty per positive impact (index-aligned)
-    data_context.uncertainties = await _detect_impact_uncertainties(data_context)
-    for impact, uncertainty in zip(data_context.positive_impacts, data_context.uncertainties):
-        print(f"  [Uncertainty] {impact!r} → {uncertainty!r}")
+    # Step A: Detect one uncertainty per positive impact
+    uncertainties_list = await _detect_impact_uncertainties(data_context)
+    for cd, uncertainty in zip(data_context.conjectural_data, uncertainties_list):
+        cd.uncertainty = uncertainty
+        print(f"  [Uncertainty] {cd.positive_impact!r} → {uncertainty!r}")
 
-    # Step B: Generate a verifiable experiment hypothesis per impact+uncertainty pair (index-aligned)
-    data_context.suppositions_solution = await _generate_conjectural_hypotheses(data_context)
-    for impact, hypothesis in zip(data_context.positive_impacts, data_context.suppositions_solution):
-        print(f"  [Hypothesis] {impact!r} → {hypothesis!r}")
+    # Step B: Generate a verifiable experiment hypothesis per impact+uncertainty pair
+    hypotheses_list = await _generate_conjectural_hypotheses(data_context)
+    for cd, hypothesis in zip(data_context.conjectural_data, hypotheses_list):
+        cd.supposition_solution = hypothesis
+        print(f"  [Hypothesis] {cd.positive_impact!r} → {hypothesis!r}")
 
-    print(f"[Analysis] Completed — {len(data_context.uncertainties)} uncertainty(ies), {len(data_context.suppositions_solution)} hypothesis(es)")
+    print(f"[Analysis] Completed — {len(data_context.conjectural_data)} conjectural data entries")
 
     return Command(
         update={

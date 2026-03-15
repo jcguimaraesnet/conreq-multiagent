@@ -6,7 +6,7 @@ node, scoring each one from 1 to 10 based on quality criteria.
 """
 
 import json
-from typing import Optional, List, Dict, Any
+from typing import Optional
 
 from langchain_core.runnables.config import RunnableConfig
 from langchain_core.messages import AIMessage, HumanMessage
@@ -15,83 +15,73 @@ from langgraph.types import Command, interrupt
 from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_state, copilotkit_emit_message
 
 from app.agent.state import WorkflowState
-from app.agent.models.data_context import DataContext
+from app.agent.models.data_context import DataContext, Evaluation
 from app.agent.utils.context_utils import extract_copilotkit_context
 
 
-VALIDATION_SYSTEM_PROMPT = """You are an expert evaluator of conjectural software requirements.
+VALIDATION_SYSTEM_PROMPT = """You are a rigorous and demanding expert evaluator of conjectural software requirements. \
+Your role is to critically assess the quality of each requirement with high standards. \
+Do not be lenient — a score of 5 (Very Good) should only be given when the criterion is fully and unambiguously satisfied.
 
 A conjectural requirement consists of two parts:
 - **FERC** (Writing Format for Conjectural Requirements): describes the desired system behavior, its positive impact, and the associated uncertainties.
 - **QESS** (Solution Assumption Experimentation Framework): describes a solution assumption, the single uncertainty it will evaluate, and how the evaluation will be performed.
 
-Evaluate each conjectural requirement below on a scale from **1 to 10** based on the following criteria:
-1. **Clarity** — Is the desired behavior clearly described?
-2. **Relevance** — Is the requirement relevant to the project context (summary, domain, stakeholder)?
-3. **Uncertainty quality** — Are the uncertainties genuine, specific, and measurable?
-4. **QESS coherence** — Does the solution assumption directly address one of the listed uncertainties?
-5. **Observability** — Is the proposed observation/analysis feasible and well-defined?
+Evaluate the following conjectural requirement on a Likert scale from **1 to 5** for each of the five quality criteria below:
 
-For each requirement, provide:
-- A score from 1 to 10
-- A brief justification (2–3 sentences) covering strengths and weaknesses
+1. **Unambiguous** — Is the requirement written in a way that can only be interpreted in one way? Are there vague terms, ambiguous pronouns, or imprecise language?
+2. **Completeness** — Does the requirement contain all necessary information (desired behavior, positive impact, uncertainties, solution assumption, observation method)? Are there missing details?
+3. **Atomicity** — Does the requirement describe exactly one behavior or concern? Could it be split into multiple independent requirements?
+4. **Verifiable** — Can the requirement be objectively tested or verified? Is there a clear criterion for determining whether it has been satisfied?
+5. **Conforming** — Does the requirement correctly follow the FERC/QESS structure and conventions? Is the QESS coherent with the FERC uncertainties?
+
+**Likert scale:**
+- 1 = Very Poor
+- 2 = Poor
+- 3 = Regular
+- 4 = Good
+- 5 = Very Good
+
+**Rules:**
+- For any score from 1 to 4, you MUST provide a justification explaining why the criterion was not fully met.
+- For a score of 5, justification is optional (leave as empty string if not needed).
+- Be strict and objective. Favor lower scores when in doubt.
 
 **Project context:**
 - Summary: {project_summary}
 - Domain: {domain}
 - Primary stakeholder: {stakeholder}
 
-**Conjectural requirements to evaluate:**
-{conjectural_requirements}
+**Conjectural Requirement #{requirement_number}:**
 
-Respond in natural language with a clear evaluation for each requirement.
-End your response with:
-1. The **overall average score** across all requirements.
-2. The **conjectural requirement** exactly as received (reproducing the full FERC and QESS fields).
-3. THE FINAL RESPONSE MUST BE EXACTLY AS FOLLOWS (including markdown syntax):
+[FERC]
+- Desired behavior: {desired_behavior}
+- Positive impact: {positive_impact}
+- Uncertainties: {uncertainties}
 
-#### Conjectural Requirement #[number]
+[QESS]
+- Solution assumption: {solution_assumption}
+- Uncertainty evaluated: {uncertainty_evaluated}
+- Observation & analysis: {observation_analysis}
 
-**Score: [score/10]**</br>
-**Justification:** [description of justification]</br>
-
-**FERC:**</br>
-**It is expected that the software system has** [desired behavior]</br>
-**So that** [need or positive impact of the desired attribute]</br>
-**However, we do not know:**</br>
-**Uncertainty:** [uncertainty associated with this requirement]</br>
-
-**QESS:**</br>
-**We expect that** [description of the solution assumption]</br>
-**Will result in updating the uncertainties about** [the uncertainty that will be evaluated]</br>
-**As a result of** [description of the observation and analysis that will result in updating the uncertainties]</br>
-
-**Overall average score: [average score across all requirements]**
+**Respond with ONLY a valid JSON object** in the following format (no markdown, no extra text):
+{{
+  "scores": {{
+    "unambiguous": <1-5>,
+    "completeness": <1-5>,
+    "atomicity": <1-5>,
+    "verifiable": <1-5>,
+    "conforming": <1-5>
+  }},
+  "justifications": {{
+    "unambiguous": "<justification or empty string>",
+    "completeness": "<justification or empty string>",
+    "atomicity": "<justification or empty string>",
+    "verifiable": "<justification or empty string>",
+    "conforming": "<justification or empty string>"
+  }}
+}}
 """
-
-
-def _format_conjectural_requirements(conjectural_requirements: List[Dict[str, Any]]) -> str:
-    """Format serialized conjectural requirements for the validation prompt."""
-    if not conjectural_requirements:
-        return "No conjectural requirements available for validation."
-
-    lines = []
-    for i, cr in enumerate(conjectural_requirements, start=1):
-        ferc = cr.get("ferc", {})
-        qess = cr.get("qess", {})
-        uncertainties = ferc.get("uncertainties", [])
-        uncertainties_text = "\n".join(f"    - {u}" for u in uncertainties)
-
-        lines.append(f"--- Conjectural Requirement #{i} ---")
-        lines.append(f"[FERC] Desired behavior: {ferc.get('desired_behavior', '')}")
-        lines.append(f"[FERC] Positive impact: {ferc.get('positive_impact', '')}")
-        lines.append(f"[FERC] Uncertainties:\n{uncertainties_text}")
-        lines.append(f"[QESS] Solution assumption: {qess.get('solution_assumption', '')}")
-        lines.append(f"[QESS] Uncertainty evaluated: {qess.get('uncertainty_evaluated', '')}")
-        lines.append(f"[QESS] Observation & analysis: {qess.get('observation_analysis', '')}")
-        lines.append("")
-
-    return "\n".join(lines)
 
 
 async def validation_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
@@ -110,75 +100,115 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     print("Validation node started.")
 
     data_context = DataContext.model_validate(state.get("data_context", {}))
-    conjectural_requirements = data_context.conjectural_requirements
     messages = state.get("messages", [])
 
-    # --- Build requirements list (needed for both first run and resume) ---
-    requirements_list = []
-    for i, cr in enumerate(conjectural_requirements):
-        ferc = cr.get("ferc", {})
-        qess = cr.get("qess", {})
-        requirements_list.append({
-            "requirement_number": i + 1,
-            "desired_behavior": ferc.get("desired_behavior", ""),
-            "positive_impact": ferc.get("positive_impact", ""),
-            "uncertainties": "; ".join(ferc.get("uncertainties", [])),
-            "solution_assumption": qess.get("solution_assumption", ""),
-            "uncertainty_evaluated": qess.get("uncertainty_evaluated", ""),
-            "observation_analysis": qess.get("observation_analysis", ""),
+    context = extract_copilotkit_context(state)
+    require_approve = context['require_approve']
+
+    # --- Step 1: Human evaluation (interrupt) ---
+    if require_approve:
+        # Build requirements list for frontend interrupt
+        requirements_list = []
+        for i, cd in enumerate(data_context.conjectural_data):
+            if not cd.conjectural_requirements:
+                continue
+            cr = cd.conjectural_requirements[-1]
+            requirements_list.append({
+                "requirement_number": i + 1,
+                "desired_behavior": cr.ferc.desired_behavior,
+                "positive_impact": cr.ferc.positive_impact,
+                "uncertainties": "; ".join(cr.ferc.uncertainties),
+                "solution_assumption": cr.qess.solution_assumption,
+                "uncertainty_evaluated": cr.qess.uncertainty_evaluated,
+                "observation_analysis": cr.qess.observation_analysis,
+            })
+
+        print(f"[Validation] Sending {len(requirements_list)} requirements for human evaluation via interrupt")
+        human_evaluation_response = interrupt({
+            "type": "hitl_req_approve",
+            "requirements": requirements_list,
         })
 
-    # --- Skip LLM evaluation if already completed (resume after interrupt) ---
-    if not state.get("validation_evaluated"):
-        print(f"[Validation] Conjectural requirements to validate: {len(conjectural_requirements)}")
+        # Parse and store human evaluation data
+        try:
+            eval_data = json.loads(human_evaluation_response) if isinstance(human_evaluation_response, str) else human_evaluation_response
+            evaluations = eval_data.get("evaluations", {})
+            print(f"[Validation] Human evaluation received for {len(evaluations)} requirements:")
+
+            for req_number_str, evaluation in evaluations.items():
+                cd_index = int(req_number_str) - 1
+                if cd_index < len(data_context.conjectural_data):
+                    human_eval = Evaluation.model_validate(evaluation)
+                    data_context.conjectural_data[cd_index].conjectural_requirements[-1].human_evaluation = human_eval
+
+            state["data_context"] = data_context.model_dump()
+            await copilotkit_emit_state(config, state)
+
+            for req_number_str, evaluation in evaluations.items():
+                human_eval = Evaluation.model_validate(evaluation)
+                print(f"  Requirement #{req_number_str}:")
+                for criterion, score in human_eval.scores.items():
+                    justification = human_eval.justifications.get(criterion, "")
+                    justification_info = f' — "{justification}"' if justification else ""
+                    print(f"    {criterion}: {score}/5{justification_info}")
+        except Exception as e:
+            print(f"[Validation] Error parsing human evaluation response: {e}")
+            print(f"[Validation] Raw response: {human_evaluation_response}")
+
+        evaluation_text = "Thanks. Conjectural requirements have been evaluated successfully."
+        response = AIMessage(content=evaluation_text)
+        messages = messages + [response]
+        await copilotkit_emit_message(config, evaluation_text)
+        
+    elif not require_approve:
+        print("[Validation] Human evaluation not required — skipping interrupt.")
+    else:
+        print("[Validation] Resuming after interrupt — human evaluation already completed.")
+
+    # --- Step 2: LLM-as-Judge evaluation ---
+    print(f"[Validation] Starting LLM evaluation for {len(data_context.conjectural_data)} requirements...")
+    model = get_model()
+    for i, cd in enumerate(data_context.conjectural_data):
+        req_num = i + 1
+
+        if not cd.conjectural_requirements:
+            print(f"[Validation] Skipping #{req_num} — no conjectural requirements.")
+            continue
+
+        cr = cd.conjectural_requirements[-1]
+        print(f"[Validation] LLM evaluating requirement #{req_num} (attempt {cr.attempt})...")
 
         prompt = VALIDATION_SYSTEM_PROMPT.format(
             project_summary=data_context.project_summary,
             domain=data_context.domain,
             stakeholder=data_context.stakeholder,
-            conjectural_requirements=_format_conjectural_requirements(conjectural_requirements),
+            requirement_number=req_num,
+            desired_behavior=cr.ferc.desired_behavior,
+            positive_impact=cr.ferc.positive_impact,
+            uncertainties="; ".join(cr.ferc.uncertainties),
+            solution_assumption=cr.qess.solution_assumption,
+            uncertainty_evaluated=cr.qess.uncertainty_evaluated,
+            observation_analysis=cr.qess.observation_analysis,
         )
-
-        model = get_model(temperature=0)
 
         try:
             response = await model.ainvoke([HumanMessage(content=prompt)])
-            response.content = extract_text(response.content)
-            print(f"[Validation] Evaluation completed.")
-            print(f"[Validation] Response preview: {response.content[:200]}...")
+            raw_content = extract_text(response.content)
+            eval_result = json.loads(raw_content)
+            llm_eval = Evaluation.model_validate(eval_result)
+            cr.llm_evaluation = llm_eval
+            print(f"[Validation] Requirement #{req_num} evaluated:")
+            for criterion, score in llm_eval.scores.items():
+                justification = llm_eval.justifications.get(criterion, "")
+                justification_info = f' — "{justification}"' if justification else ""
+                print(f"    {criterion}: {score}/5{justification_info}")
         except Exception as e:
-            print(f"Validation node error: {e}")
-            response = AIMessage(content="I'm sorry, I encountered an error validating the conjectural requirements.")
+            print(f"[Validation] Error evaluating requirement #{req_num}: {e}")
+            cr.llm_evaluation = Evaluation()
 
-        messages = messages
-
-        state["validation_evaluated"] = True
+        state["data_context"] = data_context.model_dump()
         await copilotkit_emit_state(config, state)
-    else:
-        print("[Validation] Resuming after interrupt — skipping LLM evaluation.")
 
-    context = extract_copilotkit_context(state)
-    require_approve = context['require_approve']
-
-    if require_approve:
-        # --- Interrupt: send requirements to frontend for approval ---
-        print(f"[Validation] Sending {len(requirements_list)} requirements for approval via interrupt")
-        approval_response = interrupt({
-            "type": "hitl_req_approve",
-            "requirements": requirements_list,
-        })
-        print(f"[Validation] Approval response: {approval_response}")
-
-        approval_text = "Thanks. Conjectural requirements have been approved/rejected successfully."
-        response = AIMessage(content=approval_text)
-        messages = messages + [response]
-        await copilotkit_emit_message(config, approval_text)
-    else:
-        print("[Validation] Approval not required — skipping interrupt.")
-        auto_text = "Conjectural requirements have been validated automatically."
-        response = AIMessage(content=auto_text)
-        messages = messages + [response]
-        await copilotkit_emit_message(config, auto_text)
 
     state["step4_validation"] = True
     await copilotkit_emit_state(config, state)
@@ -186,7 +216,6 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     return Command(
         update={
             "messages": messages,
-            "validation_evaluated": True,
             "step1_elicitation": True,
             "step2_analysis": True,
             "step3_specification": True,

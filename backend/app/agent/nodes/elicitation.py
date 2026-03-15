@@ -31,7 +31,7 @@ from app.agent.models.knowledge_graph import (
     kg_to_state,
     to_networkx,
 )
-from app.agent.models.data_context import DataContext
+from app.agent.models.data_context import DataContext, ConjecturalData
 
 
 # Processing mode: "quick" (default) or "extended"
@@ -467,8 +467,10 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
         for pi in positive_impacts:
             print(f"  [Generated] {pi!r}")
 
-    data_context.positive_impacts = positive_impacts
-    data_context.positive_impacts_similarity = similarity
+    data_context.conjectural_data = [
+        ConjecturalData(positive_impact=pi, positive_impact_similarity=sim)
+        for pi, sim in zip(positive_impacts, similarity)
+    ]
     print(f"[Positive Impact] Total: {len(positive_impacts)} statement(s)")
 
     return Command(
