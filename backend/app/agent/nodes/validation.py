@@ -161,8 +161,11 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         print("[Validation] Resuming after interrupt — human evaluation already completed.")
 
     # --- Step 2: LLM-as-Judge evaluation ---
-    print(f"[Validation] Starting LLM evaluation for {len(data_context.conjectural_data)} requirements...")
-    model = get_model()
+    context = extract_copilotkit_context(state)
+    model_judge_provider = context.get("model_judge", "gemini")
+    print(f"[Validation] Starting LLM-as-Judge evaluation (provider: {model_judge_provider}) for {len(data_context.conjectural_data)} requirements...")
+    judge_model_name = "gemini-3-pro-preview" if model_judge_provider == "gemini" else "gpt-5.4-pro-deployment"
+    model = get_model(provider=model_judge_provider, model=judge_model_name)
     for i, cd in enumerate(data_context.conjectural_data):
         req_num = i + 1
 

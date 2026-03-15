@@ -171,6 +171,7 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
     # Extract quantity_req_batch from context (same logic as elicitation node)
     context = extract_copilotkit_context(state)
     quantity_req_batch = context['quantity_req_batch']
+    model_provider = context['model']
 
     # --- Step 1: Retrieve elicitation context from state ---
     data_context = DataContext.model_validate(state.get("data_context", {}))
@@ -186,7 +187,7 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
         print(f"  [Impact] {cd.positive_impact[:60]} → [Uncertainty] {cd.uncertainty[:60]} → [Hypothesis] {cd.supposition_solution[:80]}")
 
     # --- Step 3: Call LLM to generate conjectural requirements (one per ConjecturalData) ---
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     print(f"[Specification] Generating {quantity_req_batch} conjectural requirement(s)...")
 

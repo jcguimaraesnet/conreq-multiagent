@@ -18,6 +18,7 @@ from copilotkit.langgraph import copilotkit_emit_state, copilotkit_customize_con
 
 from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext
+from app.agent.utils.context_utils import extract_copilotkit_context
 from app.agent.models.knowledge_graph import (
     BusinessUncertainty,
     KnowledgeGraph,
@@ -91,6 +92,7 @@ def _strip_markdown_fences(raw: str) -> str:
 
 async def _detect_impact_uncertainties(
     data_context: DataContext,
+    model_provider: str,
 ) -> List[str]:
     """Call the LLM to identify one uncertainty per positive business impact. Returns list of uncertainty strings (index-aligned)."""
     impacts = [cd.positive_impact for cd in data_context.conjectural_data]
@@ -108,7 +110,7 @@ async def _detect_impact_uncertainties(
         quantity=len(impacts),
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -122,6 +124,7 @@ async def _detect_impact_uncertainties(
 
 async def _generate_conjectural_hypotheses(
     data_context: DataContext,
+    model_provider: str,
 ) -> List[str]:
     """Call the LLM to generate a verifiable experiment hypothesis per impact+uncertainty pair. Returns list of hypothesis strings (index-aligned)."""
     impacts = [cd.positive_impact for cd in data_context.conjectural_data]
@@ -143,7 +146,7 @@ async def _generate_conjectural_hypotheses(
         quantity=len(impacts),
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -160,6 +163,7 @@ async def _detect_ambiguous_terms(
     domain: str,
     stakeholder: str,
     business_objective: str,
+    model_provider: str,
 ) -> List[str]:
     """Call the LLM to identify which entities are ambiguous."""
     if not entity_names:
@@ -174,7 +178,7 @@ async def _detect_ambiguous_terms(
         business_objective=business_objective,
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -204,18 +208,21 @@ async def analysis_node(state: WorkflowState, config: Optional[RunnableConfig] =
     print("Analysis node started.")
     config = copilotkit_customize_config(config, emit_messages=False)
 
+    context = extract_copilotkit_context(state)
+    model_provider = context['model']
+
     # Recover elicitation context from state
     data_context = DataContext.model_validate(state.get("data_context", {}))
     print(f"[Analysis] Elicitation context loaded — {len(data_context.conjectural_data)} positive impact(s)")
 
     # Step A: Detect one uncertainty per positive impact
-    uncertainties_list = await _detect_impact_uncertainties(data_context)
+    uncertainties_list = await _detect_impact_uncertainties(data_context, model_provider)
     for cd, uncertainty in zip(data_context.conjectural_data, uncertainties_list):
         cd.uncertainty = uncertainty
         print(f"  [Uncertainty] {cd.positive_impact!r} → {uncertainty!r}")
 
     # Step B: Generate a verifiable experiment hypothesis per impact+uncertainty pair
-    hypotheses_list = await _generate_conjectural_hypotheses(data_context)
+    hypotheses_list = await _generate_conjectural_hypotheses(data_context, model_provider)
     for cd, hypothesis in zip(data_context.conjectural_data, hypotheses_list):
         cd.supposition_solution = hypothesis
         print(f"  [Hypothesis] {cd.positive_impact!r} → {hypothesis!r}")

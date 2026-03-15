@@ -31,6 +31,7 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
 
     context = extract_copilotkit_context(state)
     current_project_id = context['current_project_id']
+    model_provider = context['model']
 
     # Fetch vision document text and existing requirements from Supabase
     vision_extracted_text, existing_requirements = await fetch_project_context(current_project_id)
@@ -41,7 +42,7 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
     print(f"Last message from chat: {last_message}")
 
     # Initialize the model
-    model = get_model()
+    model = get_model(provider=model_provider)
 
     # Build requirements context from fetched data
     functional = [r for r in existing_requirements if r.get("type") == "functional"]

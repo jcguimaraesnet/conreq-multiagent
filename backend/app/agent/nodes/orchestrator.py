@@ -15,7 +15,7 @@ from urllib import response
 
 from langchain_core.runnables.config import RunnableConfig
 from langchain_core.messages import SystemMessage, HumanMessage
-from app.agent.llm_config import get_model, set_model_provider
+from app.agent.llm_config import get_model
 from copilotkit.langgraph import (
   copilotkit_emit_message, 
   copilotkit_emit_state,
@@ -39,7 +39,6 @@ async def orchestrator_node(state: WorkflowState, config: Optional[RunnableConfi
     print(f"require_evaluation = {context['require_evaluation']}")
     print(f"quantity_req_batch = {context['quantity_req_batch']}")
     print(f"model = {context['model']}")
-    set_model_provider(context['model'])
 
     if config is None:
         config = RunnableConfig(recursion_limit=25)
@@ -68,7 +67,7 @@ async def orchestrator_node(state: WorkflowState, config: Optional[RunnableConfi
     # response = await model.ainvoke(prompt, config_internal)
 
     # Classify the intent
-    classification = await classify_intent(last_message, config_internal)
+    classification = await classify_intent(last_message, config_internal, context['model'])
     print(f"Intent classification result: {classification}")
 
     # Route based on intent
@@ -95,7 +94,7 @@ async def orchestrator_node(state: WorkflowState, config: Optional[RunnableConfi
         )
 
 
-async def classify_intent(user_input: str, config: Optional[RunnableConfig] = None) -> IntentClassification:
+async def classify_intent(user_input: str, config: Optional[RunnableConfig] = None, model_provider: str = "gemini") -> IntentClassification:
     """
     Use LLM to classify the user's intent from their message.
     
@@ -117,8 +116,8 @@ async def classify_intent(user_input: str, config: Optional[RunnableConfig] = No
             reasoning="Empty or whitespace-only message"
         )
     
-    model = get_model()
-    
+    model = get_model(provider=model_provider)
+
     # Use structured output for reliable classification
     structured_model = cast(Any, model).with_structured_output(IntentClassification)
     

@@ -185,6 +185,7 @@ def _compute_similarity(text_a: str, text_b: str) -> float:
 async def refine_positive_impacts(
     brief_descriptions: List[str],
     data_context: "DataContext",
+    model_provider: str,
 ) -> tuple[List[str], List[int]]:
     """
     Refine user-provided brief descriptions into elaborated positive business
@@ -206,7 +207,7 @@ async def refine_positive_impacts(
         quantity=len(brief_descriptions),
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -231,6 +232,7 @@ async def refine_positive_impacts(
 async def generate_positive_impacts(
     quantity: int,
     data_context: "DataContext",
+    model_provider: str,
 ) -> List[str]:
     """
     Generate positive business impact statements from scratch using LLM +
@@ -244,7 +246,7 @@ async def generate_positive_impacts(
         quantity=quantity,
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -259,6 +261,7 @@ async def generate_positive_impacts(
 async def extract_project_context(
     vision_extracted_text: Optional[str],
     existing_requirements: List[Dict[str, Any]],
+    model_provider: str,
 ) -> Dict[str, Any]:
     """
     Extract stakeholder, domain, business objective, and a concise
@@ -270,7 +273,7 @@ async def extract_project_context(
         requirements=_format_requirements(existing_requirements),
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -301,6 +304,7 @@ async def _build_known_knowns_batch(
     project_summary: str,
     batch_number: int,
     total_batches: int,
+    model_provider: str,
 ) -> List[Dict[str, str]]:
     """Process a single batch of entities for Known Knowns mapping."""
     entities_text = "\n".join(f"- {entity}" for entity in batch_entities)
@@ -310,7 +314,7 @@ async def _build_known_knowns_batch(
         project_summary=project_summary,
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         print(f"  [Known Knowns] Batch {batch_number}/{total_batches} — {len(batch_entities)} entities")
@@ -328,6 +332,7 @@ async def _build_known_knowns_batch(
 async def build_known_knowns(
     domain_entities: List[str],
     project_summary: str,
+    model_provider: str,
     batch_size: int = KNOWN_KNOWNS_BATCH_SIZE,
 ) -> List[Dict[str, str]]:
     """
@@ -350,6 +355,7 @@ async def build_known_knowns(
         batch_result = await _build_known_knowns_batch(
             batch, project_summary,
             batch_number=idx, total_batches=total_batches,
+            model_provider=model_provider,
         )
         all_known_knowns.extend(batch_result)
 
@@ -363,6 +369,7 @@ async def build_unknown_knowns(
     domain: str,
     project_summary: str,
     existing_requirements: List[Dict[str, Any]],
+    model_provider: str,
 ) -> List[Dict[str, str]]:
     """
     Simulate a stakeholder persona to articulate meanings for entities
@@ -381,7 +388,7 @@ async def build_unknown_knowns(
         requirements=_format_requirements(existing_requirements),
     )
 
-    model = get_model(temperature=0)
+    model = get_model(provider=model_provider, temperature=0)
 
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
@@ -413,6 +420,7 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
     require_brief_description = context['require_brief_description']
     current_project_id = context['current_project_id']
     quantity_req_batch = context['quantity_req_batch']
+    model_provider = context['model']
 
     # Fetch vision document text and existing requirements from Supabase
     vision_extracted_text, existing_requirements = await fetch_project_context(
@@ -423,7 +431,7 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
     # Step 1: Extract stakeholder, domain, project summary, and business needs (single LLM call)
     # After this step, the raw vision document is no longer used in LLM prompts.
     project_context = await extract_project_context(
-        vision_extracted_text, existing_requirements
+        vision_extracted_text, existing_requirements, model_provider
     )
     project_summary = project_context["summary"]
     domain = project_context["domain"]
@@ -457,12 +465,12 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
         print(f"[Positive Impact] Received {len(brief_descriptions)} brief description(s) from user.")
 
         if brief_descriptions:
-            positive_impacts, similarity = await refine_positive_impacts(brief_descriptions, data_context)
+            positive_impacts, similarity = await refine_positive_impacts(brief_descriptions, data_context, model_provider)
             for pi in positive_impacts:
                 print(f"  [Refined] {pi!r}")
     else:
         print("[Positive Impact] Generating impacts from project context...")
-        positive_impacts = await generate_positive_impacts(quantity_req_batch, data_context)
+        positive_impacts = await generate_positive_impacts(quantity_req_batch, data_context, model_provider)
         similarity = [0] * len(positive_impacts)
         for pi in positive_impacts:
             print(f"  [Generated] {pi!r}")

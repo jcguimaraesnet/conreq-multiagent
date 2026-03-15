@@ -13,6 +13,7 @@ from app.agent.llm_config import get_model
 from langgraph.types import Command
 
 from app.agent.state import WorkflowState
+from app.agent.utils.context_utils import extract_copilotkit_context
 
 
 async def final_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
@@ -23,7 +24,9 @@ async def final_node(state: WorkflowState, config: Optional[RunnableConfig] = No
     """
     messages = state.get("messages", [])
 
-    model = get_model(temperature=0)
+    context = extract_copilotkit_context(state)
+    model_provider = context['model']
+    model = get_model(provider=model_provider, temperature=0)
     model_with_tools = model.bind_tools(
         [
             *state.get("tools", []),
