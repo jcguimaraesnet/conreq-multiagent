@@ -229,5 +229,6 @@ async def analysis_node(state: WorkflowState, config: Optional[RunnableConfig] =
             "step1_elicitation": True,
             "step2_analysis": True,
             "pending_progress": True,
+            "spec_attempt": 0,
         }
     )

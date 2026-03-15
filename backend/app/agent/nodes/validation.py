@@ -155,11 +155,6 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
             print(f"[Validation] Error parsing human evaluation response: {e}")
             print(f"[Validation] Raw response: {human_evaluation_response}")
 
-        evaluation_text = "Thanks. Conjectural requirements have been evaluated successfully."
-        response = AIMessage(content=evaluation_text)
-        messages = messages + [response]
-        await copilotkit_emit_message(config, evaluation_text)
-        
     elif not require_approve:
         print("[Validation] Human evaluation not required — skipping interrupt.")
     else:
@@ -210,8 +205,19 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         await copilotkit_emit_state(config, state)
 
 
-    state["step4_validation"] = True
-    await copilotkit_emit_state(config, state)
+    step4_validation = False
+    pending_progress = True
+    # se attempt = 3
+    if state.get("spec_attempt", 0) >= 3:
+        print("[Validation] Maximum specification attempts reached. Proceeding to final node.")
+        evaluation_text = "Thanks. Conjectural requirements have been evaluated successfully."
+        response = AIMessage(content=evaluation_text)
+        messages = messages + [response]
+        await copilotkit_emit_message(config, evaluation_text)
+        # step4_validation is used in progress steps
+        step4_validation = True
+        pending_progress = False
+        await copilotkit_emit_state(config, state)
 
     return Command(
         update={
@@ -219,7 +225,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
             "step1_elicitation": True,
             "step2_analysis": True,
             "step3_specification": True,
-            "step4_validation": True,
-            "pending_progress": False,
+            "step4_validation": step4_validation,
+            "pending_progress": pending_progress,
         }
     )

@@ -6,7 +6,8 @@ The orchestrator node classifies user intent and routes to the appropriate workf
 
 Flow:
   orchestrator → [DECISION]
-                    ├── (conjectural_requirement_generate_response) → elicitation → analysis → specification → validation → final → END
+                    ├── (conjectural_requirement_generate_response) → elicitation → analysis → specification ⇄ validation → final → END
+                    │                                                                          (loops up to 3 attempts)
                     └── (generic_response) → generic → END
 """
 
@@ -40,6 +41,19 @@ def route_after_orchestrator(state: WorkflowState) -> str:
     return "generic_node"
 
 
+def route_after_validation(state: WorkflowState) -> str:
+    """
+    Routing function for conditional edges after validation node.
+
+    Routes back to specification for another attempt if spec_attempt < 3,
+    otherwise proceeds to final_node.
+    """
+    spec_attempt = state.get("spec_attempt", 0)
+    if spec_attempt < 3:
+        return "specification_node"
+    return "final_node"
+
+
 def create_graph():
     workflow = StateGraph(WorkflowState)
 
@@ -65,12 +79,22 @@ def create_graph():
             "generic_node": "generic_node"
         }
     )
-    
-    # Generic node ends the workflow
+
+    # Sequential edges for the conjectural requirement pipeline
     workflow.add_edge("elicitation_node", "analysis_node")
     workflow.add_edge("analysis_node", "specification_node")
     workflow.add_edge("specification_node", "validation_node")
-    workflow.add_edge("validation_node", "final_node")
+
+    # Conditional routing after validation: retry specification or finish
+    workflow.add_conditional_edges(
+        "validation_node",
+        route_after_validation,
+        {
+            "specification_node": "specification_node",
+            "final_node": "final_node",
+        }
+    )
+
     workflow.add_edge("final_node", END)
     workflow.add_edge("generic_node", END)
 

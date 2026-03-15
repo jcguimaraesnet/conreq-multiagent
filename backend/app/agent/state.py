@@ -93,6 +93,9 @@ class WorkflowState(CopilotKitState):
     step3_specification: bool
     step4_validation: bool
 
+    # Specification attempt counter (incremented each cycle through specification → validation)
+    spec_attempt: int
+
     # Flags to track evaluation completion (avoid re-evaluation on resume)
     human_evaluated: bool
     llm_evaluated: bool

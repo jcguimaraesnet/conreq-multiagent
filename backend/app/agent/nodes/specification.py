@@ -236,5 +236,6 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
             "step2_analysis": True,
             "step3_specification": True,
             "pending_progress": True,
+            "spec_attempt": state.get("spec_attempt", 0) + 1,
         }
     )
