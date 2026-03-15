@@ -36,7 +36,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-8 pb-15">
           <SettingsPanel />
         </div>
       </div>

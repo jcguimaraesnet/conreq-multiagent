@@ -324,7 +324,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* Setting 6: Model */}
-      <div id="setting-model" className="px-6 py-5">
+      <div id="setting-model" className="px-6 py-5 border-b border-border-light dark:border-border-dark">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">
@@ -343,6 +343,28 @@ export default function SettingsPanel() {
             <option value="gpt">GPT 5 Family</option>
             <option value="gpt_azure">GPT 5 Family (Azure)</option>
             <option value="llama_azure">Llama 70B (Azure)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Setting 7: Model Judge */}
+      <div id="setting-model-judge" className="px-6 py-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+              Model configuration (LLM-as-Judge)
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Select the AI model used for automated quality evaluation of conjectural requirements
+            </p>
+          </div>
+          <select
+            value={settings.model_judge}
+            onChange={(e) => updateSetting('model_judge', e.target.value)}
+            className="px-3 py-2 text-xs font-medium rounded-lg border border-border-light dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50"
+          >
+            <option value="gemini">Gemini 3.1 Pro</option>
+            <option value="gpt_azure">GPT 5.4 Pro (Azure)</option>
           </select>
         </div>
       </div>

@@ -11,6 +11,7 @@ export interface UserSettings {
   quantity_req_batch: number;
   spec_attempts: number;
   model: string;
+  model_judge: string;
 }
 
 interface SettingsContextType {
@@ -29,6 +30,7 @@ const defaultSettings: UserSettings = {
   quantity_req_batch: 5,
   spec_attempts: 3,
   model: 'gemini',
+  model_judge: 'gemini',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -102,6 +104,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             quantity_req_batch: data.quantity_req_batch,
             spec_attempts: data.spec_attempts,
             model: data.model,
+            model_judge: data.model_judge,
           }
         : defaultSettings;
 
@@ -153,6 +156,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             quantity_req_batch: data.quantity_req_batch,
             spec_attempts: data.spec_attempts,
             model: data.model,
+            model_judge: data.model_judge,
           }
         : newSettings;
 
