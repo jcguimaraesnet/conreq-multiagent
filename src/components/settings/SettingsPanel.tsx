@@ -27,6 +27,16 @@ export default function SettingsPanel() {
     updateSetting('quantity_req_batch', newValue);
   };
 
+  const incrementMaxAttempts = () => {
+    const newValue = Math.min(settings.spec_attempts + 1, 3);
+    updateSetting('spec_attempts', newValue);
+  };
+
+  const decrementMaxAttempts = () => {
+    const newValue = Math.max(settings.spec_attempts - 1, 1);
+    updateSetting('spec_attempts', newValue);
+  };
+
   if (isLoading) {
     return (
       <Card noPadding>
@@ -233,14 +243,14 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Setting 4: Batch Quantity */}
-      <div id="setting-batch-quantity" className="px-6 py-5 border-b border-border-light dark:border-border-dark">
+      {/* Sub-setting: Batch Quantity */}
+      <div id="setting-batch-quantity" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-              Quantity of requirements for batch generation
+            <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Quantity of requirements per batch
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
               Number of requirements to generate in batch mode (between 2 and 10)
             </p>
           </div>
@@ -278,7 +288,42 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Setting 5: Model */}
+      {/* Setting 5: Specification Attempts */}
+      <div id="setting-spec-attempts" className="px-6 py-5 border-b border-border-light dark:border-border-dark">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+              Specification attempts
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Number of attempts to generate conjectural requirements (between 1 and 3)
+            </p>
+          </div>
+          <div className="flex items-center">
+            <div className="flex items-center border rounded-lg overflow-hidden border-border-light dark:border-gray-600">
+              <div className="px-4 py-2 text-sm font-medium min-w-[50px] text-center bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+                {settings.spec_attempts}
+              </div>
+              <div className="flex flex-col border-l border-border-light dark:border-gray-600">
+                <button
+                  onClick={incrementMaxAttempts}
+                  className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <ChevronUp className="w-4 h-3 text-gray-600 dark:text-gray-400" />
+                </button>
+                <button
+                  onClick={decrementMaxAttempts}
+                  className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-border-light dark:border-gray-600"
+                >
+                  <ChevronDown className="w-4 h-3 text-gray-600 dark:text-gray-400" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Setting 6: Model */}
       <div id="setting-model" className="px-6 py-5">
         <div className="flex items-center justify-between">
           <div>

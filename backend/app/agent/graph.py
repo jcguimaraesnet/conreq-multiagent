@@ -45,11 +45,14 @@ def route_after_validation(state: WorkflowState) -> str:
     """
     Routing function for conditional edges after validation node.
 
-    Routes back to specification for another attempt if spec_attempt < 3,
+    Routes back to specification for another attempt if spec_attempt < spec_attempts,
     otherwise proceeds to final_node.
     """
+    from app.agent.utils.context_utils import extract_copilotkit_context
+    context = extract_copilotkit_context(state)
+    spec_attempts = context.get("spec_attempts", 3)
     spec_attempt = state.get("spec_attempt", 0)
-    if spec_attempt < 3:
+    if spec_attempt < spec_attempts:
         return "specification_node"
     return "final_node"
 

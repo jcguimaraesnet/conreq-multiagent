@@ -34,5 +34,6 @@ def extract_copilotkit_context(state: WorkflowState) -> dict:
         "require_evaluation": current_user_settings.get("require_evaluation"),
         "batch_mode": batch_mode,
         "quantity_req_batch": quantity_req_batch,
+        "spec_attempts": current_user_settings.get("spec_attempts", 3),
         "model": current_user_settings.get("model"),
     }

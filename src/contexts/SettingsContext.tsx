@@ -9,6 +9,7 @@ export interface UserSettings {
   require_evaluation: boolean;
   batch_mode: boolean;
   quantity_req_batch: number;
+  spec_attempts: number;
   model: string;
 }
 
@@ -26,6 +27,7 @@ const defaultSettings: UserSettings = {
   require_evaluation: true,
   batch_mode: true,
   quantity_req_batch: 5,
+  spec_attempts: 3,
   model: 'gemini',
 };
 
@@ -98,6 +100,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             require_evaluation: data.require_evaluation,
             batch_mode: data.batch_mode,
             quantity_req_batch: data.quantity_req_batch,
+            spec_attempts: data.spec_attempts,
             model: data.model,
           }
         : defaultSettings;
@@ -148,6 +151,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             require_evaluation: data.require_evaluation,
             batch_mode: data.batch_mode,
             quantity_req_batch: data.quantity_req_batch,
+            spec_attempts: data.spec_attempts,
             model: data.model,
           }
         : newSettings;
