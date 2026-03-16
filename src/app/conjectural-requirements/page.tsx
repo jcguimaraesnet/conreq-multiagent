@@ -762,23 +762,24 @@ function ConjecturalRequirementsInner() {
     },
   }, []);
 
-  const paramSchema = z.object({ json_requirements: z.string().describe("The JSON string containing requirements data") });
+  const paramSchema = z.object({ requirement_ids: z.string().describe("The JSON string containing requirement ids") });
 
   useFrontendTool({
     name: "show_requirements",
     followUp: false,
     parameters: paramSchema,
-    handler: async ({ json_requirements }) => {
+    handler: async ({ requirement_ids }) => {
       // const response = await fetch(`/api/weather?city=${city}&units=${units}`);
       // const data = await response.json();
       // return JSON.stringify(data);
-      return JSON.parse(json_requirements);
+      return JSON.parse(requirement_ids);
     },
     render: ({args, status, result}) => {
       console.log("status:", status, " - args:", args, " - result:", result);
       if (status !== "complete") return <>Loading...</>;
       return (
-        <ShowRequirements json_requirements={result} />
+        <span>teste</span>
+        // <ShowRequirements json_requirements={result} />
       // 
       );
     },

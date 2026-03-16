@@ -49,6 +49,10 @@ class Evaluation(BaseModel):
 
 class ConjecturalRequirement(BaseModel):
     """A conjectural software requirement specified using FERC and QESS."""
+    db_id: Optional[str] = Field(
+        default=None,
+        description="Database UUID assigned after persistence",
+    )
     attempt: int = Field(default=1, description="Attempt number for this conjectural requirement")
     ranking: Optional[int] = Field(
         default=None,

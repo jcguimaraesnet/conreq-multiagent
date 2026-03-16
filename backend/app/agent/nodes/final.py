@@ -25,7 +25,7 @@ from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_st
 #     return "Conjectural requirements are created successfully!"
 
 @tool
-def show_requirements(json_requirements: str):
+def show_requirements(requirement_ids: str):
     """Tool function to show requirements, called from the final node."""
     # get current state
     return {"message1": "Wow1!", "message2": "Wow2!"}
@@ -71,10 +71,19 @@ async def final_node(state: WorkflowState, config: Optional[RunnableConfig] = No
     json_requirements = json.dumps(requirements_by_index)
     print("json_requirements", json_requirements)
 
+    # get IDs of best (rank = 1) conjectural requirements of conjectural_data and pass to tool
+    best_requirement_ids = []
+    for entry in conjectural_data:
+        for cr in entry.get("conjectural_requirements", []):
+            if cr.get("ranking") == 1 and cr.get("db_id"):
+                best_requirement_ids.append(cr["db_id"])
+
+
     response = await model_with_tools.ainvoke(
         [
             # HumanMessage(content=f"You ONLY should CALL show_requirements tool with json_requirements: {json_requirements}"),
-            HumanMessage(content=f"You ONLY should CALL show_requirements tool with json_requirements: {json_requirements}"),
+            # HumanMessage(content=f"You ONLY should CALL show_requirements tool with json_requirements: {json_requirements}"),
+            HumanMessage(content=f"You ONLY should CALL show_requirements tool with requirement_ids: {json.dumps(best_requirement_ids) }"),
         ],
         config,
     )

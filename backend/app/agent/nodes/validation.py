@@ -17,6 +17,7 @@ from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_st
 from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext, Evaluation
 from app.agent.utils.context_utils import extract_copilotkit_context
+from app.services.conjectural_persistence import persist_conjectural_data
 
 
 VALIDATION_SYSTEM_PROMPT = """You are a rigorous and demanding expert evaluator of conjectural software requirements. \
@@ -218,7 +219,9 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     spec_attempts = context.get("spec_attempts", 3)
     if state.get("spec_attempt", 0) >= spec_attempts:
         data_context.rank_conjectural_requirements()
-        # state["data_context"] = data_context.model_dump()
+
+        # Persist to database and get generated UUIDs
+        persist_conjectural_data(context["current_project_id"], data_context)
 
         # message final
         evaluation_text = "Conjectural requirements have been created successfully. See graphic below for details."
