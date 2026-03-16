@@ -212,9 +212,10 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     step4_validation = False
     pending_progress = True
     # se attempt = 3
-    if state.get("spec_attempt", 0) >= 3:
-        print("[Validation] Maximum specification attempts reached. Proceeding to final node.")
-        evaluation_text = "Thanks. Conjectural requirements have been evaluated successfully."
+
+    spec_attempts = context.get("spec_attempts", 3)
+    if state.get("spec_attempt", 0) >= spec_attempts:
+        evaluation_text = "Conjectural requirements have been created successfully. See graphic below for details."
         response = AIMessage(content=evaluation_text)
         messages = messages + [response]
         await copilotkit_emit_message(config, evaluation_text)

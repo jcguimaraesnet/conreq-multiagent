@@ -71,11 +71,6 @@ async def final_node(state: WorkflowState, config: Optional[RunnableConfig] = No
     json_requirements = json.dumps(requirements_by_index)
     print("json_requirements", json_requirements)
 
-    evaluation_text = "Conjectural requirements have been created successfully. See the board for details!"
-    response = AIMessage(content=evaluation_text)
-    messages_to_add = [response]
-    await copilotkit_emit_message(config, evaluation_text)
-
     response = await model_with_tools.ainvoke(
         [
             # HumanMessage(content=f"You ONLY should CALL show_requirements tool with json_requirements: {json_requirements}"),
@@ -84,7 +79,7 @@ async def final_node(state: WorkflowState, config: Optional[RunnableConfig] = No
         config,
     )
 
-    messages_to_add = messages_to_add + [response]
+    messages_to_add = [response]
     print("[Final node] response", response)
 
     for tc in getattr(response, "tool_calls", []) or []:
