@@ -140,6 +140,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
                 cd_index = int(req_number_str) - 1
                 if cd_index < len(data_context.conjectural_data):
                     human_eval = Evaluation.model_validate(evaluation)
+                    human_eval.compute_overall_score()
                     data_context.conjectural_data[cd_index].conjectural_requirements[-1].human_evaluation = human_eval
 
             state["data_context"] = data_context.model_dump()
@@ -195,8 +196,9 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
             raw_content = extract_text(response.content)
             eval_result = json.loads(raw_content)
             llm_eval = Evaluation.model_validate(eval_result)
+            llm_eval.compute_overall_score()
             cr.llm_evaluation = llm_eval
-            print(f"[Validation] Requirement #{req_num} evaluated:")
+            print(f"[Validation] Requirement #{req_num} evaluated (overall: {llm_eval.overall_score}/5):")
             for criterion, score in llm_eval.scores.items():
                 justification = llm_eval.justifications.get(criterion, "")
                 justification_info = f' — "{justification}"' if justification else ""
@@ -215,14 +217,19 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
 
     spec_attempts = context.get("spec_attempts", 3)
     if state.get("spec_attempt", 0) >= spec_attempts:
+        data_context.rank_conjectural_requirements()
+        # state["data_context"] = data_context.model_dump()
+
+        # message final
         evaluation_text = "Conjectural requirements have been created successfully. See graphic below for details."
         response = AIMessage(content=evaluation_text)
         messages = messages + [response]
         await copilotkit_emit_message(config, evaluation_text)
+
         # step4_validation is used in progress steps
         step4_validation = True
         pending_progress = False
-        await copilotkit_emit_state(config, state)
+        # await copilotkit_emit_state(config, state)
 
     return Command(
         update={

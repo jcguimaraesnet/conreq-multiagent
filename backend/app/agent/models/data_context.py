@@ -35,11 +35,25 @@ class Evaluation(BaseModel):
         default_factory=dict,
         description="Justifications per quality criterion (required for scores 1-4)",
     )
+    overall_score: float = Field(
+        default=0.0,
+        description="Overall score — average of all quality criteria scores",
+    )
+
+    def compute_overall_score(self) -> float:
+        """Compute and set the overall score as the mean of all criteria scores."""
+        if self.scores:
+            self.overall_score = round(sum(self.scores.values()) / len(self.scores), 2)
+        return self.overall_score
 
 
 class ConjecturalRequirement(BaseModel):
     """A conjectural software requirement specified using FERC and QESS."""
     attempt: int = Field(default=1, description="Attempt number for this conjectural requirement")
+    ranking: Optional[int] = Field(
+        default=None,
+        description="Ranking position among attempts (1 = best overall score)",
+    )
     ferc: FERC
     qess: QESS
     llm_evaluation: Optional[Evaluation] = Field(
@@ -104,3 +118,21 @@ class DataContext(BaseModel):
         default_factory=list,
         description="Hierarchical data entries linking positive impacts, uncertainties, solution assumptions, and requirements with evaluations",
     )
+
+    def rank_conjectural_requirements(self) -> None:
+        """Rank conjectural requirements within each ConjecturalData by overall score (descending)."""
+        for cd in self.conjectural_data:
+            if len(cd.conjectural_requirements) <= 1:
+                if cd.conjectural_requirements:
+                    cd.conjectural_requirements[0].ranking = 1
+                continue
+            sorted_indices = sorted(
+                range(len(cd.conjectural_requirements)),
+                key=lambda idx: (
+                    cd.conjectural_requirements[idx].llm_evaluation.overall_score
+                    if cd.conjectural_requirements[idx].llm_evaluation else 0.0
+                ),
+                reverse=True,
+            )
+            for rank, idx in enumerate(sorted_indices, start=1):
+                cd.conjectural_requirements[idx].ranking = rank
