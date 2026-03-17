@@ -15,26 +15,26 @@ export interface ConfusionData {
   tn: number;
 }
 
-function buildOption(data: ConfusionData): echarts.EChartsCoreOption {
-  // Matrix layout:
-  //              Predicted Negative | Predicted Positive
-  // Actual Neg:       TN                  FP
-  // Actual Pos:       FN                  TP
+function buildOption(data: ConfusionData, dark: boolean): echarts.EChartsCoreOption {
   const xLabels = ['Predicted\nNegative', 'Predicted\nPositive'];
   const yLabels = ['Actual\nPositive', 'Actual\nNegative'];
+  const textColor = dark ? '#e5e7eb' : '#1f2937';
+  const labelColor = dark ? '#d1d5db' : '#374151';
+  const lineColor = dark ? '#374151' : '#d1d5db';
+  const cellBorder = dark ? '#111827' : '#ffffff';
+  const cellTextColor = dark ? '#e5e7eb' : '#1f2937';
 
-  // [x, y, value] — y=0 is bottom (Actual Positive), y=1 is top (Actual Negative)
   const heatmapData = [
-    [0, 1, data.tn],  // Actual Neg, Pred Neg = TN
-    [1, 1, data.fp],  // Actual Neg, Pred Pos = FP
-    [0, 0, data.fn],  // Actual Pos, Pred Neg = FN
-    [1, 0, data.tp],  // Actual Pos, Pred Pos = TP
+    [0, 1, data.tn],
+    [1, 1, data.fp],
+    [0, 0, data.fn],
+    [1, 0, data.tp],
   ];
 
   const maxVal = Math.max(data.tp, data.fp, data.fn, data.tn, 1);
 
   return {
-    title: { text: 'Confusion Matrix (LLM vs Human)', left: 'center', textStyle: { fontSize: 13, fontWeight: 600, color: '#e5e7eb' } },
+    title: { text: 'Confusion Matrix (LLM vs Human)', left: 'center', textStyle: { fontSize: 13, fontWeight: 600, color: textColor } },
     tooltip: {
       formatter: (params: { data: number[] }) => {
         const [x, y, val] = params.data;
@@ -48,15 +48,15 @@ function buildOption(data: ConfusionData): echarts.EChartsCoreOption {
     xAxis: {
       type: 'category',
       data: xLabels,
-      axisLabel: { color: '#d1d5db', fontSize: 11 },
-      axisLine: { lineStyle: { color: '#374151' } },
+      axisLabel: { color: labelColor, fontSize: 11 },
+      axisLine: { lineStyle: { color: lineColor } },
       splitArea: { show: true },
     },
     yAxis: {
       type: 'category',
       data: yLabels,
-      axisLabel: { color: '#d1d5db', fontSize: 11 },
-      axisLine: { lineStyle: { color: '#374151' } },
+      axisLabel: { color: labelColor, fontSize: 11 },
+      axisLine: { lineStyle: { color: lineColor } },
       splitArea: { show: true },
     },
     visualMap: {
@@ -75,10 +75,10 @@ function buildOption(data: ConfusionData): echarts.EChartsCoreOption {
         show: true,
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#e5e7eb',
+        color: cellTextColor,
         formatter: (params: { data: number[] }) => `${params.data[2]}`,
       },
-      itemStyle: { borderColor: '#111827', borderWidth: 2 },
+      itemStyle: { borderColor: cellBorder, borderWidth: 2 },
     }],
   };
 }
@@ -87,8 +87,9 @@ export const SAMPLE_DATA: ConfusionData = { tp: 12, fp: 3, fn: 5, tn: 20 };
 
 interface Props {
   data: ConfusionData;
+  dark?: boolean;
 }
 
-export default function DashboardConfusionMatrix({ data }: Props) {
-  return <ReactEChartsCore echarts={echarts} option={buildOption(data)} style={{ width: '100%', height: '100%' }} />;
+export default function DashboardConfusionMatrix({ data, dark = true }: Props) {
+  return <ReactEChartsCore echarts={echarts} option={buildOption(data, dark)} style={{ width: '100%', height: '100%' }} />;
 }

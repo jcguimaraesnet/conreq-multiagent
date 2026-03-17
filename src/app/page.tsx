@@ -15,6 +15,7 @@ import DashboardMetricsChart, { SAMPLE_DATA as METRICS_SAMPLE } from '@/componen
 import type { MetricsData } from '@/components/dashboard/DashboardMetricsChart';
 import Spinner from '@/components/ui/Spinner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -25,6 +26,7 @@ interface RadarData {
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const [projectId, setProjectId] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -74,28 +76,28 @@ export default function HomePage() {
       <DashboardToolbar selectedProjectId={projectId} onProjectChange={setProjectId} />
 
       <div className="grid grid-cols-2 gap-4">
-        <ChartCard noProject={noProject} loading={loading} loaded={!!radarData}>
+        <ChartCard dark={isDarkMode} noProject={noProject} loading={loading} loaded={!!radarData}>
           {() => noProject
-            ? <DashboardRadarChart data={RADAR_SAMPLE} />
-            : radarData && <DashboardRadarChart data={radarData} />}
+            ? <DashboardRadarChart data={RADAR_SAMPLE} dark={isDarkMode} />
+            : radarData && <DashboardRadarChart data={radarData} dark={isDarkMode} />}
         </ChartCard>
 
-        <ChartCard noProject={noProject} loading={loading} loaded={!!boxplotData}>
+        <ChartCard dark={isDarkMode} noProject={noProject} loading={loading} loaded={!!boxplotData}>
           {() => noProject
-            ? <DashboardBoxplotChart data={BOXPLOT_SAMPLE} />
-            : boxplotData && <DashboardBoxplotChart data={boxplotData} />}
+            ? <DashboardBoxplotChart data={BOXPLOT_SAMPLE} dark={isDarkMode} />
+            : boxplotData && <DashboardBoxplotChart data={boxplotData} dark={isDarkMode} />}
         </ChartCard>
 
-        <ChartCard noProject={noProject} loading={loading} loaded={!!confusionData}>
+        <ChartCard dark={isDarkMode} noProject={noProject} loading={loading} loaded={!!confusionData}>
           {() => noProject
-            ? <DashboardConfusionMatrix data={CONFUSION_SAMPLE} />
-            : confusionData && <DashboardConfusionMatrix data={confusionData} />}
+            ? <DashboardConfusionMatrix data={CONFUSION_SAMPLE} dark={isDarkMode} />
+            : confusionData && <DashboardConfusionMatrix data={confusionData} dark={isDarkMode} />}
         </ChartCard>
 
-        <ChartCard noProject={noProject} loading={loading} loaded={!!metricsData}>
+        <ChartCard dark={isDarkMode} noProject={noProject} loading={loading} loaded={!!metricsData}>
           {() => noProject
-            ? <DashboardMetricsChart data={METRICS_SAMPLE} />
-            : metricsData && <DashboardMetricsChart data={metricsData} />}
+            ? <DashboardMetricsChart data={METRICS_SAMPLE} dark={isDarkMode} />
+            : metricsData && <DashboardMetricsChart data={metricsData} dark={isDarkMode} />}
         </ChartCard>
       </div>
     </AppLayout>
@@ -104,11 +106,13 @@ export default function HomePage() {
 
 function ChartCard({
   children,
+  dark,
   noProject,
   loading,
   loaded,
 }: {
   children: (size: 'sm' | 'lg') => React.ReactNode;
+  dark: boolean;
   noProject: boolean;
   loading: boolean;
   loaded: boolean;
@@ -125,32 +129,36 @@ function ChartCard({
     return () => window.removeEventListener('keydown', handler);
   }, [showModal]);
 
+  const bg = dark ? '#111827' : '#ffffff';
+  const border = dark ? '#374151' : '#e5e7eb';
+  const iconColor = dark ? '#6b7280' : '#9ca3af';
+
   return (
     <>
       <div
         className="relative overflow-hidden"
         onClick={canOpen ? () => setShowModal(true) : undefined}
         style={{
-          backgroundColor: '#111827',
-          border: '1px solid #374151',
+          backgroundColor: bg,
+          border: `1px solid ${border}`,
           borderRadius: 10,
           height: 360,
           cursor: canOpen ? 'pointer' : 'default',
         }}
       >
-        <div style={{ position: 'absolute', top: 8, right: 8, color: '#6b7280', opacity: canOpen ? 1 : 0 }}>
+        <div style={{ position: 'absolute', top: 8, right: 8, color: iconColor, opacity: canOpen ? 1 : 0 }}>
           <Maximize2 size={14} />
         </div>
         <div className="w-full h-full p-3" style={{ pointerEvents: 'none' }}>{children('sm')}</div>
 
         {noProject && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
-            <span className="text-gray-400 text-sm font-medium">Select a project</span>
+          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: dark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(2px)' }}>
+            <span style={{ color: dark ? '#9ca3af' : '#6b7280', fontSize: 14, fontWeight: 500 }}>Select a project</span>
           </div>
         )}
 
         {!noProject && loading && !loaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: dark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)' }}>
             <Spinner size="lg" />
           </div>
         )}
@@ -158,7 +166,8 @@ function ChartCard({
 
       {showModal && createPortal(
         <div
-          className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 p-4"
+          className="fixed inset-0 z-9999 flex items-center justify-center p-4"
+          style={{ backgroundColor: dark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }}
           onClick={() => setShowModal(false)}
         >
           <div
@@ -167,10 +176,10 @@ function ChartCard({
               width: '100%',
               maxWidth: 720,
               height: 520,
-              border: '1px solid #374151',
+              border: `1px solid ${border}`,
               borderRadius: 12,
               padding: 20,
-              backgroundColor: '#111827',
+              backgroundColor: bg,
               position: 'relative',
             }}
           >
@@ -180,7 +189,7 @@ function ChartCard({
                 position: 'absolute',
                 top: 12,
                 right: 12,
-                color: '#9ca3af',
+                color: dark ? '#9ca3af' : '#6b7280',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',

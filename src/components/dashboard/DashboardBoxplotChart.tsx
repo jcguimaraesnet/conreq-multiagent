@@ -35,11 +35,14 @@ const HUMAN_COLORS: Record<number, { fill: string; border: string }> = {
   3: { fill: '#065f46', border: '#047857' },
 };
 
-function buildOption(data: BoxplotData): echarts.EChartsCoreOption {
+function buildOption(data: BoxplotData, dark: boolean): echarts.EChartsCoreOption {
   const hasHuman = data.has_human;
   const attempts = [...new Set(data.attempts.map((a) => a.attempt))].sort();
+  const textColor = dark ? '#e5e7eb' : '#1f2937';
+  const labelColor = dark ? '#d1d5db' : '#374151';
+  const lineColor = dark ? '#374151' : '#d1d5db';
+  const splitColor = dark ? '#1f2937' : '#f3f4f6';
 
-  // Build categories and box data in sync
   const categories: string[] = [];
   const boxData: any[] = [];
 
@@ -48,14 +51,12 @@ function buildOption(data: BoxplotData): echarts.EChartsCoreOption {
     const human = data.attempts.find((a) => a.attempt === att && a.type === 'human');
 
     if (hasHuman) {
-      // LLM box
       categories.push(`Att ${att} LLM`);
       boxData.push(
         llm
           ? { value: [llm.min, llm.q1, llm.median, llm.q3, llm.max], itemStyle: { color: LLM_COLORS[att]?.fill ?? '#6366f1', borderColor: LLM_COLORS[att]?.border ?? '#818cf8' } }
           : { value: [0, 0, 0, 0, 0], itemStyle: { color: 'transparent', borderColor: 'transparent' } }
       );
-      // Human box
       categories.push(`Att ${att} Human`);
       boxData.push(
         human
@@ -73,7 +74,7 @@ function buildOption(data: BoxplotData): echarts.EChartsCoreOption {
   }
 
   return {
-    title: { text: 'Score Distribution by Attempt', left: 'center', textStyle: { fontSize: 13, fontWeight: 600, color: '#e5e7eb' } },
+    title: { text: 'Score Distribution by Attempt', left: 'center', textStyle: { fontSize: 13, fontWeight: 600, color: textColor } },
     tooltip: {
       trigger: 'item',
       formatter: (params: any) => {
@@ -87,16 +88,16 @@ function buildOption(data: BoxplotData): echarts.EChartsCoreOption {
     xAxis: {
       type: 'category',
       data: categories,
-      axisLabel: { color: '#d1d5db', fontSize: 10, rotate: hasHuman ? 20 : 0 },
-      axisLine: { lineStyle: { color: '#374151' } },
+      axisLabel: { color: labelColor, fontSize: 10, rotate: hasHuman ? 20 : 0 },
+      axisLine: { lineStyle: { color: lineColor } },
     },
     yAxis: {
       type: 'value',
       min: 1,
       max: 5,
-      axisLabel: { color: '#d1d5db' },
-      axisLine: { lineStyle: { color: '#374151' } },
-      splitLine: { lineStyle: { color: '#1f2937' } },
+      axisLabel: { color: labelColor },
+      axisLine: { lineStyle: { color: lineColor } },
+      splitLine: { lineStyle: { color: splitColor } },
     },
     series: [{
       name: 'Overall Score',
@@ -120,8 +121,9 @@ export const SAMPLE_DATA: BoxplotData = {
 
 interface Props {
   data: BoxplotData;
+  dark?: boolean;
 }
 
-export default function DashboardBoxplotChart({ data }: Props) {
-  return <ReactEChartsCore echarts={echarts} option={buildOption(data)} style={{ width: '100%', height: '100%' }} />;
+export default function DashboardBoxplotChart({ data, dark = true }: Props) {
+  return <ReactEChartsCore echarts={echarts} option={buildOption(data, dark)} style={{ width: '100%', height: '100%' }} />;
 }
