@@ -16,6 +16,7 @@ export interface UserSettings {
 
 interface SettingsContextType {
   settings: UserSettings;
+  hasSavedSettings: boolean;
   isLoading: boolean;
   error: string | null;
   updateSetting: <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => void;
@@ -37,6 +38,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 // Module-level state to persist between navigations
 let cachedSettings: UserSettings | null = null;
+let cachedHasSaved: boolean = false;
 let cachedUserId: string | null = null;
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -49,6 +51,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(
     hasCachedSettings ? cachedSettings! : defaultSettings
   );
+  const [hasSavedSettings, setHasSavedSettings] = useState(hasCachedSettings ? cachedHasSaved : false);
   // Only show loading if we don't have cached settings or auth is still loading
   const [isLoading, setIsLoading] = useState(isAuthLoading || !hasCachedSettings);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +69,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
     if (!user?.id) {
       setSettings(defaultSettings);
+      setHasSavedSettings(false);
       cachedSettings = null;
+      cachedHasSaved = false;
       cachedUserId = null;
       fetchedForUser.current = null;
       setIsLoading(false);
@@ -96,6 +101,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         throw fetchError;
       }
 
+      const foundInDb = !!data;
       const loadedSettings: UserSettings = data
         ? {
             require_brief_description: data.require_brief_description,
@@ -110,10 +116,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
       // Update module-level cache
       cachedSettings = loadedSettings;
+      cachedHasSaved = foundInDb;
       cachedUserId = user.id;
       fetchedForUser.current = user.id;
 
       setSettings(loadedSettings);
+      setHasSavedSettings(foundInDb);
     } catch (err) {
       console.error('Error loading settings:', err);
       setError('Failed to load settings');
@@ -162,9 +170,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
       // Update cache and state from source of truth
       cachedSettings = persistedSettings;
+      cachedHasSaved = true;
       cachedUserId = user.id;
       fetchedForUser.current = user.id;
       setSettings(persistedSettings);
+      setHasSavedSettings(true);
     } catch (err) {
       console.error('Error saving settings:', err);
       setError('Failed to save settings');
@@ -191,6 +201,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const value: SettingsContextType = {
     settings,
+    hasSavedSettings,
     isLoading,
     error,
     updateSetting,

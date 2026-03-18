@@ -2,8 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useOnborda } from 'onborda';
-import { Settings, FolderKanban, Sparkles, Star } from 'lucide-react';
+import { Settings, FolderKanban, Sparkles, Star, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useSettings } from '@/contexts/SettingsContext';
+import { useProject } from '@/contexts/ProjectContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useHasConjecturalRequirements } from '@/hooks/useHasConjecturalRequirements';
 
 interface CardConfig {
   step: number;
@@ -16,20 +20,53 @@ interface CardConfig {
   heroDecorations: React.ReactNode;
 }
 
-function StepCircle({ step }: { step: number }) {
+const CIRCLE_RADIUS = 16;
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+
+function StepCircle({ step, completed }: { step: number; completed?: boolean }) {
   return (
-    <div
-      className="flex items-center justify-center shrink-0"
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: '50%',
-        border: '3px dashed rgba(242, 138, 74, 0.4)',
-      }}
-    >
-      <span className="text-sm font-bold" style={{ color: '#F28A4A' }}>
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: 40, height: 40 }}>
+      <svg width="40" height="40" className="absolute inset-0">
+        {/* Dashed orange base circle */}
+        <circle
+          cx="20"
+          cy="20"
+          r={CIRCLE_RADIUS}
+          fill="none"
+          stroke="rgba(242, 138, 74, 0.4)"
+          strokeWidth="3"
+          strokeDasharray="4 4"
+          className={completed ? 'animate-[fadeOut_0.1s_ease-out_1.1s_forwards]' : ''}
+        />
+        {/* Animated green overlay circle */}
+        {completed && (
+          <circle
+            cx="20"
+            cy="20"
+            r={CIRCLE_RADIUS}
+            fill="none"
+            stroke="rgba(34, 197, 94, 0.7)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={CIRCLE_CIRCUMFERENCE}
+            strokeDashoffset={CIRCLE_CIRCUMFERENCE}
+            transform="rotate(-90 20 20)"
+            className="animate-[circleDraw_0.8s_ease-out_0.3s_forwards]"
+          />
+        )}
+      </svg>
+      {/* Number → fades out when completed, Check → fades in */}
+      <span
+        className={`absolute text-sm font-bold ${completed ? 'animate-[fadeOut_0.3s_ease-in_0.8s_forwards]' : ''}`}
+        style={{ color: '#F28A4A' }}
+      >
         {step}
       </span>
+      {completed && (
+        <Check
+          className="absolute w-5 h-5 text-green-600 dark:text-green-400 opacity-0 animate-[fadeIn_0.3s_ease-in_1.1s_forwards]"
+        />
+      )}
     </div>
   );
 }
@@ -139,19 +176,35 @@ const CARDS: CardConfig[] = [
 export default function OnboardingCards() {
   const router = useRouter();
   const { startOnborda } = useOnborda();
+  const { hasSavedSettings } = useSettings();
+  const { projects } = useProject();
+  const { user } = useAuth();
+  const hasOwnProjects = projects.some(p => p.user_id === user?.id);
+  const hasConjectural = useHasConjecturalRequirements();
 
   const handleCta = (step: number) => {
     switch (step) {
-      case 1: {
-        const settingsBtn = document.querySelector('#header-settings') as HTMLElement | null;
-        if (settingsBtn) settingsBtn.click();
+      case 1:
+        if (hasSavedSettings) {
+          const settingsBtn = document.querySelector('#header-settings') as HTMLButtonElement;
+          if (settingsBtn) settingsBtn.click();
+        } else {
+          startOnborda('settings-tour');
+        }
         break;
-      }
       case 2:
-        router.push('/projects');
+        if (hasOwnProjects) {
+          router.push('/projects');
+        } else {
+          startOnborda('sidebar-projects-tour');
+        }
         break;
       case 3:
-        router.push('/projects?tour=conjectural');
+        if (hasConjectural) {
+          router.push('/projects');
+        } else {
+          router.push('/projects?tour=conjectural-nav');
+        }
         break;
     }
   };
@@ -167,7 +220,7 @@ export default function OnboardingCards() {
           <div className="relative h-40 overflow-hidden bg-linear-to-br from-indigo-50 via-white to-orange-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-700 text-gray-400 dark:text-gray-500">
             {card.heroDecorations}
             {/* Icon + skeleton label */}
-            <div className="relative z-10 p-4 flex items-center gap-3">
+            <div className="relative p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-400">
                 {card.icon}
               </div>
@@ -200,7 +253,7 @@ export default function OnboardingCards() {
 
             {/* Footer: step circle + CTA */}
             <div className="flex items-center justify-between">
-              <StepCircle step={card.step} />
+              <StepCircle step={card.step} completed={(card.step === 1 && hasSavedSettings) || (card.step === 2 && hasOwnProjects) || (card.step === 3 && hasConjectural)} />
               <Button size="md" className="rounded-md" onClick={() => handleCta(card.step)}>
                 {card.ctaLabel}
               </Button>

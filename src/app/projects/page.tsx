@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useOnborda } from 'onborda';
 import AppLayout from '@/components/layout/AppLayout';
 import PageTitle from '@/components/ui/PageTitle';
 import ProjectsTable from '@/components/projects/ProjectsTable';
@@ -28,6 +29,8 @@ export default function ProjectsPage() {
   const { projects, isLoading, error: contextError, refreshProjects } = useProject();
   const { prefetchRequirements } = useRequirements();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { startOnborda } = useOnborda();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddPopup, setShowAddPopup] = useState(false);
   
@@ -67,6 +70,19 @@ export default function ProjectsPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
+
+  // Start tour when arriving via query string
+  useEffect(() => {
+    const tourParam = searchParams.get('tour');
+    if (tourParam === 'projects') {
+      const timer = setTimeout(() => startOnborda('projects-tour'), 400);
+      return () => clearTimeout(timer);
+    }
+    if (tourParam === 'conjectural-nav') {
+      const timer = setTimeout(() => startOnborda('conjectural-nav-tour'), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, startOnborda]);
 
   // Count total projects for generating project ID
   const projectCount = projects.length;

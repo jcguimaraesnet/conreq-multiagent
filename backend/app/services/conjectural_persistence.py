@@ -83,9 +83,9 @@ def _build_requirement_snapshot(cr: ConjecturalRequirement) -> dict:
     }
 
 
-def _build_requirement_row(project_id: str, cr: ConjecturalRequirement, requirement_id: str) -> dict:
+def _build_requirement_row(project_id: str, cr: ConjecturalRequirement, requirement_id: str, user_id: str | None = None) -> dict:
     """Build a database row dict from a ConjecturalRequirement (ranking=1 only)."""
-    return {
+    row = {
         "project_id": project_id,
         "requirement_id": requirement_id,
         "status": "todo",
@@ -96,6 +96,9 @@ def _build_requirement_row(project_id: str, cr: ConjecturalRequirement, requirem
         "uncertainty_evaluated": cr.qess.uncertainty_evaluated,
         "observation_analysis": cr.qess.observation_analysis,
     }
+    if user_id:
+        row["user_id"] = user_id
+    return row
 
 
 def _build_evaluation_row(
@@ -122,7 +125,7 @@ def _build_evaluation_row(
     }
 
 
-def persist_conjectural_data(project_id: str, data_context: DataContext) -> list[str]:
+def persist_conjectural_data(project_id: str, data_context: DataContext, user_id: str | None = None) -> list[str]:
     """Persist conjectural requirements and evaluations to the database.
 
     Only ranking=1 requirements are inserted into conjectural_requirements.
@@ -150,7 +153,7 @@ def persist_conjectural_data(project_id: str, data_context: DataContext) -> list
         requirement_ids.append(req_id)
 
         # Insert only the winning requirement
-        row = _build_requirement_row(project_id, winner, req_id)
+        row = _build_requirement_row(project_id, winner, req_id, user_id)
         row["history_snapshot"] = history_snapshot
         result = supabase.table("conjectural_requirements").insert(row).execute()
 

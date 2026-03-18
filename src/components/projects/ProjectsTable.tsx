@@ -146,6 +146,7 @@ export default function ProjectsTable({
 
                       <button
                         id={index === 0 ? 'btn-go-to-conjectural-first' : undefined}
+                        data-project-id={project.id}
                         className="p-1.5 text-orange-500 hover:text-orange-600 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                         title="Go to Conjectural Requirements"
                         onClick={() => onNavigateToConjecturalRequirements?.(project.id)}

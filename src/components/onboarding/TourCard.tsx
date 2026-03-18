@@ -5,13 +5,9 @@ import { useOnborda } from 'onborda';
 import { useRouter } from 'next/navigation';
 import { useOnboardingStatus, type OnboardingStage } from '@/hooks/useOnboardingStatus';
 
-const NEXT_ROUTE_MAP: Record<string, string> = {
-  'settings-tour': '/projects',
-};
-
 const TOUR_STAGE_MAP: Record<string, OnboardingStage> = {
-  'home-tour': 'stage1',
-  'settings-tour': 'stage2',
+  'settings-tour': 'stage1',
+  'settings-detail-tour': 'stage2',
   'projects-tour': 'stage3',
 };
 
@@ -23,16 +19,12 @@ export default function TourCard({
   prevStep,
   arrow,
 }: CardComponentProps) {
-  const { currentTour, closeOnborda } = useOnborda();
+  const { currentTour, closeOnborda, startOnborda } = useOnborda();
   const { completeStage } = useOnboardingStatus();
   const router = useRouter();
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
-  const isLastStepOfFinalTour =
-    currentTour === 'projects-tour' && isLastStep;
-  const isLastStepOfIntermediateTour =
-    isLastStep && currentTour !== 'projects-tour';
 
   const completeCurrentStage = () => {
     if (currentTour) {
@@ -42,20 +34,22 @@ export default function TourCard({
   };
 
   const handleNext = () => {
-    if (isLastStepOfFinalTour) {
-      completeCurrentStage();
-      closeOnborda();
-    } else if (isLastStepOfIntermediateTour) {
+    if (isLastStep) {
       completeCurrentStage();
       closeOnborda();
 
-      if (currentTour === 'home-tour') {
-        // Open settings modal by clicking the gear icon
+      if (currentTour === 'settings-tour') {
         const settingsBtn = document.querySelector('#header-settings') as HTMLButtonElement;
         if (settingsBtn) settingsBtn.click();
-      } else {
-        const nextRoute = currentTour ? NEXT_ROUTE_MAP[currentTour] : null;
-        if (nextRoute) router.push(nextRoute);
+        setTimeout(() => startOnborda('settings-detail-tour'), 400);
+      } else if (currentTour === 'sidebar-projects-tour') {
+        router.push('/projects?tour=projects');
+      } else if (currentTour === 'conjectural-nav-tour') {
+        const projectBtn = document.querySelector('#btn-go-to-conjectural-first') as HTMLElement;
+        const projectId = projectBtn?.dataset.projectId;
+        const params = new URLSearchParams({ tour: 'chatbot-suggestion' });
+        if (projectId) params.set('projectId', projectId);
+        router.push(`/conjectural-requirements?${params.toString()}`);
       }
     } else {
       nextStep();
@@ -68,16 +62,18 @@ export default function TourCard({
   };
 
   const BUTTON_LABEL_MAP: Record<string, string> = {
-    'home-tour': 'Open Settings',
-    'settings-tour': 'Go to Projects',
+    'settings-tour': 'Open Settings',
+    'settings-detail-tour': 'Close',
+    'sidebar-projects-tour': 'Go to Projects',
+    'conjectural-nav-tour': 'Go to Page',
   };
 
   const getNextButtonLabel = () => {
-    if (isLastStepOfFinalTour) return 'Close';
-    if (isLastStepOfIntermediateTour && currentTour) {
-      return BUTTON_LABEL_MAP[currentTour] ?? 'Close';
+    if (!isLastStep) return 'Next';
+    if (currentTour && BUTTON_LABEL_MAP[currentTour]) {
+      return BUTTON_LABEL_MAP[currentTour];
     }
-    return 'Next';
+    return 'Close';
   };
 
   return (
@@ -105,7 +101,7 @@ export default function TourCard({
       {/* Footer */}
       <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center gap-2">
-          {!isLastStepOfFinalTour && !(isLastStepOfIntermediateTour && totalSteps > 1) && (
+          {(!(isLastStep && totalSteps === 1) || (currentTour && BUTTON_LABEL_MAP[currentTour] && BUTTON_LABEL_MAP[currentTour] !== 'Close')) && (
             <button
               onClick={handleSkip}
               className="px-3 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"

@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
 import type { ConjecturalRequirement, ConjecturalEvaluation, ConjecturalStatus } from '@/types';
+import { useOnborda } from 'onborda';
 import { X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { z } from "zod";
 import EvaluationRadarCard from '@/components/conjectural-requirements/EvaluationRadarCard';
@@ -1016,6 +1017,17 @@ function ConjecturalRequirementsInner() {
 }
 
 export default function ConjecturalRequirementsPage() {
+  const searchParamsOuter = useSearchParams();
+  const { startOnborda } = useOnborda();
+
+  // Start chatbot-suggestion-tour when arriving via query string
+  useEffect(() => {
+    if (searchParamsOuter.get('tour') === 'chatbot-suggestion') {
+      const timer = setTimeout(() => startOnborda('chatbot-suggestion-tour'), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParamsOuter, startOnborda]);
+
   useConfigureSuggestions({
     suggestions: [
         {

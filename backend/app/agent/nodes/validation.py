@@ -221,7 +221,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         data_context.rank_conjectural_requirements()
 
         # Persist to database and get generated UUIDs
-        saved_ids = persist_conjectural_data(context["current_project_id"], data_context)
+        saved_ids = persist_conjectural_data(context["current_project_id"], data_context, context.get("current_user_id"))
 
         # message 1
         msg_created_text = "The following conjectural requirements were successfully **created**: " + ", ".join(saved_ids) + "."

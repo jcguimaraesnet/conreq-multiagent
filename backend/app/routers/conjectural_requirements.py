@@ -70,6 +70,28 @@ async def list_by_project(
         )
 
 
+@router.get("/user/has-any")
+async def has_any_conjectural(authorization: Optional[str] = Header(None)):
+    """Check if the authenticated user has at least one conjectural requirement."""
+    user_id = get_user_id_from_header(authorization)
+    supabase = get_supabase_client()
+
+    try:
+        result = supabase.table("conjectural_requirements") \
+            .select("id", count="exact") \
+            .eq("user_id", user_id) \
+            .limit(1) \
+            .execute()
+
+        return {"has_conjectural": (result.count or 0) > 0}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to check conjectural requirements: {str(e)}",
+        )
+
+
 @router.get("/{requirement_id}")
 async def get_requirement(
     requirement_id: UUID,

@@ -1,5 +1,5 @@
 import type { OnbordaProps } from 'onborda';
-import { Settings, CheckCircle, Layers, Hash, PlusCircle, ArrowRightCircle, UserCheck, ShieldCheck, Cpu } from 'lucide-react';
+import { Settings, CheckCircle, Layers, Hash, PlusCircle, ArrowRightCircle, UserCheck, ShieldCheck, Cpu, Repeat, Scale, FolderKanban, Sparkles } from 'lucide-react';
 
 export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] {
   const projectActionsSelector = hasProjects
@@ -24,7 +24,7 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
 
   return [
   {
-    tour: 'home-tour',
+    tour: 'settings-tour',
     steps: [
       {
         icon: <Settings className="w-5 h-5" />,
@@ -44,7 +44,7 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
     ],
   },
   {
-    tour: 'settings-tour',
+    tour: 'settings-detail-tour',
     steps: [
       {
         icon: <UserCheck className="w-5 h-5" />,
@@ -127,6 +127,22 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
         pointerRadius: 10,
       },
       {
+        icon: <Repeat className="w-5 h-5" />,
+        title: 'Specification Attempts',
+        content: (
+          <>
+            Set the number of <strong>specification attempts</strong> (1 to 3).
+            Each attempt refines the conjectural requirement through additional
+            rounds of AI-assisted generation and evaluation.
+          </>
+        ),
+        selector: '#setting-spec-attempts',
+        side: 'top',
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 10,
+      },
+      {
         icon: <Cpu className="w-5 h-5" />,
         title: 'Model Configuration',
         content: (
@@ -138,6 +154,43 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
         ),
         selector: '#setting-model',
         side: 'top',
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 10,
+      },
+      {
+        icon: <Scale className="w-5 h-5" />,
+        title: 'Model Configuration (LLM-as-Judge)',
+        content: (
+          <>
+            Select the <strong>AI model</strong> used for automated quality
+            evaluation of conjectural requirements. This model acts as a judge,
+            scoring each requirement against quality criteria.
+          </>
+        ),
+        selector: '#setting-model-judge',
+        side: 'top',
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 10,
+      },
+    ],
+  },
+  {
+    tour: 'sidebar-projects-tour',
+    steps: [
+      {
+        icon: <FolderKanban className="w-5 h-5" />,
+        title: 'Go to Projects',
+        content: (
+          <>
+            Click <strong>Projects</strong> in the sidebar to create and manage
+            your projects. Each project holds its own set of conjectural
+            requirements.
+          </>
+        ),
+        selector: '#sidebar-projects',
+        side: 'right',
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
@@ -162,12 +215,37 @@ export function getOnboardingTours(hasProjects: boolean): OnbordaProps['steps'] 
         pointerPadding: 10,
         pointerRadius: 10,
       },
+    ],
+  },
+  {
+    tour: 'conjectural-nav-tour',
+    steps: [
       {
         icon: <ArrowRightCircle className="w-5 h-5" />,
-        title: 'Project Actions',
+        title: 'Go to Conjectural Requirements',
         content: projectActionsContent,
         selector: projectActionsSelector,
         side: hasProjects ? 'left' : 'bottom',
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 10,
+      },
+    ],
+  },
+  {
+    tour: 'chatbot-suggestion-tour',
+    steps: [
+      {
+        icon: <Sparkles className="w-5 h-5" />,
+        title: 'Generate Your First Requirement',
+        content: (
+          <>
+            Click the <strong>Generate conjectural requirements</strong> suggestion
+            to start creating your first conjectural requirement with AI assistance.
+          </>
+        ),
+        selector: '.copilotKitMessages footer .suggestions button:first-child',
+        side: 'top',
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,

@@ -24,10 +24,10 @@ export default function Header() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Start settings-tour when modal opens and stage2 onboarding is pending
+  // Start settings-detail-tour when modal opens and stage2 onboarding is pending
   useEffect(() => {
     if (isSettingsOpen && !stageCompleted.stage2) {
-      const timer = setTimeout(() => startOnborda('settings-tour'), 500);
+      const timer = setTimeout(() => startOnborda('settings-detail-tour'), 500);
       return () => clearTimeout(timer);
     }
   }, [isSettingsOpen, stageCompleted.stage2, startOnborda]);
