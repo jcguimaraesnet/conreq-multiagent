@@ -286,10 +286,6 @@ function ProjectsPageInner() {
     handleDownloadDocument(project.id, 'requirements', project.requirements_document_name);
   }, [handleDownloadDocument]);
 
-  const handleModalNavigate = useCallback((project: ProjectDetails) => {
-    handleNavigateToRequirements(project.id);
-  }, [handleNavigateToRequirements]);
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -352,10 +348,11 @@ function ProjectsPageInner() {
         isDeleting={isDeleting}
       />
 
-      <AddProjectPopup 
-        open={showAddPopup} 
+      <AddProjectPopup
+        open={showAddPopup}
         onClose={handleCloseAdd}
         onProjectCreated={handleProjectCreated}
+        onGenerate={() => setTimeout(() => startOnborda('conjectural-nav-tour'), 400)}
         projectCount={projectCount}
       />
 
@@ -367,7 +364,6 @@ function ProjectsPageInner() {
         onClose={handleCloseDetails}
         onDownloadVision={handleDownloadVision}
         onDownloadRequirements={handleDownloadRequirements}
-        onNavigateToRequirements={handleModalNavigate}
       />
     </AppLayout>
   );

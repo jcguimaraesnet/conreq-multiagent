@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Download, X } from 'lucide-react';
 import { ProjectDetails, RequirementCounts } from '@/types';
 
@@ -11,7 +12,6 @@ interface ProjectDetailsModalProps {
   onClose: () => void;
   onDownloadVision?: (project: ProjectDetails) => void;
   onDownloadRequirements?: (project: ProjectDetails) => void;
-  onNavigateToRequirements?: (project: ProjectDetails) => void;
 }
 
 const emptyCounts: RequirementCounts = {
@@ -28,17 +28,20 @@ export default function ProjectDetailsModal({
   onClose,
   onDownloadVision,
   onDownloadRequirements,
-  onNavigateToRequirements,
 }: ProjectDetailsModalProps) {
+  // Close on ESC key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const counts = project?.requirement_counts ?? emptyCounts;
-
-  const handleNavigate = () => {
-    if (project) {
-      onNavigateToRequirements?.(project);
-    }
-  };
 
   const handleDownloadVisionClick = () => {
     if (project) {
@@ -71,7 +74,12 @@ export default function ProjectDetailsModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[15vh]"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark">
         <div className="flex items-start justify-between border-b border-border-light dark:border-border-dark px-6 py-4">
           <div>
@@ -161,19 +169,12 @@ export default function ProjectDetailsModal({
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-end gap-3 border-t border-border-light dark:border-border-dark px-6 py-4">
+        <div className="flex justify-end border-t border-border-light dark:border-border-dark px-6 py-4">
           <button
             onClick={onClose}
             className="inline-flex justify-center rounded-xl border border-gray-300 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             Close
-          </button>
-          <button
-            onClick={handleNavigate}
-            disabled={!project}
-            className="inline-flex justify-center rounded-xl bg-black text-white dark:bg-white dark:text-black px-5 py-2.5 text-sm font-semibold shadow-md hover:opacity-80 transition-opacity disabled:opacity-50"
-          >
-            Go to Requirements
           </button>
         </div>
       </div>

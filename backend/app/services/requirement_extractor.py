@@ -10,6 +10,7 @@ import json
 import pdfplumber
 from google import genai
 from app.config import get_settings
+from app.agent.llm_config import DEFAULT_GEMINI_FLASH_MODEL
 from app.models.schemas import (
     FunctionalRequirement,
     NonFunctionalRequirement,
@@ -151,7 +152,7 @@ If no requirements are found, return empty arrays. Ensure all IDs are unique and
 
     # Call Gemini API
     response = await client.aio.models.generate_content(
-        model='gemini-2.0-flash',
+        model=DEFAULT_GEMINI_FLASH_MODEL,
         contents=prompt
     )
     response_text = response.text.strip()

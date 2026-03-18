@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { X, FileText, Tag, Calendar, User } from 'lucide-react';
 import { Requirement, RequirementType, NFRCategory } from '@/types';
 import Badge from '@/components/ui/Badge';
@@ -33,12 +34,27 @@ export default function RequirementDetailsModal({
   requirement,
   onClose,
 }: RequirementDetailsModalProps) {
+  // Close on ESC key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
   if (!open || !requirement) return null;
 
   const isNonFunctional = requirement.type === RequirementType.NonFunctional;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[15vh]"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border-light dark:border-border-dark px-6 py-4">
@@ -145,7 +161,7 @@ export default function RequirementDetailsModal({
         <div className="flex justify-end border-t border-border-light dark:border-border-dark px-6 py-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="inline-flex justify-center rounded-xl border border-gray-300 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             Close
           </button>

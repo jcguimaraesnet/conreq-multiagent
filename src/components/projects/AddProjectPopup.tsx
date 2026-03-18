@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { X, UploadCloud, Check, Loader2, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,6 +11,7 @@ interface AddProjectPopupProps {
   open: boolean;
   onClose: () => void;
   onProjectCreated?: () => void;
+  onGenerate?: () => void;
   projectCount: number;
 }
 
@@ -38,10 +38,9 @@ interface ExtractedRequirements {
   non_functional: NonFunctionalRequirement[];
 }
 
-type WizardStep = 1 | 2 | 3 | 4; // 4 = success screen
+type WizardStep = 1 | 2 | 3 | 4 | 5; // 4 = review, 5 = success screen
 
-export default function AddProjectPopup({ open, onClose, onProjectCreated, projectCount }: AddProjectPopupProps) {
-  const router = useRouter();
+export default function AddProjectPopup({ open, onClose, onProjectCreated, onGenerate, projectCount }: AddProjectPopupProps) {
   const { user } = useAuth();
   const [step, setStep] = useState<WizardStep>(1);
   
@@ -73,6 +72,16 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
   // Refs for interval cleanup (used for progress simulation)
   const visionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const requirementsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Close on ESC key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
   // Reset state when popup closes
   useEffect(() => {
@@ -283,7 +292,7 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
 
       const result = await response.json();
       setRequirementsCount(result.requirements_count || 0);
-      setStep(4);
+      setStep(5);
       
       // Notify parent to refresh project list
       onProjectCreated?.();
@@ -300,10 +309,10 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
   const canProceedStep3 = requirementsProcessed && !requirementsError && !isCreatingProject;
 
   const handleNext = async () => {
-    if (step === 3) {
-      // On step 3, create the project instead of just moving to step 4
+    if (step === 4) {
+      // On step 4 (review), create the project
       await createProject();
-    } else if (step < 4) {
+    } else if (step < 5) {
       setStep((step + 1) as WizardStep);
     }
   };
@@ -316,7 +325,7 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
 
   const handleNavigateToRequirements = () => {
     onClose();
-    router.push("/requirements");
+    onGenerate?.();
   };
 
   const handleClose = () => {
@@ -325,16 +334,22 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
 
   if (!open) return null;
 
-  const stepTitles = {
+  const stepTitles: Record<WizardStep, string> = {
     1: "Project Information",
     2: "Vision Document",
     3: "Requirements Document",
-    4: "Project Created"
+    4: "Review",
+    5: "Project Created"
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-background-light dark:bg-background-dark rounded-xl shadow-lg w-full max-w-2xl relative overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[15vh]"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark relative overflow-hidden">
         {/* Header */}
         <div className="px-8 pt-6 pb-4 border-b border-border-light dark:border-border-dark">
           <button
@@ -345,13 +360,13 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
             <X size={22} />
           </button>
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {step === 4 ? "Success!" : "Add Project"}
+            {step === 5 ? "Success!" : "Add Project"}
           </h2>
-          
+
           {/* Step Indicator */}
-          {step !== 4 && (
+          {step !== 5 && (
             <div className="flex items-center gap-2 mt-4">
-              {[1, 2, 3].map((s) => (
+              {[1, 2, 3, 4].map((s) => (
                 <div key={s} className="flex items-center">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
@@ -364,9 +379,9 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
                   >
                     {s < step ? <Check size={16} /> : s}
                   </div>
-                  {s < 3 && (
+                  {s < 4 && (
                     <div
-                      className={`w-16 h-1 mx-2 rounded ${
+                      className={`w-12 h-1 mx-2 rounded ${
                         s < step ? "bg-green-500" : "bg-gray-200 dark:bg-gray-700"
                       }`}
                     />
@@ -375,16 +390,16 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
               ))}
             </div>
           )}
-          
-          {step !== 4 && (
+
+          {step !== 5 && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-              Step {step} of 3: {stepTitles[step]}
+              Step {step} of 4: {stepTitles[step]}
             </p>
           )}
         </div>
 
         {/* Content */}
-        <div className="px-8 py-6 min-h-[280px]">
+        <div className="px-8 py-6 h-80 flex flex-col overflow-hidden">
           {/* Step 1: Project Info */}
           {step === 1 && (
             <div className="space-y-5">
@@ -394,7 +409,7 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
                 </label>
                 <input
                   type="text"
-                  className="w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                  className="w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-3 py-2 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter project title"
@@ -405,7 +420,7 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  className="w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary transition-colors resize-none min-h-[120px]"
+                  className="w-full rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-3 py-2 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-colors resize-none min-h-35"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter project description"
@@ -416,12 +431,12 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
 
           {/* Step 2: Vision Document */}
           {step === 2 && (
-            <div className="space-y-5">
+            <div className="flex flex-col flex-1 gap-5">
               <p className="text-gray-600 dark:text-gray-300">
                 Upload the project vision document. The system will extract the text content for analysis.
               </p>
-              
-              <div className="border-2 border-dashed border-border-light dark:border-border-dark rounded-xl p-8 text-center">
+
+              <div className="border-2 border-dashed border-border-light dark:border-border-dark rounded-xl p-8 text-center flex-1 flex items-center justify-center">
                 {!visionFile ? (
                   <label className="cursor-pointer flex flex-col items-center gap-3">
                     <UploadCloud size={48} className="text-gray-400" />
@@ -510,12 +525,12 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
 
           {/* Step 3: Requirements Document */}
           {step === 3 && (
-            <div className="space-y-5">
+            <div className="flex flex-col flex-1 gap-5">
               <p className="text-gray-600 dark:text-gray-300">
-                Upload the requirements document. The system will extract functional and non-functional requirements.
+                Optionally upload a requirements document. The system will extract functional and non-functional requirements.
               </p>
-              
-              <div className="border-2 border-dashed border-border-light dark:border-border-dark rounded-xl p-8 text-center">
+
+              <div className="border-2 border-dashed border-border-light dark:border-border-dark rounded-xl p-8 text-center flex-1 flex items-center justify-center">
                 {!requirementsFile ? (
                   <label className="cursor-pointer flex flex-col items-center gap-3">
                     <UploadCloud size={48} className="text-gray-400" />
@@ -610,26 +625,72 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
             </div>
           )}
 
-          {/* Step 4: Success */}
+          {/* Step 4: Review */}
           {step === 4 && (
-            <div className="flex flex-col items-center justify-center text-center py-8">
-              <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
-                <CheckCircle2 size={48} className="text-green-500" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Project Created Successfully!
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-2 max-w-md">
-                Your project &quot;{title}&quot; has been created with the uploaded documents.
+            <div className="flex flex-col flex-1 gap-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Review the information before creating the project.
               </p>
-              {requirementsCount > 0 && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                  {requirementsCount} requirement{requirementsCount !== 1 ? 's' : ''} extracted and saved.
-                </p>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40">
+                  <CheckCircle2 size={20} className="text-green-500 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Project Information</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40">
+                  <CheckCircle2 size={20} className="text-green-500 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Vision Document</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{visionFile?.name ?? "—"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40">
+                  {requirementsFile ? (
+                    <CheckCircle2 size={20} className="text-green-500 shrink-0" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 shrink-0" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Requirements Document</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {requirementsFile?.name ?? "Skipped"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {creationError && (
+                <div className="flex items-center gap-2 text-red-500">
+                  <AlertCircle size={18} />
+                  <span className="text-sm">{creationError}</span>
+                </div>
               )}
-              <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-4 max-w-md">
+            </div>
+          )}
+
+          {/* Step 5: Success */}
+          {step === 5 && (
+            <div className="flex flex-col items-center justify-center flex-1 text-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle2 size={32} className="text-green-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Project Created Successfully!
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  Your project &quot;{title}&quot; has been created with the uploaded documents.
+                </p>
+                {requirementsCount > 0 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {requirementsCount} requirement{requirementsCount !== 1 ? 's' : ''} extracted and saved.
+                  </p>
+                )}
+              </div>
+              <div className="bg-primary/10 dark:bg-primary/20 rounded-lg px-5 py-3">
                 <p className="text-gray-700 dark:text-gray-200 text-sm">
-                  Would you like to navigate to the requirements page to generate conjectural requirements using AI?
+                  Would you like to generate conjectural requirements using AI Multi-Agent?
                 </p>
               </div>
             </div>
@@ -638,36 +699,48 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
 
         {/* Footer */}
         <div className="px-8 py-4 border-t border-border-light dark:border-border-dark flex justify-between">
-          {step !== 4 ? (
+          {step !== 5 ? (
             <>
               <button
                 type="button"
-                className="rounded-lg px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={step === 1 ? onClose : handleBack}
                 disabled={isCreatingProject}
               >
                 {step === 1 ? "Cancel" : "Back"}
               </button>
-              <button
-                type="button"
-                className="rounded-lg px-6 py-2 bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                onClick={handleNext}
-                disabled={
-                  (step === 1 && !canProceedStep1) ||
-                  (step === 2 && !canProceedStep2) ||
-                  (step === 3 && !canProceedStep3) ||
-                  isCreatingProject
-                }
-              >
-                {isCreatingProject && <Loader2 size={16} className="animate-spin" />}
-                {step === 3 ? (isCreatingProject ? "Creating..." : "Finish") : "Next"}
-              </button>
+              <div className="flex items-center gap-3">
+                {step === 3 && !requirementsFile && (
+                  <button
+                    type="button"
+                    className="text-base text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed mr-4"
+                    onClick={handleNext}
+                    disabled={isCreatingProject}
+                  >
+                    Skip Step
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="rounded-lg px-6 py-2 bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  onClick={handleNext}
+                  disabled={
+                    (step === 1 && !canProceedStep1) ||
+                    (step === 2 && !canProceedStep2) ||
+                    (step === 3 && !canProceedStep3) ||
+                    isCreatingProject
+                  }
+                >
+                  {isCreatingProject && <Loader2 size={16} className="animate-spin" />}
+                  {step === 4 ? (isCreatingProject ? "Creating..." : "Create Project") : "Next"}
+                </button>
+              </div>
             </>
           ) : (
             <>
               <button
                 type="button"
-                className="rounded-lg px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="rounded-lg px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 onClick={handleClose}
               >
                 Close
@@ -677,7 +750,7 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, proje
                 className="rounded-lg px-6 py-2 bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
                 onClick={handleNavigateToRequirements}
               >
-                Go to Requirements
+                Go to AI Multi-Agent
               </button>
             </>
           )}

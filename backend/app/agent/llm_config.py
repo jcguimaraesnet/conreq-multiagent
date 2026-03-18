@@ -24,7 +24,9 @@ LLMProvider = Literal["gpt", "gemini", "gpt_azure", "llama_azure"]
 DEFAULT_LLM_PROVIDER: LLMProvider = "gemini"
 DEFAULT_OPENAI_MODEL = "gpt-4o"
 DEFAULT_GEMINI_MODEL = "gemini-3-pro-preview"
+DEFAULT_GEMINI_FLASH_MODEL = "gemini-2.5-flash"
 DEFAULT_AZURE_OPENAI_MODEL = "gpt-4o"
+DEFAULT_AZURE_OPENAI_JUDGE_MODEL = "gpt-5.4-pro-deployment"
 DEFAULT_AZURE_AI_MODEL = "Llama-3.3-70B-Instruct"
 
 # ---------------------------------------------------------------------------

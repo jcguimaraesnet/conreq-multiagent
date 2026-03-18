@@ -30,7 +30,15 @@
       "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit*react-ui* -name *.tsx -o -name *.ts)",
       "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit*react-ui* -type f -name *.tsx)",
       "Bash(grep -o suggestion[^}]* c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit+react-ui@1.53.0_f00243af7e3caedcd4b20f6508395ffcnode_modules@copilotkitreact-uidistindex.mjs)",
-      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f -name *ppLayout* -o -name *idebar*)"
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f -name *ppLayout* -o -name *idebar*)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/node_modules/onborda -type f \\\\\\(-name *.css -o -name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/node_modules/@copilotkit -type f -name *.css)",
+      "Bash(grep -r \"z-\\\\|zIndex\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src/components --include=*.tsx --include=*.css)",
+      "Bash(find c:/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/node_modules -path *radix*portal* -name *.js)",
+      "Read(//c/Users/jcgui/.claude/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills"
     ]
   }
 }

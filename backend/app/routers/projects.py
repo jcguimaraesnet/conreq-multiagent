@@ -67,8 +67,14 @@ def _fetch_requirement_counts(supabase, project_id: str) -> RequirementCounts:
             counts.functional += 1
         elif req_type == RequirementType.NON_FUNCTIONAL.value:
             counts.non_functional += 1
-        elif req_type == RequirementType.CONJECTURAL.value:
-            counts.conjectural += 1
+
+    # Conjectural requirements are stored in a separate table
+    conjectural_result = supabase.table("conjectural_requirements")\
+        .select("id", count="exact")\
+        .eq("project_id", project_id)\
+        .execute()
+    counts.conjectural = conjectural_result.count or 0
+
     return counts
 
 

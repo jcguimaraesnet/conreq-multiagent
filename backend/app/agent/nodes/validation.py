@@ -10,7 +10,7 @@ from typing import Optional
 
 from langchain_core.runnables.config import RunnableConfig
 from langchain_core.messages import AIMessage, HumanMessage
-from app.agent.llm_config import get_model, extract_text
+from app.agent.llm_config import get_model, extract_text, DEFAULT_GEMINI_MODEL, DEFAULT_AZURE_OPENAI_JUDGE_MODEL
 from langgraph.types import Command, interrupt
 from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_state, copilotkit_emit_message
 
@@ -167,7 +167,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
     context = extract_copilotkit_context(state)
     model_judge_provider = context.get("model_judge", "gemini")
     print(f"[Validation] Starting LLM-as-Judge evaluation (provider: {model_judge_provider}) for {len(data_context.conjectural_data)} requirements...")
-    judge_model_name = "gemini-3-pro-preview" if model_judge_provider == "gemini" else "gpt-5.4-pro-deployment"
+    judge_model_name = DEFAULT_GEMINI_MODEL if model_judge_provider == "gemini" else DEFAULT_AZURE_OPENAI_JUDGE_MODEL
     model = get_model(provider=model_judge_provider, model=judge_model_name)
     for i, cd in enumerate(data_context.conjectural_data):
         req_num = i + 1

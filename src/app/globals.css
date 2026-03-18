@@ -47,6 +47,14 @@ html.dark {
 /* Scan onborda dist so its Tailwind classes (z-[900], z-[950], etc.) are generated */
 @source "../../node_modules/onborda/dist";
 
+/* Fix Onborda tour card appearing behind CopilotKit sidebar during fade-in.
+   When opacity < 1, CSS creates a new stacking context at z-index: auto (≈0),
+   which is lower than the CopilotKit sidebar (z-index: 30). Adding an explicit
+   z-index ensures the overlay stacks above the sidebar throughout the animation. */
+[data-name="onborda-overlay"] {
+  z-index: 999 !important;
+}
+
 @keyframes fadeSlideIn {
   from {
     opacity: 0;
