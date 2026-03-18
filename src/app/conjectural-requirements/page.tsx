@@ -18,8 +18,8 @@ import { useComponent, useRenderTool, ToolCallStatus } from "@copilotkit/react-c
 import { useAgentContext } from "@copilotkit/react-core/v2";
 import { useAgent } from "@copilotkit/react-core/v2";
 import { useConfigureSuggestions } from "@copilotkit/react-core/v2";
-import StepProgress from '@/components/requirements/StepProgress';
-import InterruptForm from '@/components/requirements/InterruptForm';
+import StepProgress from '@/components/conjectural-requirements/StepProgress';
+import InterruptFormPositiveImpactDescription from '@/components/conjectural-requirements/InterruptFormPositiveImpactDescription';
 import Spinner from "@/components/ui/Spinner";
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
@@ -731,7 +731,7 @@ function ConjecturalRequirementsInner() {
     render: ({ event, resolve }) => {
       const quantity_req_batch = JSON.parse(event.value).quantity_req_batch || settings.quantity_req_batch;
       return (
-              <InterruptForm
+              <InterruptFormPositiveImpactDescription
                 inputCount={quantity_req_batch}
                 onSubmit={resolve}
               />
