@@ -179,25 +179,6 @@ export default function KanbanBoard({
     );
   }
 
-  if (isLoading) {
-    return (
-      <Card className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        <span className="ml-3 text-gray-600 dark:text-gray-300">Loading requirements...</span>
-      </Card>
-    );
-  }
-
-  if (requirements.length === 0) {
-    return (
-      <Card className="flex items-center justify-center py-12">
-        <p className="text-gray-500 dark:text-gray-400 text-center">
-          No conjectural requirements found.
-        </p>
-      </Card>
-    );
-  }
-
   return (
     <div className="grid grid-cols-3 gap-4">
       {COLUMNS.map((col) => (
@@ -218,11 +199,18 @@ export default function KanbanBoard({
             </span>
           </div>
 
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="h-0.5 overflow-hidden">
+              <div className="h-full w-1/3 bg-primary/40 rounded animate-[shimmer_1.2s_ease-in-out_infinite]" />
+            </div>
+          )}
+
           {/* Cards */}
           <div className="p-3 space-y-3 h-155 overflow-y-auto">
             {grouped[col.key].length === 0 ? (
               <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-8">
-                {dragOverColumn === col.key ? "Drop here" : "No requirements"}
+                {dragOverColumn === col.key ? "Drop here" : isLoading ? "Loading..." : "No requirements"}
               </p>
             ) : (
               grouped[col.key].map((req) => (

@@ -439,27 +439,35 @@ function ConjecturalRequirementsInner() {
   }, [selectedProject?.id, projectIdFromQuery, currentProjectId, fetchRequirements]);
 
   // Fetch kanban conjectural requirements (ranking = 1 only)
-  const fetchKanbanRequirements = useCallback(async (projectId: string) => {
+  const fetchKanbanRequirements = useCallback(async (projectId: string, signal: AbortSignal) => {
     setKanbanLoading(true);
     setKanbanError(null);
+    setKanbanRequirements([]);
     try {
       const res = await fetch(`${API_URL}/api/conjectural-requirements/project/${projectId}`, {
         headers: { Authorization: `Bearer ${user?.id || ""}` },
+        signal,
       });
       if (!res.ok) throw new Error("Failed to fetch conjectural requirements");
       const data: ConjecturalRequirement[] = await res.json();
-      setKanbanRequirements(data);
+      if (!signal.aborted) {
+        setKanbanRequirements(data);
+      }
     } catch (err) {
+      if (signal.aborted) return;
       setKanbanError(err instanceof Error ? err.message : "Unknown error");
     } finally {
-      setKanbanLoading(false);
+      if (!signal.aborted) {
+        setKanbanLoading(false);
+      }
     }
   }, [API_URL, user?.id]);
 
   useEffect(() => {
-    if (selectedProject?.id) {
-      fetchKanbanRequirements(selectedProject.id);
-    }
+    if (!selectedProject?.id) return;
+    const controller = new AbortController();
+    fetchKanbanRequirements(selectedProject.id, controller.signal);
+    return () => controller.abort();
   }, [selectedProject?.id, fetchKanbanRequirements]);
 
   // Kanban status change handler
