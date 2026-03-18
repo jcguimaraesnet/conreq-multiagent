@@ -1,6 +1,5 @@
 "use client";
 
-import { Plus } from 'lucide-react';
 import { RequirementType } from '@/types';
 import Toolbar from '@/components/ui/Toolbar';
 import Input from '@/components/ui/Input';
@@ -13,15 +12,12 @@ interface RequirementsToolbarProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   onClear: () => void;
-  onExport?: () => void;
-  onAdd?: () => void;
 }
 
 const typeOptions = [
   { value: '', label: 'All Types' },
   { value: RequirementType.Functional, label: 'Functional' },
   { value: RequirementType.NonFunctional, label: 'Non-Functional' },
-  { value: RequirementType.Conjectural, label: 'Conjectural' },
 ];
 
 export default function RequirementsToolbar({
@@ -30,8 +26,6 @@ export default function RequirementsToolbar({
   searchQuery,
   setSearchQuery,
   onClear,
-  onExport,
-  onAdd,
 }: RequirementsToolbarProps) {
   return (
     <Toolbar>
@@ -55,20 +49,9 @@ export default function RequirementsToolbar({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      
+
       <Button variant="ghost" onClick={onClear}>
         Clear
-      </Button>
-
-      <div className="flex-grow"></div>
-
-      <Button variant="outline" onClick={onExport}>
-        Export Requirements
-      </Button>
-
-      <Button variant="primary" onClick={onAdd}>
-        <Plus className="w-4 h-4" />
-        Add Requirement
       </Button>
     </Toolbar>
   );

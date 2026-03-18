@@ -1,9 +1,8 @@
 ﻿"use client";
 
-import { LayoutDashboard, Bot, ChevronDown, FolderKanban, BotMessageSquare, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, BotMessageSquare, BarChart3 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { AI_MODELS } from '@/constants';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -36,27 +35,6 @@ export default function Sidebar() {
           <span className="font-medium">Dashboard</span>
         </Link>
       </nav>
-
-      {pathname === '/requirements' && (
-        <div className="border-t border-border-light dark:border-border-dark">
-          <div className="px-4 pt-4 pb-4">
-            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Model Configuration</label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                <Bot className="w-4 h-4" />
-              </span>
-              <select className="block w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-border-light dark:border-border-dark rounded-lg focus:ring-1 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200 appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors outline-none">
-                {AI_MODELS.map(model => (
-                  <option key={model}>{model}</option>
-                ))}
-              </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                <ChevronDown className="w-4 h-4" />
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
     </aside>
   );
 }

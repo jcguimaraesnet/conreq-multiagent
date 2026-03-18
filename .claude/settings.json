@@ -29,7 +29,8 @@
       "Bash(grep -r \"\\\\.suggestion\\\\|suggestion\\\\|suggestions\" c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit*react-ui*)",
       "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit*react-ui* -name *.tsx -o -name *.ts)",
       "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit*react-ui* -type f -name *.tsx)",
-      "Bash(grep -o suggestion[^}]* c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit+react-ui@1.53.0_f00243af7e3caedcd4b20f6508395ffcnode_modules@copilotkitreact-uidistindex.mjs)"
+      "Bash(grep -o suggestion[^}]* c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistnode_modules.pnpm@copilotkit+react-ui@1.53.0_f00243af7e3caedcd4b20f6508395ffcnode_modules@copilotkitreact-uidistindex.mjs)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f -name *ppLayout* -o -name *idebar*)"
     ]
   }
 }

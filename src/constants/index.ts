@@ -10,9 +10,3 @@ export const MOCK_PROJECTS = [
 ];
 
 // MOCK_PROJECTS_LIST removed - now using API data from backend
-
-export const AI_MODELS = [
-  "OpenAI GPT-4",
-  "Anthropic Claude 3",
-  "Meta Llama 3"
-];
