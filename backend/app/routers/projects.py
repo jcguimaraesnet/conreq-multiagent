@@ -23,6 +23,7 @@ from app.models.schemas import (
 )
 from app.services.document_parser import extract_text_from_pdf, get_pdf_metadata
 from app.services.requirement_extractor import extract_requirements_with_ai
+from app.services.language_detector import detect_language
 from app.services.supabase_client import get_supabase_client
 
 
@@ -261,6 +262,9 @@ async def create_project(
             requirements_content = await requirements_file.read()
             requirements_document_data = base64.b64encode(requirements_content).decode('utf-8')
         
+        # Detect language from vision document text
+        detected_language = await detect_language(vision_extracted_text) if vision_extracted_text else None
+
         # Insert project
         project_data = {
             "user_id": user_id,
@@ -270,6 +274,7 @@ async def create_project(
             "vision_document_name": vision_document_name,
             "vision_extracted_text": vision_extracted_text,
             "requirements_document_name": requirements_document_name,
+            "language": detected_language,
         }
         
         # Add document data if files were uploaded
