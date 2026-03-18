@@ -20,7 +20,9 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f \\\\\\(-name *.sql -o -name *migration* -o -name *schema* \\\\\\))",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f -name *.ts -o -name *.tsx)",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f \\\\\\(-name *.md -o -name *.txt -o -name *.yaml \\\\\\))",
-      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -maxdepth 3 -type f -name README* -o -name *.md)"
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -maxdepth 3 -type f -name README* -o -name *.md)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -maxdepth 2 -name tailwind* -o -name globals.css)",
+      "Bash(grep -r \"product tour\\\\|feature tour\\\\|introduction\\\\|tutorial\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src --include=*.tsx --include=*.ts)"
     ]
   }
 }
