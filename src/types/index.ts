@@ -91,6 +91,10 @@ export interface Project {
   user_id?: string;
   vision_document_name?: string | null;
   vision_extracted_text?: string | null;
+  summary?: string | null;
+  business_domain?: string | null;
+  business_objective?: string | null;
+  stakeholder?: string | null;
   requirements_document_name?: string | null;
   created_at?: string;
   updated_at?: string;

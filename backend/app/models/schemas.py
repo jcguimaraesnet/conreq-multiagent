@@ -74,6 +74,10 @@ class ProjectResponse(BaseModel):
     author_last_name: Optional[str] = None
     vision_document_name: Optional[str]
     vision_extracted_text: Optional[str]
+    summary: Optional[str] = None
+    business_domain: Optional[str] = None
+    business_objective: Optional[str] = None
+    stakeholder: Optional[str] = None
     requirements_document_name: Optional[str]
     # Note: document data fields are excluded from response to avoid large payloads
     created_at: datetime

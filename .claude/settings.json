@@ -49,7 +49,9 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f \\\\\\(-name *.sql -o -name *schema* -o -name *migration* \\\\\\))",
       "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assistbackendapp -name *.py -type f)",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/backend -type f -name *.py)",
-      "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assist -name *.sql -o -name schema.sql)"
+      "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assist -name *.sql -o -name schema.sql)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js \\\\\\))",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -name *.sql -o -name *migration* -o -name schema*)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

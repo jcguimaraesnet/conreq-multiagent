@@ -24,6 +24,8 @@ from app.models.schemas import (
 from app.services.document_parser import extract_text_from_pdf, get_pdf_metadata
 from app.services.requirement_extractor import extract_requirements_with_ai
 from app.services.language_detector import detect_language
+from app.services.text_translator import translate_to_english
+from app.services.vision_analyzer import analyze_vision_text
 from app.services.supabase_client import get_supabase_client
 
 
@@ -265,6 +267,15 @@ async def create_project(
         # Detect language from vision document text
         detected_language = await detect_language(vision_extracted_text) if vision_extracted_text else None
 
+        # Translate vision text to en-US if not already in English
+        if vision_extracted_text and detected_language and detected_language != "en-us":
+            vision_extracted_text = await translate_to_english(vision_extracted_text)
+
+        # Analyze vision text to extract summary, domain, objective, stakeholder
+        vision_analysis = None
+        if vision_extracted_text:
+            vision_analysis = await analyze_vision_text(vision_extracted_text)
+
         # Insert project
         project_data = {
             "user_id": user_id,
@@ -276,6 +287,12 @@ async def create_project(
             "requirements_document_name": requirements_document_name,
             "language": detected_language,
         }
+
+        if vision_analysis:
+            project_data["summary"] = vision_analysis.summary
+            project_data["business_domain"] = vision_analysis.business_domain
+            project_data["business_objective"] = vision_analysis.business_objective
+            project_data["stakeholder"] = vision_analysis.stakeholder
         
         # Add document data if files were uploaded
         if vision_document_data:
