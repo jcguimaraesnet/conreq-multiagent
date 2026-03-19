@@ -488,9 +488,31 @@ function ConjecturalRequirementsInner() {
       if (!res.ok) throw new Error("Failed to update status");
     } catch {
       // Revert on failure
-      if (selectedProject?.id) fetchKanbanRequirements(selectedProject.id);
+      if (selectedProject?.id) fetchKanbanRequirements(selectedProject.id, new AbortController().signal);
     }
   }, [API_URL, user?.id, selectedProject?.id, fetchKanbanRequirements]);
+
+  useFrontendTool({
+    name: "moveRequirement",
+    description: "Move a conjectural requirement to a different status column on the Kanban board. Valid statuses: todo, inprogress, done.",
+    parameters: z.object({
+      requirement_id: z.string().describe("The requirement ID in REQ-C format (e.g., REQ-C001)"),
+      new_status: z.enum(["todo", "inprogress", "done"]).describe("The target status column: todo, inprogress, or done"),
+    }),
+    followUp: false,
+    handler: async ({ requirement_id, new_status }: { requirement_id: string; new_status: ConjecturalStatus }) => {
+      const req = kanbanRequirements.find((r) => r.requirement_id === requirement_id);
+      if (!req) {
+        return { success: false, error: `Requirement ${requirement_id} not found on the board` };
+      }
+      if (req.status === new_status) {
+        return { success: false, error: `Requirement ${requirement_id} is already in status '${new_status}'` };
+      }
+      setNewCardIds(new Set([req.id]));
+      await handleKanbanStatusChange(req.id, new_status);
+      return { success: true, message: `Moved ${requirement_id} to ${new_status}` };
+    },
+  }, [kanbanRequirements, handleKanbanStatusChange]);
 
   // Kanban search filter
   const filteredKanbanRequirements = useMemo(() => {

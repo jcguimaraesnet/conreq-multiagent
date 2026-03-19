@@ -35,10 +35,16 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/node_modules/@copilotkit -type f -name *.css)",
       "Bash(grep -r \"z-\\\\|zIndex\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src/components --include=*.tsx --include=*.css)",
       "Bash(find c:/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/node_modules -path *radix*portal* -name *.js)",
-      "Read(//c/Users/jcgui/.claude/**)"
+      "Read(//c/Users/jcgui/.claude/**)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f -name *.tsx -o -name *.ts)",
+      "Bash(grep -r \"animate-fade-in\\\\|keyframes\\\\|@keyframes\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src --include=*.css --include=*.tsx --include=*.ts)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/backend/app -type f -name *.py)",
+      "Read(//c/Users/jcgui/**)",
+      "Read(//c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/**)"
     ],
     "additionalDirectories": [
-      "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills"
+      "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",
+      "c:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills"
     ]
   }
 }

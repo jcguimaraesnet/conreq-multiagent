@@ -41,8 +41,11 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
     last_message = str(messages[-1].content) if messages else ""
     print(f"Last message from chat: {last_message}")
 
-    # Initialize the model
+    # Initialize the model with frontend tools
     model = get_model(provider=model_provider, temperature=1.0)
+    frontend_tools = state.get("tools", [])
+    if frontend_tools:
+        model = model.bind_tools(frontend_tools)
 
     # Build requirements context from fetched data
     functional = [r for r in existing_requirements if r.get("type") == "functional"]
@@ -67,6 +70,29 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
         response = await model.ainvoke(conversation, config_internal)
         print(f"Generic response: {extract_text(response.content)[:100]}...")
 
+        # If the LLM returned only a tool call with no text, generate a friendly follow-up message
+        if hasattr(response, 'tool_calls') and response.tool_calls and not extract_text(response.content).strip():
+            tool_call = response.tool_calls[0]
+            tool_name = tool_call.get("name", "")
+            tool_args = tool_call.get("args", {})
+
+            followup_model = get_model(provider=model_provider, temperature=1.0)
+            followup_prompt = TOOL_FOLLOWUP_PROMPT.format(
+                tool_name=tool_name,
+                tool_args=tool_args,
+                last_message=last_message,
+            )
+            followup_response = await followup_model.ainvoke(
+                [SystemMessage(content=followup_prompt)],
+                config_internal,
+            )
+            followup_response.content = extract_text(followup_response.content)
+            return Command(
+                update={
+                    "messages": messages + [followup_response, response]
+                }
+            )
+
     except Exception as e:
         print(f"Generic node error: {e}")
         msg_exception = "I'm sorry, I encountered an error processing your request. How can I help you with requirements engineering today?"
@@ -79,6 +105,15 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
             "messages": messages + [response]
         }
     )
+
+TOOL_FOLLOWUP_PROMPT = """You just executed a frontend tool on behalf of the user. Write a SHORT, friendly message (1-2 sentences) confirming what was done. Respond in the same language the user used.
+
+Tool called: {tool_name}
+Tool arguments: {tool_args}
+User's original message: {last_message}
+
+Do NOT repeat the tool arguments literally. Summarize naturally, e.g. "Done! The requirement was moved to the In Progress column." or "Pronto! O requisito foi movido para a coluna Em Progresso."
+"""
 
 # System prompt for generic conversational responses
 GENERIC_RESPONSE_PROMPT = """You are a helpful assistant for a requirements engineering application.
