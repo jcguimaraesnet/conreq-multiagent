@@ -22,7 +22,7 @@ from langgraph.types import Command, interrupt
 from app.agent.state import WorkflowState
 from app.agent.tools import generate_task_steps_generative_ui
 from app.agent.utils.context_utils import extract_copilotkit_context
-from app.agent.utils.project_data import fetch_project_context_fields
+from app.agent.utils.project_data import fetch_project_context_fields, language_instruction
 from app.agent.utils.nlp_entity_extractor import extract_domain_entities, extract_entity_relations
 from app.agent.models.knowledge_graph import (
     EntityNode,
@@ -205,7 +205,7 @@ async def refine_positive_impacts(
         project_summary=data_context.project_summary,
         brief_descriptions=descriptions_text,
         quantity=len(brief_descriptions),
-    )
+    ) + language_instruction(data_context.language)
 
     model = get_model(provider=model_provider, temperature=0)
 
@@ -244,7 +244,7 @@ async def generate_positive_impacts(
         business_objective=data_context.business_objective,
         project_summary=data_context.project_summary,
         quantity=quantity,
-    )
+    ) + language_instruction(data_context.language)
 
     model = get_model(provider=model_provider, temperature=0)
 
@@ -256,44 +256,6 @@ async def generate_positive_impacts(
     except (json.JSONDecodeError, Exception) as e:
         print(f"[Positive Impact] Error generating impacts: {e}")
         return []
-
-
-async def extract_project_context(
-    vision_extracted_text: Optional[str],
-    existing_requirements: List[Dict[str, Any]],
-    model_provider: str,
-) -> Dict[str, Any]:
-    """
-    Extract stakeholder, domain, business objective, and a concise
-    project summary in a single LLM call. The summary replaces the raw vision
-    document in all downstream prompts. Falls back to defaults if extraction fails.
-    """
-    prompt = CONTEXT_EXTRACTION_SYSTEM_PROMPT.format(
-        vision_text=vision_extracted_text or "No vision document available.",
-        requirements=_format_requirements(existing_requirements),
-    )
-
-    model = get_model(provider=model_provider, temperature=0)
-
-    try:
-        response = await model.ainvoke([HumanMessage(content=prompt)])
-        raw_content = _strip_markdown_fences(extract_text(response.content).strip())
-        result: Dict[str, str] = json.loads(raw_content)
-        return {
-            "stakeholder": result.get("stakeholder", "end user"),
-            "domain": result.get("domain", "general software"),
-            "summary": result.get("summary", "No vision document available."),
-            "business_objective": result.get("business_objective", "No business objective identified."),
-        }
-
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"Error extracting project context: {e}")
-        return {
-            "stakeholder": "end user",
-            "domain": "general software",
-            "summary": "No vision document available.",
-            "business_objective": "No business objective identified.",
-        }
 
 
 KNOWN_KNOWNS_BATCH_SIZE = 10

@@ -18,6 +18,7 @@ from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_st
 from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext, Evaluation
 from app.agent.utils.context_utils import extract_copilotkit_context
+from app.agent.utils.project_data import language_instruction
 from app.services.conjectural_persistence import persist_conjectural_data
 
 
@@ -197,7 +198,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
             solution_assumption=cr.qess.solution_assumption,
             uncertainty_evaluated=cr.qess.uncertainty_evaluated,
             observation_analysis=cr.qess.observation_analysis,
-        )
+        ) + language_instruction(data_context.language)
 
         try:
             response = await model.ainvoke([HumanMessage(content=prompt)])

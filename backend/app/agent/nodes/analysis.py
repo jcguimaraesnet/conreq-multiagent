@@ -19,6 +19,7 @@ from copilotkit.langgraph import copilotkit_emit_state, copilotkit_customize_con
 from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext
 from app.agent.utils.context_utils import extract_copilotkit_context
+from app.agent.utils.project_data import language_instruction
 from app.agent.models.knowledge_graph import (
     BusinessUncertainty,
     KnowledgeGraph,
@@ -108,7 +109,7 @@ async def _detect_impact_uncertainties(
         stakeholder=data_context.stakeholder,
         business_objective=data_context.business_objective,
         quantity=len(impacts),
-    )
+    ) + language_instruction(data_context.language)
 
     model = get_model(provider=model_provider, temperature=0)
 
@@ -144,7 +145,7 @@ async def _generate_conjectural_hypotheses(
         stakeholder=data_context.stakeholder,
         business_objective=data_context.business_objective,
         quantity=len(impacts),
-    )
+    ) + language_instruction(data_context.language)
 
     model = get_model(provider=model_provider, temperature=0)
 

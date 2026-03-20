@@ -10,6 +10,13 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 from app.services.supabase_client import get_async_supabase_client
 
 
+def language_instruction(language: str) -> str:
+    """Return a translation instruction if the language is not en-us, otherwise empty string."""
+    if language.lower() == "en-us":
+        return ""
+    return f"\n\nIMPORTANT: You MUST write your entire response in {language}. Translate all output to {language}."
+
+
 @dataclass
 class ProjectContext:
     vision_extracted_text: Optional[str]
