@@ -373,6 +373,15 @@ export default function AuthFormPanel({ confirmed }: AuthFormPanelProps) {
         </AnimatePresence>
       </div>
 
+      <div className="mx-auto w-full max-w-sm">
+        <Link
+          href="/"
+          className="block rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm text-gray-600 shadow-sm transition-colors hover:bg-white hover:text-gray-800"
+        >
+          Click here to view the cover page.
+        </Link>
+      </div>
+
       {/* Contact Footer */}
       <ContactFooter />
     </div>
