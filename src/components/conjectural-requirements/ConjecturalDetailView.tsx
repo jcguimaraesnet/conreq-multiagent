@@ -284,7 +284,6 @@ export default function ConjecturalDetailView({
                   rows={3}
                   className="w-full text-base"
                 />
-                <p className="text-xs text-gray-400 mt-1">One uncertainty per line</p>
               </div>
             </div>
           </div>

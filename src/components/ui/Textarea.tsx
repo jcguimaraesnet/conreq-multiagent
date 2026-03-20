@@ -23,7 +23,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             "py-2 px-3 text-sm",
             "focus:ring-1 focus:ring-primary focus:border-primary",
             "dark:text-gray-200 outline-none placeholder-gray-400",
-            "resize-y min-h-[80px]",
+            "resize-none min-h-[80px] styled-scrollbar",
             className
           )}
           {...props}

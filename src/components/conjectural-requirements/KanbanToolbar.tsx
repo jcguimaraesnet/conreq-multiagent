@@ -9,7 +9,7 @@ export type DisplayField = "desired_behavior" | "positive_impact" | "uncertainti
 const FIELD_LABELS: Record<DisplayField, string> = {
   desired_behavior: "Desired Behavior",
   positive_impact: "Positive Impact",
-  uncertainties: "Uncertainties",
+  uncertainties: "Uncertainty",
 };
 
 const FIELD_CYCLE: DisplayField[] = ["desired_behavior", "positive_impact", "uncertainties"];

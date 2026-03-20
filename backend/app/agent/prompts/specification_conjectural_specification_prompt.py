@@ -4,7 +4,7 @@ SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT = {
 This app's main goal is to generate a type of software requirements specification with uncertainties,
 here called a "conjectural requirement."
 
-## Information Sources
+## General Project Information
 
 **Project Summary:**
 {project_summary}
@@ -15,39 +15,41 @@ here called a "conjectural requirement."
 
 **Business Objective:** {business_objective}
 
-## Positive Business Impact, Uncertainty, and Solution Hypothesis
+## Specific information to guide the generation of the conjectural requirement specification
 
-Generate exactly ONE conjectural requirement specification for the following input:
+- **Initial idea of positive impact:** {positive_impact}
+- **Initial idea of uncertainty:** {uncertainty}
+- **Initial idea of solution hypothesis:** {supposition_solution}
 
-- **Positive Impact:** {positive_impact}
-- **Uncertainty:** {uncertainty}
-- **Solution Hypothesis:** {supposition_solution}
+## General instructions
 
-## Instruction
+Generate exactly ONE conjectural requirement by filling in the bracketed fields contained in the TEMPLATE below, based on the information above.
 
-Generate exactly ONE conjectural requirement specification following the FERC writing format and the QESS framework described below.
+## Instructions for each field
 
-The FERC's "desired behavior" should address the positive impact, the "positive impact" should relate to the business objective, and the "uncertainties" MUST include the associated uncertainty identified above (you may add additional uncertainties if relevant).
+[desired behavior] -> Write a text describing a desired system behavior that contributes to the [positive impact]
+[positive impact] -> Write a refined text based on the **initial idea of positive impact**
+[uncertainty] -> Write a refined text based on the **initial idea of uncertainty**
 
-The QESS's "solution assumption" should be based on the proposed hypothesis, and the experiment should aim to resolve the associated uncertainty.
+[solution assumption] -> Write a refined text based on the **initial idea of solution hypothesis**
+[uncertainty] -> Same text as the [uncertainty] field in FERC
+[observation description] -> Write a text describing what will be observed and analyzed in terms of experiment metrics, which may resolve the doubt about the uncertainty
 
----
+VERY IMPORTANT: The text of each field is a complement to a sentence, therefore each text must be written so that it agrees grammatically with the rest of the sentence.
 
-## Template for Conjectural Requirement Specification
 
-**Writing Format for Conjectural Requirements (FERC):**
+## TEMPLATE
+
+**FERC (Writing Format for Conjectural Requirements):**
 **It is expected that the software system has** [desired behavior]
-**So that** [need or positive impact of the desired attribute]
-**However, we do not know:**
-- **Uncertainty:** [uncertainty associated with this requirement — one or many]
-- **Uncertainty:** [uncertainty associated with this requirement — one or many]
+**So that** [positive impact]
+**However, we do not know** [uncertainty]
 
-**Solution Assumption Experimentation Framework (QESS):**
+**QESS (Solution Assumption Experimentation Framework):**
 **We expect that** [description of the solution assumption]
-**Will result in updating the uncertainties about** [only one of the uncertainties that will be evaluated]
-**As a result of** [description of the observation and analysis that will result in updating the uncertainties]
+**Will result in updating the uncertainties about** [uncertainty]
+**As a result of** [observation description]
 
----
 
 ## Examples
 
@@ -110,10 +112,10 @@ You MUST return ONLY a valid JSON object (no markdown, no explanation) with:
 """,
     "pt-br": """Você é um especialista em especificação de requisitos de software com incertezas.
 
-O objetivo principal deste aplicativo é gerar um tipo de especificação de requisitos de software com incertezas,
+O objetivo principal deste aplicativo é gerar um tipo de especificação de requisito de software com incerteza,
 aqui chamado de "requisito conjectural".
 
-## Fontes de Informação
+## Informações Gerais do Projeto
 
 **Resumo do Projeto:**
 {project_summary}
@@ -124,45 +126,47 @@ aqui chamado de "requisito conjectural".
 
 **Objetivo de Negócio:** {business_objective}
 
-## Impacto Positivo de Negócio, Incerteza e Hipótese de Solução
+## Informações específicas para guiar a geração da especificação do requisito conjectural
 
-Gere exatamente UM requisito conjectural para a seguinte entrada:
+- **Ideia inicial de impacto positivo:** {positive_impact}
+- **Ideia inicial de incerteza:** {uncertainty}
+- **Ideia inicial de hipótese de solução:** {supposition_solution}
 
-- **Impacto Positivo:** {positive_impact}
-- **Incerteza:** {uncertainty}
-- **Hipótese de Solução:** {supposition_solution}
+## Instruções gerais
 
-## Instrução
+Gere exatamente UM requisito conjectural preenchendo os campos entre colchetes contidos no MODELO abaixo, tomando como base as informações acima.
 
-Gere exatamente UM requisito conjectural seguindo o formato de escrita FERC e o framework QESS descritos abaixo.
+## Instruções sobre cada campo
 
-O "comportamento desejado" do FERC deve abordar o impacto positivo, o "impacto positivo" deve se relacionar ao objetivo de negócio, e as "incertezas" DEVEM incluir a incerteza associada identificada acima (você pode adicionar incertezas adicionais se relevante).
+[comportamento desejado] -> Elabore um texto que descreva um comportamento desejado no sistema que contribua para o [impacto positivo]
+[impacto positivo] -> Elabore um texto refinado da **ideia inicial de impacto positivo**
+[incerteza] -> Elabore um texto refinado da **ideia inicial de incerteza**
 
-A "suposição de solução" do QESS deve ser baseada na hipótese proposta, e o experimento deve visar resolver a incerteza associada.
+[suposição de solução] -> Elabore um texto refinado da **ideia inicial de hipótese de solução**
+[incerteza] -> Mesmo texto elaborado para o campo [incerteza] do FERC
+[descrição da observação] -> Elabore um texto que descreva o que será observado e analisado em termos de métricas do experimento, que poderá resolver a dúvida sobre a incerteza
 
----
+MUITO IMPORTANTE: O texto de cada campo é um complemento de uma frase, portanto cada texto deve ser elaborado para que tenha concordancia com o restante da frase.
 
-## Modelo para Especificação de Requisito Conjectural
 
-**Formato de Escrita para Requisitos Conjecturais (FERC):**
-**É esperado que o sistema de software tenha** [comportamento desejado]
-**De modo que** [necessidade ou impacto positivo do atributo desejado]
-**Porém, não sabemos:**
-- **Incerteza:** [incerteza associada a este requisito — uma ou várias]
-- **Incerteza:** [incerteza associada a este requisito — uma ou várias]
+## MODELO
 
-**Framework de Experimentação de Suposição de Solução (QESS):**
+**FERC (Formato de Escrita para Requisitos Conjecturais):**
+**É esperado que o sistema de software possua** [comportamento desejado]
+**De modo que** [impacto positivo]
+**Porém, não sabemos** [incerteza]
+
+**QESS (Framework de Experimentação de Suposição de Solução):**
 **Esperamos que** [descrição da suposição de solução]
-**Resulte na atualização das incertezas sobre** [apenas uma das incertezas que será avaliada]
-**Como resultado de** [descrição da observação e análise que resultará na atualização das incertezas]
+**Resulte na atualização das incertezas sobre** [incerteza]
+**Como resultado de** [descrição da observação] 
 
----
 
 ## Exemplos
 
 **Exemplo 1:**
 FERC:
-**É esperado que o sistema de software tenha** equipamento de baixo custo
+**É esperado que o sistema de software possua** equipamento de baixo custo
 **De modo que** o produto possa ser vendido a um preço menor do que outros produtos atualmente no mercado com funções similares.
 **Porém, não sabemos:**
 - **Incerteza:** quais equipamentos (sensores, wearables, cabos, conectores e display) são funcionais e possuem o menor custo.
@@ -173,7 +177,7 @@ QESS:
 
 **Exemplo 2:**
 FERC:
-**É esperado que o sistema de software tenha** equipamento de fácil montagem
+**É esperado que o sistema de software possua** equipamento de fácil montagem
 **De modo que** o equipamento possa ser montado rapidamente por pessoas sem conhecimento em eletrônica.
 **Porém, não sabemos:**
 - **Incerteza:** quais modelos de cabo e conector facilitam a montagem.
@@ -185,7 +189,7 @@ QESS:
 
 **Exemplo 3:**
 FERC:
-**É esperado que o sistema de software tenha** confiabilidade
+**É esperado que o sistema de software possua** confiabilidade
 **De modo que** a medição de sinais seja realizada sem interferência da iluminação externa.
 **Porém, não sabemos:**
 - **Incerteza:** qual tipo de dispositivo permite medição sem interferência prejudicial.
@@ -196,7 +200,7 @@ QESS:
 
 **Exemplo 4:**
 FERC:
-**É esperado que o sistema de software tenha** estabilidade
+**É esperado que o sistema de software possua** estabilidade
 **De modo que** a medição de sinais permaneça consistente no mesmo paciente por um longo período, considerando movimentos corporais.
 **Porém, não sabemos:**
 - **Incerteza:** quais modelos de sensores garantem estabilidade de medição por longos períodos, considerando movimentos corporais.
