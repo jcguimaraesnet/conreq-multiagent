@@ -35,6 +35,12 @@ from app.agent.models.data_context import DataContext, ConjecturalData
 from app.agent.prompts.factory import get_prompt
 from app.agent.prompts.elicitation_refine_positive_impact_prompt import ELICITATION_REFINE_POSITIVE_IMPACT_PROMPT
 from app.agent.prompts.elicitation_generate_positive_impact_prompt import ELICITATION_GENERATE_POSITIVE_IMPACT_PROMPT
+from app.services.embedding_service import (
+    generate_embeddings,
+    fetch_existing_embeddings,
+    select_most_diverse,
+    is_similar_to_existing,
+)
 
 
 # Processing mode: "quick" (default) or "extended"
@@ -73,10 +79,16 @@ async def refine_positive_impacts(
     brief_descriptions: List[str],
     data_context: "DataContext",
     model_provider: str,
+    project_id: Optional[str] = None,
 ) -> tuple[List[str], List[int]]:
     """
     Refine user-provided brief descriptions into elaborated positive business
     impact statements using LLM + project context.
+
+    After refinement, checks each impact against existing embeddings in the DB.
+    If a refined impact is too similar to an existing one, falls back to
+    generate_positive_impacts (3 candidates, pick most diverse).
+
     Returns (refined_list, similarity_percentages).
     """
     if not brief_descriptions:
@@ -109,6 +121,28 @@ async def refine_positive_impacts(
             print(f"  [Similarity] {sim_pct}% — {brief!r} → {refined!r}")
             results.append(refined)
             similarities.append(sim_pct)
+
+        # Check refined impacts against existing embeddings in DB
+        if project_id:
+            existing_rows = await fetch_existing_embeddings(project_id)
+            existing_embs = [row["embedding"] for row in existing_rows if row.get("embedding")]
+
+            if existing_embs:
+                print(f"[Positive Impact] Checking {len(results)} refined impact(s) against {len(existing_embs)} existing embedding(s)...")
+                try:
+                    refined_embeddings = await generate_embeddings(results)
+                except Exception as e:
+                    print(f"[Positive Impact] Error generating embeddings for similarity check: {e}")
+                    return results, similarities
+
+                for i, (refined_emb, refined_text) in enumerate(zip(refined_embeddings, list(results))):
+                    if is_similar_to_existing(refined_emb, existing_embs):
+                        print(f"  [Positive Impact] Refined impact #{i+1} is too similar to existing. Falling back to generation...")
+                        fallback = await generate_positive_impacts(1, data_context, model_provider, project_id)
+                        if fallback:
+                            results[i] = fallback[0]
+                            similarities[i] = 0  # auto-generated, not user-refined
+
         return results, similarities
 
     except (json.JSONDecodeError, Exception) as e:
@@ -120,17 +154,23 @@ async def generate_positive_impacts(
     quantity: int,
     data_context: "DataContext",
     model_provider: str,
+    project_id: Optional[str] = None,
 ) -> List[str]:
     """
     Generate positive business impact statements from scratch using LLM +
-    project context. Returns a list of impact strings.
+    project context. Generates quantity*3 candidates, then selects the
+    `quantity` most diverse via embedding similarity against existing
+    requirements in the database. Returns a list of impact strings.
     """
+    candidate_count = quantity * 3
+    print(f"[Positive Impact] Generating {candidate_count} candidates (quantity={quantity} x 3)...")
+
     prompt = get_prompt(ELICITATION_GENERATE_POSITIVE_IMPACT_PROMPT, data_context.language).format(
         domain=data_context.domain,
         stakeholder=data_context.stakeholder,
         business_objective=data_context.business_objective,
         project_summary=data_context.project_summary,
-        quantity=quantity,
+        quantity=candidate_count,
     )
 
     model = get_model(provider=model_provider, temperature=0)
@@ -138,11 +178,31 @@ async def generate_positive_impacts(
     try:
         response = await model.ainvoke([HumanMessage(content=prompt)])
         raw = _strip_markdown_fences(extract_text(response.content).strip())
-        return json.loads(raw)
-
+        candidates: List[str] = json.loads(raw)
     except (json.JSONDecodeError, Exception) as e:
         print(f"[Positive Impact] Error generating impacts: {e}")
         return []
+
+    if not candidates:
+        return []
+
+    print(f"[Positive Impact] Got {len(candidates)} candidates. Selecting {quantity} most diverse...")
+
+    # Generate embeddings for all candidates
+    try:
+        candidate_embeddings = await generate_embeddings(candidates)
+    except Exception as e:
+        print(f"[Positive Impact] Error generating embeddings, falling back to first {quantity}: {e}")
+        return candidates[:quantity]
+
+    # Fetch existing embeddings from the database
+    existing_rows = await fetch_existing_embeddings(project_id) if project_id else []
+    existing_embeddings = [row["embedding"] for row in existing_rows if row.get("embedding")]
+    print(f"[Positive Impact] Found {len(existing_embeddings)} existing embedding(s) in DB for comparison")
+
+    # Select the most diverse candidates
+    selected_indices = select_most_diverse(candidates, candidate_embeddings, existing_embeddings, quantity)
+    return [candidates[i] for i in selected_indices]
 
 
 KNOWN_KNOWNS_BATCH_SIZE = 10
@@ -309,15 +369,15 @@ async def elicitation_node(state: WorkflowState, config: Optional[RunnableConfig
         print(f"[Positive Impact] Received {len(brief_descriptions)} brief description(s) from user.")
 
         if brief_descriptions:
-            positive_impacts, similarity = await refine_positive_impacts(brief_descriptions, data_context, model_provider)
+            positive_impacts, similarity = await refine_positive_impacts(brief_descriptions, data_context, model_provider, project_id=current_project_id)
             for pi in positive_impacts:
-                print(f"  [Refined] {pi!r}")
+                print(f"  [Positive Impact Refined] {pi}")
     else:
         print("[Positive Impact] Generating impacts from project context...")
-        positive_impacts = await generate_positive_impacts(quantity_req_batch, data_context, model_provider)
+        positive_impacts = await generate_positive_impacts(quantity_req_batch, data_context, model_provider, project_id=current_project_id)
         similarity = [0] * len(positive_impacts)
         for pi in positive_impacts:
-            print(f"  [Generated] {pi!r}")
+            print(f"  [Positive Impact Generated] {pi}")
 
     data_context.conjectural_data = [
         ConjecturalData(positive_impact=pi, positive_impact_similarity=sim)

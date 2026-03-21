@@ -9,6 +9,7 @@ import re
 
 from app.agent.models.data_context import DataContext, ConjecturalData, ConjecturalRequirement, Evaluation
 from app.services.supabase_client import get_supabase_client
+from app.services.embedding_service import generate_embeddings_sync
 
 
 def _get_next_requirement_number(supabase, project_id: str) -> int:
@@ -155,6 +156,16 @@ def persist_conjectural_data(project_id: str, data_context: DataContext, user_id
         # Insert only the winning requirement
         row = _build_requirement_row(project_id, winner, req_id, user_id)
         row["history_snapshot"] = history_snapshot
+
+        # Generate and store embedding for the positive_impact
+        try:
+            embeddings = generate_embeddings_sync([winner.ferc.positive_impact])
+            if embeddings:
+                row["positive_impact_embedding"] = embeddings[0]
+                print(f"[Persistence] Generated embedding for {req_id} positive_impact")
+        except Exception as e:
+            print(f"[Persistence] Error generating embedding for {req_id}: {e}")
+
         result = supabase.table("conjectural_requirements").insert(row).execute()
 
         if not result.data:

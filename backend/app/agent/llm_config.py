@@ -80,8 +80,9 @@ def get_model(
             ),
             azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
             api_key=SecretStr(azure_openai_key) if azure_openai_key else None,
-            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-03-01-preview"),
+            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview"),
             use_responses_api=True,
+            # temperature=temperature # não suporta em nenhum modelo
         )
 
     if provider == "llama_azure":

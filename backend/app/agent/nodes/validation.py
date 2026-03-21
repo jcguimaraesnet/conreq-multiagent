@@ -196,7 +196,7 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
                 if cr.ranking == 1 and cr.db_id:
                     best_requirement_ids.append(cr.db_id)
 
-        model_with_tools = get_model(provider=context['model'], temperature=0)
+        model_with_tools = get_model(provider=context['model'], temperature=0.1)
         model_with_tools = model_with_tools.bind_tools([show_requirements, *state.get("tools", [])])
 
         tool_response = await model_with_tools.ainvoke(
@@ -207,8 +207,6 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         )
 
         messages = messages + [tool_response]
-        print("[Validation node] tool_response", tool_response)
-
         for tc in getattr(tool_response, "tool_calls", []) or []:
             print("[Validation node] tc=", tc)
             if tc["name"] == "show_requirements":

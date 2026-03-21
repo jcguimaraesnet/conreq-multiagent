@@ -52,7 +52,12 @@
       "Bash(find c:reposufrjrequirement-conjectural-multiagentapp-multi-agent-conjectural-assist -name *.sql -o -name schema.sql)",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js \\\\\\))",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -name *.sql -o -name *migration* -o -name schema*)",
-      "WebFetch(domain:selfrefine.info)"
+      "WebFetch(domain:selfrefine.info)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f -name *util* -o -name *service* -o -name *client*)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f \\\\\\(-name *.sql -o -name *README* -o -name *schema* \\\\\\))",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -name *type* -o -name *interface*)",
+      "Bash(python -c \"import openai; print\\(openai.__version__\\)\")"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

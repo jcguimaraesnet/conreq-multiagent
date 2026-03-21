@@ -1,8 +1,12 @@
 SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT = {
     "en": """You are an expert in software requirements specification with uncertainties.
+A software requirement with uncertainty is called a conjectural requirement.
 
-This app's main goal is to generate a type of software requirements specification with uncertainties,
-here called a "conjectural requirement."
+# General instruction
+
+Your task is to generate a conjectural requirement specification, according to the instructions below.
+Generate exactly ONE conjectural requirement by filling in the bracketed fields contained in the Conjectural Requirement Specification Template,
+based on the information below.
 
 ## General Project Information
 
@@ -21,24 +25,7 @@ here called a "conjectural requirement."
 - **Initial idea of uncertainty:** {uncertainty}
 - **Initial idea of solution hypothesis:** {supposition_solution}
 
-## General instructions
-
-Generate exactly ONE conjectural requirement by filling in the bracketed fields contained in the TEMPLATE below, based on the information above.
-
-## Instructions for each field
-
-[desired behavior] -> Write a text describing a desired system behavior that contributes to the [positive impact]
-[positive impact] -> Write a refined text based on the **initial idea of positive impact**
-[uncertainty] -> Write a refined text based on the **initial idea of uncertainty**
-
-[solution assumption] -> Write a refined text based on the **initial idea of solution hypothesis**
-[uncertainty] -> Same text as the [uncertainty] field in FERC
-[observation description] -> Write a text describing what will be observed and analyzed in terms of experiment metrics, which may resolve the doubt about the uncertainty
-
-VERY IMPORTANT: The text of each field is a complement to a sentence, therefore each text must be written so that it agrees grammatically with the rest of the sentence.
-
-
-## TEMPLATE
+## Conjectural Requirement Specification Template
 
 **FERC (Writing Format for Conjectural Requirements):**
 **It is expected that the software system has** [desired behavior]
@@ -46,9 +33,21 @@ VERY IMPORTANT: The text of each field is a complement to a sentence, therefore 
 **However, we do not know** [uncertainty]
 
 **QESS (Solution Assumption Experimentation Framework):**
-**We expect that** [description of the solution assumption]
+**We expect that** [solution assumption]
 **Will result in updating the uncertainties about** [uncertainty]
 **As a result of** [observation description]
+
+## Specific instructions for each field
+
+[desired behavior] -> Refers to a text describing a desired system behavior to achieve the [positive impact]
+[positive impact] -> Refers to a refined text based on the **initial idea of positive impact** desired in the business
+[uncertainty] -> Refers to a refined text based on the **initial idea of uncertainty** to achieve the [positive impact] in the business
+
+[solution assumption] -> Refers to a refined text based on the **initial idea of solution hypothesis** to resolve the [uncertainty]
+[uncertainty] -> Same text as the [uncertainty] field in FERC
+[observation description] -> Write a text describing what will be observed and analyzed in terms of metrics in the experiment proposed in the [solution assumption], which may resolve the doubt about the uncertainty
+
+VERY IMPORTANT: The text of each field is the REMAINING complement of an initial sentence, therefore each text must be written so that it agrees grammatically with its respective initial sentence.
 
 
 ## Examples
@@ -98,22 +97,26 @@ QESS:
 **Will result in updating the uncertainties about** the stability of the sensors on the patient's arm of the low-cost device that will be used for building the software system
 **As a result of** observation of the operation of the oximeter with the rigid wristband and the data generated.
 
----
+## About the response format
 
 You MUST return ONLY a valid JSON object (no markdown, no explanation) with:
 - "ferc": an object with:
-  - "desired_behavior": the [desired behavior] part of the FERC (string)
-  - "positive_impact": the [need or positive impact] part of the FERC (string)
-  - "uncertainties": list of uncertainty strings (array of strings)
+  - "desired_behavior": [desired behavior] (string)
+  - "positive_impact": [positive impact] (string)
+  - "uncertainties": only one [uncertainty] (array of strings)
 - "qess": an object with:
-  - "solution_assumption": the [description of the solution assumption] (string)
-  - "uncertainty_evaluated": the [one uncertainty that will be evaluated] (string)
-  - "observation_analysis": the [observation and analysis description] (string)
+  - "solution_assumption": [solution assumption] (string)
+  - "uncertainty_evaluated": [uncertainty] (string)
+  - "observation_analysis": [observation description] (string)
 """,
     "pt-br": """Você é um especialista em especificação de requisitos de software com incertezas.
+Um requisito de software com incerteza é chamado de requisito conjectural.
 
-O objetivo principal deste aplicativo é gerar um tipo de especificação de requisito de software com incerteza,
-aqui chamado de "requisito conjectural".
+# Instrução geral
+
+Sua tarefa é gerar uma especificação de requisito conjectural, de acordo com as instruções abaixo.
+Gere exatamente UM requisito conjectural preenchendo os campos entre colchetes contidos no Modelo de Especificação de Requisito Conjectural, 
+tomando como base as informações abaixo.
 
 ## Informações Gerais do Projeto
 
@@ -132,24 +135,7 @@ aqui chamado de "requisito conjectural".
 - **Ideia inicial de incerteza:** {uncertainty}
 - **Ideia inicial de hipótese de solução:** {supposition_solution}
 
-## Instruções gerais
-
-Gere exatamente UM requisito conjectural preenchendo os campos entre colchetes contidos no MODELO abaixo, tomando como base as informações acima.
-
-## Instruções sobre cada campo
-
-[comportamento desejado] -> Elabore um texto que descreva um comportamento desejado no sistema que contribua para o [impacto positivo]
-[impacto positivo] -> Elabore um texto refinado da **ideia inicial de impacto positivo**
-[incerteza] -> Elabore um texto refinado da **ideia inicial de incerteza**
-
-[suposição de solução] -> Elabore um texto refinado da **ideia inicial de hipótese de solução**
-[incerteza] -> Mesmo texto elaborado para o campo [incerteza] do FERC
-[descrição da observação] -> Elabore um texto que descreva o que será observado e analisado em termos de métricas do experimento, que poderá resolver a dúvida sobre a incerteza
-
-MUITO IMPORTANTE: O texto de cada campo é um complemento de uma frase, portanto cada texto deve ser elaborado para que tenha concordancia com o restante da frase.
-
-
-## MODELO
+## Modelo de Especificação de Requisito Conjectural
 
 **FERC (Formato de Escrita para Requisitos Conjecturais):**
 **É esperado que o sistema de software possua** [comportamento desejado]
@@ -157,9 +143,21 @@ MUITO IMPORTANTE: O texto de cada campo é um complemento de uma frase, portanto
 **Porém, não sabemos** [incerteza]
 
 **QESS (Framework de Experimentação de Suposição de Solução):**
-**Esperamos que** [descrição da suposição de solução]
+**Esperamos que** [suposição de solução]
 **Resulte na atualização das incertezas sobre** [incerteza]
 **Como resultado de** [descrição da observação] 
+
+## Instruções específicas sobre cada campo
+
+[comportamento desejado] -> Se refere a um texto que descreve um comportamento desejado no sistema para alcançar o [impacto positivo]
+[impacto positivo] -> Se refere a um texto refinado da **ideia inicial de impacto positivo** desejado no negócio
+[incerteza] -> Se refere a um texto refinado da **ideia inicial de incerteza** para alcançar o [impacto positivo] no negócio
+
+[suposição de solução] -> Se refere a um texto refinado da **ideia inicial de hipótese de solução** para resolver a [incerteza]
+[incerteza] -> Mesmo texto elaborado para o campo [incerteza] do FERC
+[descrição da observação] -> Elabore um texto que descreva o que será observado e analisado em termos de métricas do experimento proposto na [suposição de solução], que poderá resolver a dúvida sobre a incerteza
+
+MUITO IMPORTANTE: O texto de cada campo é um complemento RESTANTE de uma frase inicial, portanto cada texto deve ser elaborado para que tenha concordancia com sua respectiva frase inicial.
 
 
 ## Exemplos
@@ -209,16 +207,16 @@ QESS:
 **Resulte na atualização das incertezas sobre** a estabilidade dos sensores no braço do paciente do dispositivo de baixo custo que será usado para construção do sistema de software
 **Como resultado de** observação do funcionamento do oxímetro com a pulseira rígida e dos dados gerados.
 
----
+## Sobre o formato de resposta
 
 Você DEVE retornar APENAS um objeto JSON válido (sem markdown, sem explicação) com:
 - "ferc": um objeto com:
-  - "desired_behavior": a parte [comportamento desejado] do FERC (string)
-  - "positive_impact": a parte [necessidade ou impacto positivo] do FERC (string)
-  - "uncertainties": lista de strings de incertezas (array de strings)
+  - "desired_behavior": [comportamento desejado] (string)
+  - "positive_impact": [impacto positivo] (string)
+  - "uncertainties": apenas uma [incerteza] (array de strings)
 - "qess": um objeto com:
-  - "solution_assumption": a [descrição da suposição de solução] (string)
-  - "uncertainty_evaluated": a [uma incerteza que será avaliada] (string)
-  - "observation_analysis": a [descrição da observação e análise] (string)
+  - "solution_assumption": [suposição de solução] (string)
+  - "uncertainty_evaluated": [incerteza] (string)
+  - "observation_analysis": [descrição da observação] (string)
 """,
 }

@@ -93,7 +93,7 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
         print(f"  [Impact] {cd.positive_impact[:60]} → [Uncertainty] {cd.uncertainty[:60]} → [Hypothesis] {cd.supposition_solution[:80]}")
 
     # --- Step 3: Call LLM to generate conjectural requirements (one per ConjecturalData) ---
-    model = get_model(provider=model_provider, temperature=0)
+    model = get_model(provider=model_provider, temperature=1)
 
     print(f"[Specification] Generating {quantity_req_batch} conjectural requirement(s)...")
 
