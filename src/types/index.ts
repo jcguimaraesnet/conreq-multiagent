@@ -142,7 +142,7 @@ export interface ConjecturalRequirement {
   status: ConjecturalStatus;
   desired_behavior: string;
   positive_impact: string;
-  uncertainties: string[];
+  uncertainty: string;
   solution_assumption: string;
   uncertainty_evaluated: string;
   observation_analysis: string;

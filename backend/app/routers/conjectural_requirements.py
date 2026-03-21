@@ -16,7 +16,7 @@ class ConjecturalRequirementUpdate(BaseModel):
     """Editable fields of a conjectural requirement."""
     desired_behavior: Optional[str] = None
     positive_impact: Optional[str] = None
-    uncertainties: Optional[List[str]] = None
+    uncertainty: Optional[str] = None
     solution_assumption: Optional[str] = None
     uncertainty_evaluated: Optional[str] = None
     observation_analysis: Optional[str] = None

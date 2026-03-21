@@ -55,8 +55,8 @@ const STATUS_LABELS: Record<ConjecturalStatus, string> = {
 };
 
 function getCardDescription(req: ConjecturalRequirement, field: DisplayField): string {
-  if (field === "uncertainties") {
-    return req.uncertainties.join("; ");
+  if (field === "uncertainty") {
+    return req.uncertainty;
   }
   return req[field];
 }

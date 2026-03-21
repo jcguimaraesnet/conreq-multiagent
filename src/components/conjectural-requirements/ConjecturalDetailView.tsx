@@ -21,7 +21,7 @@ interface HistorySnapshotEntry {
   ferc: {
     desired_behavior: string;
     positive_impact: string;
-    uncertainties: string[];
+    uncertainty: string;
   };
   qess: {
     solution_assumption: string;
@@ -197,7 +197,7 @@ function HistoryPanel({ entries }: { entries: HistorySnapshotEntry[] }) {
               </div>
               <div className="rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-gray-800 p-4">
                 <span className="text-base font-semibold text-orange-600 dark:text-orange-400">However, we do not know:&nbsp;</span>
-                <span className="text-base text-gray-700 dark:text-gray-300">{entry.ferc.uncertainties.join("; ")}</span>
+                <span className="text-base text-gray-700 dark:text-gray-300">{entry.ferc.uncertainty}</span>
               </div>
             </div>
           )}
@@ -261,7 +261,7 @@ export default function ConjecturalDetailView({
   // Editable fields
   const [desiredBehavior, setDesiredBehavior] = useState("");
   const [positiveImpact, setPositiveImpact] = useState("");
-  const [uncertainties, setUncertainties] = useState("");
+  const [uncertainty, setUncertainty] = useState("");
   const [solutionAssumption, setSolutionAssumption] = useState("");
   const [uncertaintyEvaluated, setUncertaintyEvaluated] = useState("");
   const [observationAnalysis, setObservationAnalysis] = useState("");
@@ -271,7 +271,7 @@ export default function ConjecturalDetailView({
     if (requirement) {
       setDesiredBehavior(requirement.desired_behavior);
       setPositiveImpact(requirement.positive_impact);
-      setUncertainties(requirement.uncertainties.join("\n"));
+      setUncertainty(requirement.uncertainty);
       setSolutionAssumption(requirement.solution_assumption);
       setUncertaintyEvaluated(requirement.uncertainty_evaluated);
       setObservationAnalysis(requirement.observation_analysis);
@@ -301,7 +301,7 @@ export default function ConjecturalDetailView({
         body: JSON.stringify({
           desired_behavior: desiredBehavior,
           positive_impact: positiveImpact,
-          uncertainties: uncertainties.split("\n").map((u) => u.trim()).filter(Boolean),
+          uncertainty,
           solution_assumption: solutionAssumption,
           uncertainty_evaluated: uncertaintyEvaluated,
           observation_analysis: observationAnalysis,
@@ -315,7 +315,7 @@ export default function ConjecturalDetailView({
     } finally {
       setSaving(false);
     }
-  }, [requirement, userId, desiredBehavior, positiveImpact, uncertainties, solutionAssumption, uncertaintyEvaluated, observationAnalysis, onSaved]);
+  }, [requirement, userId, desiredBehavior, positiveImpact, uncertainty, solutionAssumption, uncertaintyEvaluated, observationAnalysis, onSaved]);
 
   if (!open || !requirement) return null;
 
@@ -381,9 +381,9 @@ export default function ConjecturalDetailView({
                     However, we do not know:
                   </p>
                   <Textarea
-                    value={uncertainties}
-                    onChange={(e) => setUncertainties(e.target.value)}
-                    placeholder="One uncertainty per line..."
+                    value={uncertainty}
+                    onChange={(e) => setUncertainty(e.target.value)}
+                    placeholder="Uncertainty..."
                     rows={3}
                     className="w-full text-base"
                   />

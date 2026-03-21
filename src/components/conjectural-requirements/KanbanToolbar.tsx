@@ -4,15 +4,15 @@ import Toolbar from "@/components/ui/Toolbar";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
-export type DisplayField = "desired_behavior" | "positive_impact" | "uncertainties";
+export type DisplayField = "desired_behavior" | "positive_impact" | "uncertainty";
 
 const FIELD_LABELS: Record<DisplayField, string> = {
   desired_behavior: "Desired Behavior",
   positive_impact: "Positive Impact",
-  uncertainties: "Uncertainty",
+  uncertainty: "Uncertainty",
 };
 
-const FIELD_CYCLE: DisplayField[] = ["desired_behavior", "positive_impact", "uncertainties"];
+const FIELD_CYCLE: DisplayField[] = ["desired_behavior", "positive_impact", "uncertainty"];
 
 interface KanbanToolbarProps {
   searchQuery: string;

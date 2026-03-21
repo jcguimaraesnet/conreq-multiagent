@@ -15,7 +15,7 @@ class FERC(BaseModel):
     """Writing Format for Conjectural Requirements."""
     desired_behavior: str = Field(description="The desired system behavior")
     positive_impact: str = Field(description="The need or positive impact of the desired attribute")
-    uncertainties: List[str] = Field(description="Uncertainties associated with this requirement")
+    uncertainty: str = Field(description="Uncertainty associated with this requirement")
 
 
 class QESS(BaseModel):

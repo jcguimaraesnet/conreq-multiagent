@@ -103,7 +103,7 @@ You MUST return ONLY a valid JSON object (no markdown, no explanation) with:
 - "ferc": an object with:
   - "desired_behavior": [desired behavior] (string)
   - "positive_impact": [positive impact] (string)
-  - "uncertainties": only one [uncertainty] (array of strings)
+  - "uncertainty": [uncertainty] (string)
 - "qess": an object with:
   - "solution_assumption": [solution assumption] (string)
   - "uncertainty_evaluated": [uncertainty] (string)
@@ -213,7 +213,7 @@ Você DEVE retornar APENAS um objeto JSON válido (sem markdown, sem explicaçã
 - "ferc": um objeto com:
   - "desired_behavior": [comportamento desejado] (string)
   - "positive_impact": [impacto positivo] (string)
-  - "uncertainties": apenas uma [incerteza] (array de strings)
+  - "uncertainty": [incerteza] (string)
 - "qess": um objeto com:
   - "solution_assumption": [suposição de solução] (string)
   - "uncertainty_evaluated": [incerteza] (string)

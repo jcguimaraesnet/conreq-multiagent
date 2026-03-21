@@ -39,7 +39,7 @@ def _build_history_snapshot(cd: ConjecturalData) -> list[dict]:
             "ferc": {
                 "desired_behavior": cr.ferc.desired_behavior,
                 "positive_impact": cr.ferc.positive_impact,
-                "uncertainties": list(cr.ferc.uncertainties),
+                "uncertainty": cr.ferc.uncertainty,
             },
             "qess": {
                 "solution_assumption": cr.qess.solution_assumption,
@@ -74,7 +74,7 @@ def _build_requirement_snapshot(cr: ConjecturalRequirement) -> dict:
         "ferc": {
             "desired_behavior": cr.ferc.desired_behavior,
             "positive_impact": cr.ferc.positive_impact,
-            "uncertainties": list(cr.ferc.uncertainties),
+            "uncertainty": cr.ferc.uncertainty,
         },
         "qess": {
             "solution_assumption": cr.qess.solution_assumption,
@@ -92,7 +92,7 @@ def _build_requirement_row(project_id: str, cr: ConjecturalRequirement, requirem
         "status": "todo",
         "desired_behavior": cr.ferc.desired_behavior,
         "positive_impact": cr.ferc.positive_impact,
-        "uncertainties": list(cr.ferc.uncertainties),
+        "uncertainty": cr.ferc.uncertainty,
         "solution_assumption": cr.qess.solution_assumption,
         "uncertainty_evaluated": cr.qess.uncertainty_evaluated,
         "observation_analysis": cr.qess.observation_analysis,

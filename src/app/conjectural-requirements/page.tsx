@@ -148,7 +148,7 @@ function DisplayCard({ req }: { req: RequirementItem }) {
                       However, we do not know:
                     </p>
                     <span className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                      <strong className="text-base font-semibold text-orange-600 dark:text-orange-400 tracking-wider">Uncertainty:</strong> {req.uncertainties || "N/A"}
+                      <strong className="text-base font-semibold text-orange-600 dark:text-orange-400 tracking-wider">Uncertainty:</strong> {req.uncertainty || "N/A"}
                     </span>
                   </div>
                 </div>
@@ -540,7 +540,7 @@ function ConjecturalRequirementsInner() {
       (r) =>
         r.desired_behavior.toLowerCase().includes(q) ||
         r.positive_impact.toLowerCase().includes(q) ||
-        r.uncertainties.some((u) => u.toLowerCase().includes(q))
+        r.uncertainty.toLowerCase().includes(q)
     );
   }, [kanbanRequirements, kanbanSearchQuery]);
 

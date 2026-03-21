@@ -125,7 +125,7 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
                 business_objective=business_objective,
                 prev_desired_behavior=last_cr.ferc.desired_behavior,
                 prev_positive_impact=last_cr.ferc.positive_impact,
-                prev_uncertainties="; ".join(last_cr.ferc.uncertainties),
+                prev_uncertainties=last_cr.ferc.uncertainty,
                 prev_solution_assumption=last_cr.qess.solution_assumption,
                 prev_uncertainty_evaluated=last_cr.qess.uncertainty_evaluated,
                 prev_observation_analysis=last_cr.qess.observation_analysis,
@@ -144,8 +144,7 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
             print(f"  --- Conjectural Requirement #{req_num} (attempt {cr.attempt}) ---")
             print(f"  [FERC] Desired behavior: {cr.ferc.desired_behavior}")
             print(f"  [FERC] Positive impact: {cr.ferc.positive_impact}")
-            for j, uncertainty in enumerate(cr.ferc.uncertainties, start=1):
-                print(f"  [FERC] Uncertainty {j}: {uncertainty}")
+            print(f"  [FERC] Uncertainty: {cr.ferc.uncertainty}")
             print(f"  [QESS] Solution assumption: {cr.qess.solution_assumption}")
             print(f"  [QESS] Uncertainty evaluated: {cr.qess.uncertainty_evaluated}")
             print(f"  [QESS] Observation & analysis: {cr.qess.observation_analysis}")

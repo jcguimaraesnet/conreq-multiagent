@@ -9,7 +9,7 @@ export interface RequirementItem {
   attempt: number;
   desired_behavior: string;
   positive_impact: string;
-  uncertainties: string;
+  uncertainty: string;
   solution_assumption: string;
   uncertainty_evaluated: string;
   observation_analysis: string;
@@ -218,7 +218,7 @@ function SingleCard({
                       However, we do not know:
                     </p>
                     <span className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                      <strong className="text-base font-semibold text-orange-600 dark:text-orange-400 tracking-wider">Uncertainty:</strong> {current.uncertainties || "N/A"}
+                      <strong className="text-base font-semibold text-orange-600 dark:text-orange-400 tracking-wider">Uncertainty:</strong> {current.uncertainty || "N/A"}
                     </span>
                   </div>
                 </div>
