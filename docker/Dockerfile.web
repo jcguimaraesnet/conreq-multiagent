@@ -1,0 +1,31 @@
+# ===== BUILD =====
+FROM node:20-bullseye AS builder
+
+WORKDIR /app
+
+# Instala pnpm
+RUN npm install -g pnpm
+
+# Copia apenas arquivos de dependência primeiro (cache)
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+
+# Copia o restante do frontend
+COPY . .
+
+# Build do Next.js
+RUN pnpm build
+
+# ===== RUN =====
+FROM node:20-bullseye
+
+WORKDIR /app
+
+RUN npm install -g pnpm
+
+# Copia build final
+COPY --from=builder /app ./
+
+EXPOSE 3000
+
+CMD ["pnpm", "start"]

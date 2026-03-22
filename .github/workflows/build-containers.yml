@@ -1,0 +1,35 @@
+name: Build and Push
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login no ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: acrconreq.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build e push API
+        run: |
+          docker build -t acrconreq.azurecr.io/api:latest -f docker/Dockerfile.api .
+          docker push acrconreq.azurecr.io/api:latest
+
+      - name: Build e push WEB
+        run: |
+          docker build -t acrconreq.azurecr.io/web:latest -f docker/Dockerfile.web .
+          docker push acrconreq.azurecr.io/web:latest
+
+      - name: Build e push AGENT
+        run: |
+          docker build -t acrconreq.azurecr.io/agent:latest -f docker/Dockerfile.agent .
+          docker push acrconreq.azurecr.io/agent:latest
