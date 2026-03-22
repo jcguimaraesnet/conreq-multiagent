@@ -5,6 +5,10 @@ FastAPI application for handling project and requirement management,
 including document processing and AI-powered requirement extraction.
 """
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

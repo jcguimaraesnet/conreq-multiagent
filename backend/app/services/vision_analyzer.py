@@ -1,15 +1,13 @@
 """
 Vision Analyzer Service
 
-Analyzes the vision document text using Google Gemini to extract
-project summary, business domain, business objective, and stakeholder.
+Analyzes the vision document text using the user's configured LLM provider
+to extract project summary, business domain, business objective, and stakeholder.
 """
 
 import json as json_module
 
-from google import genai
-from app.config import get_settings
-from app.agent.llm_config import DEFAULT_GEMINI_MODEL
+from app.agent.llm_config import get_model, extract_text, LLMProvider
 
 
 class VisionAnalysisResult:
@@ -20,7 +18,7 @@ class VisionAnalysisResult:
         self.stakeholder = stakeholder
 
 
-async def analyze_vision_text(text: str) -> VisionAnalysisResult:
+async def analyze_vision_text(text: str, provider: LLMProvider = "gemini") -> VisionAnalysisResult:
     """
     Analyze the vision document text to extract key project information.
 
@@ -33,11 +31,8 @@ async def analyze_vision_text(text: str) -> VisionAnalysisResult:
     if not text or not text.strip():
         raise ValueError("Vision text is empty — cannot analyze.")
 
-    settings = get_settings()
-    client = genai.Client(api_key=settings.gemini_api_key)
-
     prompt = f"""Analyze the following project vision document text and extract the information below.
-All output MUST be in American English (en-US).
+All output MUST be in the same language as the vision document text below.
 
 1. **summary**: Rewrite the content of the vision document sentence by sentence in a concise manner without losing relevant information.
 2. **business_domain**: Identify the business domain of the project.
@@ -50,12 +45,10 @@ Respond with ONLY a valid JSON object in this exact format (no markdown, no code
 Vision document text:
 {text}"""
 
-    response = await client.aio.models.generate_content(
-        model=DEFAULT_GEMINI_MODEL,
-        contents=prompt,
-    )
+    llm = get_model(provider=provider, temperature=0)
+    response = await llm.ainvoke(prompt)
 
-    raw = response.text.strip()
+    raw = extract_text(response.content).strip()
 
     # Strip markdown code fences if present
     if raw.startswith("```"):

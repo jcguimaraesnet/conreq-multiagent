@@ -186,6 +186,9 @@ export default function AddProjectPopup({ open, onClose, onProjectCreated, onGen
 
       const response = await fetch(`${API_BASE_URL}${API_PREFIX}/projects/requirements/extract`, {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${user?.id}`,
+        },
         body: formData,
       });
 

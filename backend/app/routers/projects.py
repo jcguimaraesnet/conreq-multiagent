@@ -24,9 +24,9 @@ from app.models.schemas import (
 from app.services.document_parser import extract_text_from_pdf, get_pdf_metadata
 from app.services.requirement_extractor import extract_requirements_with_ai
 from app.services.language_detector import detect_language
-from app.services.text_translator import translate_to_english
 from app.services.vision_analyzer import analyze_vision_text
 from app.services.supabase_client import get_supabase_client
+from app.services.user_settings import get_user_model_preference
 
 
 PROJECT_SELECT_COLUMNS = (
@@ -183,31 +183,41 @@ async def extract_vision_document(
 
 @router.post("/requirements/extract", response_model=ExtractedRequirements)
 async def extract_requirements_document(
-    file: UploadFile = File(..., description="PDF file to extract requirements from")
+    file: UploadFile = File(..., description="PDF file to extract requirements from"),
+    authorization: Optional[str] = Header(None),
 ):
     """
     Extract requirements from a requirements document (PDF).
-    
-    Uses pdfplumber for table extraction and Google Gemini AI for
+
+    Uses pdfplumber for table extraction and AI for
     intelligent requirement extraction and categorization.
     This is Step 3 of the project wizard.
     """
     # Validate file type
     if not file.filename or not file.filename.lower().endswith('.pdf'):
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="Only PDF files are supported"
         )
-    
+
+    # Determine provider from user settings if auth is provided
+    provider = "gemini"
+    if authorization:
+        try:
+            user_id = get_user_id_from_header(authorization)
+            provider = get_user_model_preference(user_id)
+        except HTTPException:
+            pass  # If auth is invalid, default to gemini
+
     # Read file content
     content = await file.read()
-    
+
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
-    
+
     try:
-        # Extract requirements using pdfplumber + Gemini AI
-        requirements = await extract_requirements_with_ai(content)
+        # Extract requirements using pdfplumber + AI
+        requirements = await extract_requirements_with_ai(content, provider=provider)
         return requirements
         
     except ValueError as e:
@@ -240,7 +250,8 @@ async def create_project(
     """
     user_id = get_user_id_from_header(authorization)
     supabase = get_supabase_client()
-    
+    model_provider = get_user_model_preference(user_id)
+
     # Parse requirements JSON if provided
     requirements = None
     if requirements_json:
@@ -265,16 +276,12 @@ async def create_project(
             requirements_document_data = base64.b64encode(requirements_content).decode('utf-8')
         
         # Detect language from vision document text
-        detected_language = await detect_language(vision_extracted_text) if vision_extracted_text else None
-
-        # Translate vision text to en-US if not already in English
-        if vision_extracted_text and detected_language and detected_language != "en-us":
-            vision_extracted_text = await translate_to_english(vision_extracted_text)
+        detected_language = await detect_language(vision_extracted_text, provider=model_provider) if vision_extracted_text else None
 
         # Analyze vision text to extract summary, domain, objective, stakeholder
         vision_analysis = None
         if vision_extracted_text:
-            vision_analysis = await analyze_vision_text(vision_extracted_text)
+            vision_analysis = await analyze_vision_text(vision_extracted_text, provider=model_provider)
 
         # Insert project
         project_data = {

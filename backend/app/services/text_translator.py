@@ -1,27 +1,22 @@
 """
 Text Translator Service
 
-Translates text to en-US using Google Gemini,
+Translates text to en-US using the user's configured LLM provider,
 preserving the original formatting and structure.
 """
 
-from google import genai
-from app.config import get_settings
-from app.agent.llm_config import DEFAULT_GEMINI_MODEL
+from app.agent.llm_config import get_model, extract_text, LLMProvider
 
 
-async def translate_to_english(text: str) -> str:
+async def translate_to_english(text: str, provider: LLMProvider = "gemini") -> str:
     """
-    Translate the given text to en-US using Gemini.
+    Translate the given text to en-US.
 
     Returns the translated text, or the original text
     if translation fails.
     """
     if not text or not text.strip():
         return text
-
-    settings = get_settings()
-    client = genai.Client(api_key=settings.gemini_api_key)
 
     prompt = f"""Translate the following text to American English (en-US).
 Preserve the original formatting, structure, paragraph breaks, and any technical terms.
@@ -32,11 +27,9 @@ Text:
 {text}"""
 
     try:
-        response = await client.aio.models.generate_content(
-            model=DEFAULT_GEMINI_MODEL,
-            contents=prompt,
-        )
-        translated = response.text.strip()
+        llm = get_model(provider=provider, temperature=0)
+        response = await llm.ainvoke(prompt)
+        translated = extract_text(response.content).strip()
         if translated:
             return translated
         return text

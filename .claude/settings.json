@@ -57,7 +57,13 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -type f -name *util* -o -name *service* -o -name *client*)",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f \\\\\\(-name *.sql -o -name *README* -o -name *schema* \\\\\\))",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src -name *type* -o -name *interface*)",
-      "Bash(python -c \"import openai; print\\(openai.__version__\\)\")"
+      "Bash(python -c \"import openai; print\\(openai.__version__\\)\")",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/backend -type f -name *.sql)",
+      "Bash(grep -r \"settings\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/backend/app/routers/*.py)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/app -type f \\\\\\(-name *setting* -o -name *context* \\\\\\))",
+      "Bash(grep -r CurrentUserSettings /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src --include=*.tsx --include=*.ts)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f -name *.sql -o -type d -name supabase)",
+      "Bash(grep -r \"CREATE TABLE\\\\|settings\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",
