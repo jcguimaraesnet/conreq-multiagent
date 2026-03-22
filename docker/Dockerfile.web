@@ -30,7 +30,7 @@ ENV LANGGRAPH_DEPLOYMENT_URL=$LANGGRAPH_DEPLOYMENT_URL
 ENV LANGSMITH_API_KEY=$LANGSMITH_API_KEY
 
 # Build do Next.js
-RUN pnpm dev:frontend
+RUN pnpm build:turbopack
 
 # ===== RUN =====
 FROM node:20-bullseye
