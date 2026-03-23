@@ -77,10 +77,10 @@ jobs:
     steps:
       - name: Debug das Variáveis OIDC
         run: |
-          echo "Tamanho do Client ID (Secrets): ${#CLIENT_ID}"
-          echo "Tamanho do Client Secret (Secrets): ${#CLIENT_SEC}"
-          echo "Tamanho do Tenant ID (Secrets): ${#TENANT_ID}"
-          echo "Tamanho do Sub ID (Secrets): ${#SUB_ID}"
+          echo "Client ID (Secrets): ${#CLIENT_ID}"
+          echo "Client Secret (Secrets): ${#CLIENT_SEC}"
+          echo "Tenant ID (Secrets): ${#TENANT_ID}"
+          echo "Sub ID (Secrets): ${#SUB_ID}"
 
         env:
           CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CONTAINER }}
