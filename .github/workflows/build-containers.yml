@@ -69,6 +69,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment: azure-container
 
     steps:
       # Login Azure
