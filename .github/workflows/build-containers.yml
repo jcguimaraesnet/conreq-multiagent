@@ -141,9 +141,9 @@ jobs:
               OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               LANGSMITH_API_KEY=${{ secrets.LANGSMITH_API_KEY }} \
               AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }} \
-              AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }} \
-              AZURE_OPENAI_DEPLOYMENT_NAME=${{ secrets.AZURE_OPENAI_DEPLOYMENT_NAME }} \
-              AZURE_AI_ENDPOINT=${{ secrets.AZURE_AI_ENDPOINT }} \
+              AZURE_OPENAI_ENDPOINT=${{ vars.AZURE_OPENAI_ENDPOINT }} \
+              AZURE_OPENAI_DEPLOYMENT_NAME=${{ vars.AZURE_OPENAI_DEPLOYMENT_NAME }} \
+              AZURE_AI_ENDPOINT=${{ vars.AZURE_AI_ENDPOINT }} \
               AZURE_AI_API_KEY=${{ secrets.AZURE_AI_API_KEY }}
 
       # =========================
@@ -167,7 +167,7 @@ jobs:
               OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               LANGSMITH_API_KEY=${{ secrets.LANGSMITH_API_KEY }} \
               AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }} \
-              AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }} \
-              AZURE_OPENAI_DEPLOYMENT_NAME=${{ secrets.AZURE_OPENAI_DEPLOYMENT_NAME }} \
-              AZURE_AI_ENDPOINT=${{ secrets.AZURE_AI_ENDPOINT }} \
+              AZURE_OPENAI_ENDPOINT=${{ vars.AZURE_OPENAI_ENDPOINT }} \
+              AZURE_OPENAI_DEPLOYMENT_NAME=${{ vars.AZURE_OPENAI_DEPLOYMENT_NAME }} \
+              AZURE_AI_ENDPOINT=${{ vars.AZURE_AI_ENDPOINT }} \
               AZURE_AI_API_KEY=${{ secrets.AZURE_AI_API_KEY }}
