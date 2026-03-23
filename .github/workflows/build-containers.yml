@@ -46,6 +46,23 @@ jobs:
           docker build -t acrconreq.azurecr.io/agent:latest -f docker/Dockerfile.agent .
           docker push acrconreq.azurecr.io/agent:latest
 
+      # =========================
+      # 🔍 DEBUG DA SECRET
+      # =========================
+      - name: Validar JSON da AZURE_CREDENTIALS
+        env:
+          AZURE_CREDS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          echo "Lendo as chaves presentes na secret..."
+          # Isso vai listar apenas os nomes das propriedades (ex: ["clientId", "clientSecret"...])
+          echo "$AZURE_CREDS" | jq 'keys'
+
+          echo "Validando se as 4 chaves exatas existem (case sensitive)..."
+          # O parâmetro -e faz o comando falhar se retornar falso
+          echo "$AZURE_CREDS" | jq -e 'has("clientId") and has("clientSecret") and has("subscriptionId") and has("tenantId")' > /dev/null
+
+          echo "Sucesso! O JSON é perfeitamente válido e contém as chaves corretas."
+
   # =========================
   # 🚀 DEPLOY
   # =========================
