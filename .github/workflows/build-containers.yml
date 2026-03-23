@@ -113,6 +113,7 @@ jobs:
             --ingress external \
             --registry-server acrconreq.azurecr.io \
             --env-vars \
+              TZ=America/Sao_Paulo \
               NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }} \
               NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
               NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }} \
@@ -134,6 +135,7 @@ jobs:
             --ingress external \
             --registry-server acrconreq.azurecr.io \
             --env-vars \
+              TZ=America/Sao_Paulo \
               NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }} \
               NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
               SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
@@ -160,6 +162,7 @@ jobs:
             --ingress external \
             --registry-server acrconreq.azurecr.io \
             --env-vars \
+              TZ=America/Sao_Paulo \
               NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }} \
               NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
               SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
