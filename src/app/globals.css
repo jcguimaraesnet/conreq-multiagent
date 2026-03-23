@@ -74,6 +74,31 @@ html.dark .styled-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(100, 116, 139, 0.6);
 }
 
+.copilotKitMessages::-webkit-scrollbar {
+  width: 15px !important;
+}
+
+.copilotKitMessages::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5) !important;
+  border-radius: 10rem !important;
+}
+
+.copilotKitMessages::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7) !important;
+}
+
+html.dark .copilotKitMessages::-webkit-scrollbar-thumb {
+  background-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+html.dark .copilotKitMessages::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(51, 65, 85, 1) !important;
+}
+
+.copilotKitMessageControls button[aria-label="Regenerate response"] {
+  display: none !important;
+}
+
 .copilotKitMessages footer .suggestions .suggestion {
     background-color: var(--copilot-kit-contrast-color);
 }
