@@ -6,6 +6,7 @@ including document processing and AI-powered requirement extraction.
 """
 
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -21,8 +22,8 @@ settings = get_settings()
 
 # Create FastAPI app
 app = FastAPI(
-    title="Conjectural Assist API",
-    description="Backend API for Conjectural Assist - A requirements management system with AI-powered extraction",
+    title="CONREQ Multi-Agent API",
+    description="Backend API for CONREQ Multi-Agent - An approach to generating software requirements specifications with uncertainty.",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -49,7 +50,7 @@ app.include_router(dashboard.router, prefix="/api")
 async def root():
     """Root endpoint - API health check."""
     return {
-        "message": "Conjectural Assist API",
+        "message": f"CONREQ Multi-Agent - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         "version": "1.0.0",
         "status": "healthy",
         "docs": "/docs"
