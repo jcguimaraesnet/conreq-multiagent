@@ -207,14 +207,6 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         )
 
         messages = messages + [tool_response]
-        for tc in getattr(tool_response, "tool_calls", []) or []:
-            print("[Validation node] tc=", tc)
-            if tc["name"] == "show_requirements":
-                result = show_requirements.invoke(tc["args"])
-                print("[Validation node] result=", result)
-                messages = messages + [
-                    ToolMessage(content=json.dumps(result), tool_call_id=tc["id"])
-                ]
 
     return Command(
         update={
