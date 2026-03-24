@@ -22,6 +22,7 @@ import {
   RefreshCw,
   SlidersHorizontal,
   Sparkles,
+  Network,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -253,9 +254,9 @@ export default function LandingPage() {
               description="Execution progress, review states, and quality trends are visualized to make the multi-agent process transparent to users."
             />
             <FeatureCard
-              icon={<Layers className="w-5 h-5" />}
-              title="Multiple Fundamental Models"
-              description="The system combines multiple foundation models tailored to each scenario, balancing in-depth reasoning, efficient execution, and long-term contextual understanding."
+              icon={<Network className="w-5 h-5" />}
+              title="Coordinator Pattern"
+              description="Uses a coordinator pattern to orchestrate interactions across multiple agents, routing tasks and consolidating outputs through a structured flow."
             />
           </div>
         </section>
