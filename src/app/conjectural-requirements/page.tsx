@@ -352,7 +352,33 @@ function ConjecturalRequirementsInner() {
       const firstReq = newRequirements[0] ?? null;
       const evaluations = firstReq?.evaluations ?? [];
 
-      return { evaluations, requirementId: firstReq?.requirement_id ?? null };
+      return { evaluations, requirementId: firstReq?.cod_requirement ?? null };
+    },
+    render: ({ status, result }) => {
+      if (status !== ToolCallStatus.Complete || !result) return null;
+
+      const parsed = typeof result === 'string' ? JSON.parse(result) : result;
+      const evaluations: ConjecturalEvaluation[] = parsed?.evaluations ?? [];
+      const requirementId: string | null = parsed?.requirementId ?? null;
+
+      return <EvaluationRadarCard evaluations={evaluations} requirementId={requirementId} />;
+    },
+  }, [API_URL, user?.id]);
+
+  const showEvalParamSchema = z.object({ cod_requirement: z.string().describe("The conjectural requirement code (e.g. REQ-C001)") });
+
+  useFrontendTool({
+    name: "show_evaluations",
+    description: "Display chart evaluation of a conjectural requirement identified by its code (e.g. REQ-C001)",
+    followUp: false,
+    parameters: showEvalParamSchema,
+    handler: async ({ cod_requirement }) => {
+      const res = await fetch(`${API_URL}/api/conjectural-requirements/by-cod/${cod_requirement}`, {
+        headers: { Authorization: `Bearer ${user?.id || ""}` },
+      });
+      if (!res.ok) return { evaluations: [], requirementId: null };
+      const req: ConjecturalRequirement = await res.json();
+      return { evaluations: req.evaluations ?? [], requirementId: req.cod_requirement ?? null };
     },
     render: ({ status, result }) => {
       if (status !== ToolCallStatus.Complete || !result) return null;
@@ -484,38 +510,38 @@ function ConjecturalRequirementsInner() {
     name: "moveRequirement",
     description: "Move a conjectural requirement to a different status column on the Kanban board. Valid statuses: todo, inprogress, done.",
     parameters: z.object({
-      requirement_id: z.string().describe("The requirement ID in REQ-C format (e.g., REQ-C001)"),
+      cod_requirement: z.string().describe("The requirement code in REQ-C format (e.g., REQ-C001)"),
       new_status: z.enum(["todo", "inprogress", "done"]).describe("The target status column: todo, inprogress, or done"),
     }),
     followUp: false,
-    handler: async ({ requirement_id, new_status }: { requirement_id: string; new_status: ConjecturalStatus }) => {
-      const req = kanbanRequirements.find((r) => r.requirement_id === requirement_id);
+    handler: async ({ cod_requirement, new_status }: { cod_requirement: string; new_status: ConjecturalStatus }) => {
+      const req = kanbanRequirements.find((r) => r.cod_requirement === cod_requirement);
       if (!req) {
-        return { success: false, error: `Requirement ${requirement_id} not found on the board` };
+        return { success: false, error: `Requirement ${cod_requirement} not found on the board` };
       }
       if (req.status === new_status) {
-        return { success: false, error: `Requirement ${requirement_id} is already in status '${new_status}'` };
+        return { success: false, error: `Requirement ${cod_requirement} is already in status '${new_status}'` };
       }
       setNewCardIds(new Set([req.id]));
       await handleKanbanStatusChange(req.id, new_status);
-      return { success: true, message: `Moved ${requirement_id} to ${new_status}` };
+      return { success: true, message: `Moved ${cod_requirement} to ${new_status}` };
     },
   }, [kanbanRequirements, handleKanbanStatusChange]);
 
   useFrontendTool({
     name: "showRequirementDetails",
-    description: "Open the detail view of a conjectural requirement on the Kanban board. The requirement ID must be in REQ-C format (e.g., REQ-C001).",
+    description: "Open the detail view of a conjectural requirement on the Kanban board. The requirement code must be in REQ-C format (e.g., REQ-C001).",
     parameters: z.object({
-      requirement_id: z.string().describe("The requirement ID in REQ-C format (e.g., REQ-C001)"),
+      cod_requirement: z.string().describe("The requirement code in REQ-C format (e.g., REQ-C001)"),
     }),
     followUp: false,
-    handler: async ({ requirement_id }: { requirement_id: string }) => {
-      const req = kanbanRequirements.find((r) => r.requirement_id === requirement_id);
+    handler: async ({ cod_requirement }: { cod_requirement: string }) => {
+      const req = kanbanRequirements.find((r) => r.cod_requirement === cod_requirement);
       if (!req) {
-        return { success: false, error: `Requirement ${requirement_id} not found on the board` };
+        return { success: false, error: `Requirement ${cod_requirement} not found on the board` };
       }
       setSelectedRequirement(req);
-      return { success: true, message: `Showing details for ${requirement_id}` };
+      return { success: true, message: `Showing details for ${cod_requirement}` };
     },
   }, [kanbanRequirements]);
 

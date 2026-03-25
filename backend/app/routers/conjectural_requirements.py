@@ -92,6 +92,35 @@ async def has_any_conjectural(authorization: Optional[str] = Header(None)):
         )
 
 
+@router.get("/by-cod/{cod_requirement}")
+async def get_requirement_by_cod(
+    cod_requirement: str,
+    authorization: Optional[str] = Header(None),
+):
+    """Get a single conjectural requirement by cod_requirement (e.g. REQ-C001), including evaluations."""
+    get_user_id_from_header(authorization)
+    supabase = get_supabase_client()
+
+    try:
+        result = supabase.table("conjectural_requirements") \
+            .select("*, evaluations(*)") \
+            .eq("cod_requirement", cod_requirement) \
+            .execute()
+
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Conjectural requirement not found")
+
+        return result.data[0]
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get conjectural requirement: {str(e)}",
+        )
+
+
 @router.get("/{requirement_id}")
 async def get_requirement(
     requirement_id: UUID,

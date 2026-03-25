@@ -15,17 +15,17 @@ from app.services.embedding_service import generate_embeddings_sync
 def _get_next_requirement_number(supabase, project_id: str) -> int:
     """Query the highest REQ-C number for a project and return the next one."""
     result = supabase.table("conjectural_requirements") \
-        .select("requirement_id") \
+        .select("cod_requirement") \
         .eq("project_id", project_id) \
-        .not_.is_("requirement_id", "null") \
-        .order("requirement_id", desc=True) \
+        .not_.is_("cod_requirement", "null") \
+        .order("cod_requirement", desc=True) \
         .limit(1) \
         .execute()
 
-    if not result.data or not result.data[0].get("requirement_id"):
+    if not result.data or not result.data[0].get("cod_requirement"):
         return 1
 
-    match = re.search(r"REQ-C(\d+)", result.data[0]["requirement_id"])
+    match = re.search(r"REQ-C(\d+)", result.data[0]["cod_requirement"])
     return int(match.group(1)) + 1 if match else 1
 
 
@@ -84,11 +84,11 @@ def _build_requirement_snapshot(cr: ConjecturalRequirement) -> dict:
     }
 
 
-def _build_requirement_row(project_id: str, cr: ConjecturalRequirement, requirement_id: str, user_id: str | None = None) -> dict:
+def _build_requirement_row(project_id: str, cr: ConjecturalRequirement, cod_requirement: str, user_id: str | None = None) -> dict:
     """Build a database row dict from a ConjecturalRequirement (ranking=1 only)."""
     row = {
         "project_id": project_id,
-        "requirement_id": requirement_id,
+        "cod_requirement": cod_requirement,
         "status": "todo",
         "desired_behavior": cr.ferc.desired_behavior,
         "positive_impact": cr.ferc.positive_impact,

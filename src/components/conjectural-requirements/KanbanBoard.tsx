@@ -89,7 +89,7 @@ function KanbanCard({
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-xs font-mono text-gray-400 dark:text-gray-500">
-          {requirement.requirement_id ?? "—"}
+          {requirement.cod_requirement ?? "—"}
         </span>
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE_STYLES[requirement.status]}`}>
           {STATUS_LABELS[requirement.status]}

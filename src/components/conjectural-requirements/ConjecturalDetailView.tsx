@@ -332,7 +332,7 @@ export default function ConjecturalDetailView({
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Conjectural Requirement</p>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mt-1">
-              {requirement.requirement_id ?? "Detail"}
+              {requirement.cod_requirement ?? "Detail"}
             </h2>
           </div>
           <div className="flex items-center gap-2">

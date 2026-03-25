@@ -136,7 +136,7 @@ export interface ConjecturalEvaluation {
 export interface ConjecturalRequirement {
   id: string;
   project_id: string;
-  requirement_id: string | null;
+  cod_requirement: string | null;
   attempt: number;
   ranking: number | null;
   status: ConjecturalStatus;

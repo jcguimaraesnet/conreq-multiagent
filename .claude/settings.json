@@ -73,7 +73,8 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -name *auth* -path */app/* -type f)",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent -name *.md -o -name README*)",
-      "Bash(grep -r \"create table\\\\|CREATE TABLE\\\\|ALTER TABLE\\\\|ROLE\\\\|role\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql --include=*.md)"
+      "Bash(grep -r \"create table\\\\|CREATE TABLE\\\\|ALTER TABLE\\\\|ROLE\\\\|role\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql --include=*.md)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/backend -name *conjectural* -type f)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",
