@@ -38,20 +38,24 @@ async def coordinator_node(state: WorkflowState, config: Optional[RunnableConfig
 
     if phase == "elicitation":
         state["pending_progress"] = True
+        state["step1_elicitation"] = False
         await copilotkit_emit_state(config, state)
         return Command(
             update={
                 "pending_progress": True,
+                "step1_elicitation": False,
             }
         )
 
     elif phase == "analysis":
         state["step1_elicitation"] = True
+        state["step2_analysis"] = False
         state["pending_progress"] = True
         await copilotkit_emit_state(config, state)
         return Command(
             update={
                 "step1_elicitation": True,
+                "step2_analysis": False,
                 "pending_progress": True,
             }
         )
@@ -59,12 +63,14 @@ async def coordinator_node(state: WorkflowState, config: Optional[RunnableConfig
     elif phase == "specification":
         state["step1_elicitation"] = True
         state["step2_analysis"] = True
+        state["step3_specification"] = False
         state["pending_progress"] = True
         await copilotkit_emit_state(config, state)
         return Command(
             update={
                 "step1_elicitation": True,
                 "step2_analysis": True,
+                "step3_specification": False,
                 "pending_progress": True,
             }
         )
@@ -74,6 +80,7 @@ async def coordinator_node(state: WorkflowState, config: Optional[RunnableConfig
         state["step1_elicitation"] = True
         state["step2_analysis"] = True
         state["step3_specification"] = True
+        state["step4_validation"] = False
         state["pending_progress"] = True
         state["spec_attempt"] = new_spec_attempt
         await copilotkit_emit_state(config, state)
@@ -82,6 +89,7 @@ async def coordinator_node(state: WorkflowState, config: Optional[RunnableConfig
                 "step1_elicitation": True,
                 "step2_analysis": True,
                 "step3_specification": True,
+                "step4_validation": False,
                 "pending_progress": True,
                 "spec_attempt": new_spec_attempt,
             }
@@ -109,6 +117,9 @@ async def coordinator_node(state: WorkflowState, config: Optional[RunnableConfig
         return Command(
             update={
                 "coordinator_phase": "done",
+                "step1_elicitation": True,
+                "step2_analysis": True,
+                "step3_specification": True,
                 "step4_validation": True,
                 "pending_progress": False,
             }

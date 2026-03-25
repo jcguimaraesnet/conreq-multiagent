@@ -67,6 +67,18 @@ export default function StepProgress({ state }: StepProgressProps) {
     if (!pending) return;
 
     const p = phaseRef.current;
+
+    // Detect the validation→specification loop: when the coordinator loops
+    // back, s3 becomes false while the phase is already past specification.
+    // Reset back to the specification spinner (phase 4).
+    if (!s3 && p > 4) {
+      phaseRef.current = 4;
+      timerRef.current = setTimeout(() => setPhase(4), 0);
+      return () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
+    }
+
     const stepIndex = Math.floor(p / 2);
     const isCheckPhase = p % 2 === 1;
 
