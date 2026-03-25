@@ -1,22 +1,7 @@
-'use client'
-
-import { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
 import AuthFormPanel from '@/components/auth/AuthFormPanel'
 import PresentationPanel from '@/components/auth/PresentationPanel'
 
 export default function AuthPage() {
-  return (
-    <Suspense>
-      <AuthPageContent />
-    </Suspense>
-  )
-}
-
-function AuthPageContent() {
-  const searchParams = useSearchParams()
-  const confirmed = searchParams.get('confirmed') === 'true'
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 md:p-8">
       {/* Outer wrapper with rounded corners and shadow */}
@@ -24,7 +9,7 @@ function AuthPageContent() {
         <div className="flex gap-5 h-200">
           {/* Left: Form Card — equal width */}
           <div className="w-full lg:w-1/2 flex flex-col bg-white rounded-2xl border border-gray-200 pt-5 px-8 pb-8 md:pt-6 md:px-12 md:pb-12 overflow-y-auto">
-            <AuthFormPanel confirmed={confirmed} />
+            <AuthFormPanel />
           </div>
 
           {/* Right: Presentation Card — equal width */}

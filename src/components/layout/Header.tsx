@@ -1,8 +1,8 @@
 ﻿"use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { Folder, ChevronDown, Moon, Sun, LogOut, Settings } from 'lucide-react';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { Folder, ChevronDown, Moon, Sun, LogOut, Settings, Users } from 'lucide-react';
 import { useOnborda } from 'onborda';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,10 +13,11 @@ import SettingsModal from '@/components/settings/SettingsModal';
 export default function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const projectIdFromQuery = searchParams.get('projectId');
   const isRequirementsPage = pathname === '/requirements' || pathname === '/conjectural-requirements';
   const { isDarkMode, toggleTheme, mounted } = useTheme();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { selectedProject, isLoading: isLoadingProjects } = useProject();
   const { startOnborda } = useOnborda();
   const { stageCompleted } = useOnboardingStatus();
@@ -146,6 +147,15 @@ export default function Header() {
           {/* Profile Dropdown Menu */}
           {isProfileMenuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-surface-light dark:bg-surface-dark rounded-lg shadow-lg border border-border-light dark:border-border-dark py-1 z-50">
+              {isAdmin && (
+                <button
+                  onClick={() => { setIsProfileMenuOpen(false); router.push('/admin/users'); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Users</span>
+                </button>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

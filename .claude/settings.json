@@ -63,7 +63,17 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/app -type f \\\\\\(-name *setting* -o -name *context* \\\\\\))",
       "Bash(grep -r CurrentUserSettings /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/src --include=*.tsx --include=*.ts)",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f -name *.sql -o -type d -name supabase)",
-      "Bash(grep -r \"CREATE TABLE\\\\|settings\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql)"
+      "Bash(grep -r \"CREATE TABLE\\\\|settings\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -type f -name *.sql -o -name *types* -o -name *profile* -o -name *header* -o -name *navbar* -o -name *menu*)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent -type f -name *.sql)",
+      "Bash(ls -la /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/*.ts)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -name *supabase* -type f)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -name useOnboardingStatus*)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent -name *.py -path */backend/*)",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist -name *auth* -path */app/* -type f)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
+      "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent -name *.md -o -name README*)",
+      "Bash(grep -r \"create table\\\\|CREATE TABLE\\\\|ALTER TABLE\\\\|ROLE\\\\|role\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql --include=*.md)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

@@ -6,17 +6,13 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Mail, Lock, Eye, EyeOff, User, ArrowRight,
-  CheckCircle, BotMessageSquare,
+  Clock, BotMessageSquare,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { signup } from '@/app/auth/actions'
 
-interface AuthFormPanelProps {
-  confirmed: boolean
-}
-
-export default function AuthFormPanel({ confirmed }: AuthFormPanelProps) {
+export default function AuthFormPanel() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
   const [showPassword, setShowPassword] = useState(false)
@@ -48,6 +44,27 @@ export default function AuthFormPanel({ confirmed }: AuthFormPanelProps) {
       return
     }
 
+    // Check if user is approved before allowing access
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_approved')
+        .eq('id', user.id)
+        .single()
+
+      if (profileError) {
+        console.error('Failed to fetch profile for approval check:', profileError.message)
+      }
+
+      if (profile && profile.is_approved === false) {
+        await supabase.auth.signOut()
+        setError('Your account is pending admin approval. Please wait for an administrator to approve your access.')
+        setIsLoading(false)
+        return
+      }
+    }
+
     router.push('/home')
     router.refresh()
   }
@@ -70,18 +87,18 @@ export default function AuthFormPanel({ confirmed }: AuthFormPanelProps) {
     setIsLoading(false)
   }
 
-  // Signup success screen
+  // Signup success screen — pending admin approval
   if (signupSuccess) {
     return (
       <div className="flex-1 flex flex-col">
         <Branding />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Clock className="w-8 h-8 text-amber-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Check Your Email
+              Account Submitted for Approval
             </h1>
             <p className="text-gray-500 text-sm mb-6 max-w-sm">
               {signupSuccess}
@@ -143,17 +160,6 @@ export default function AuthFormPanel({ confirmed }: AuthFormPanelProps) {
             Sign Up
           </button>
         </div>
-
-        {/* Confirmation Success Banner */}
-        {confirmed && activeTab === 'signin' && (
-          <div className="mb-5 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-green-800">Email confirmed successfully!</p>
-              <p className="text-sm text-green-600 mt-1">You can now sign in with your credentials.</p>
-            </div>
-          </div>
-        )}
 
         {/* Error Banner */}
         {error && (

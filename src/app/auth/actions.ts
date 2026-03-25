@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { notifyAdminNewUser } from '@/lib/email'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -38,7 +39,6 @@ export async function signup(formData: FormData) {
         first_name: firstName,
         last_name: lastName,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/confirm`,
     },
   })
 
@@ -46,7 +46,16 @@ export async function signup(formData: FormData) {
     return { error: error.message }
   }
 
-  return { success: true, message: 'Check your email to confirm your account!' }
+  // Sign out immediately — user cannot use the app until admin approves
+  await supabase.auth.signOut()
+
+  // Notify admin about new registration (fire-and-forget)
+  notifyAdminNewUser({ firstName, lastName, email })
+
+  return {
+    success: true,
+    message: 'Your account has been submitted for admin approval. You will be able to sign in once an administrator approves your access.',
+  }
 }
 
 export async function resetPassword(formData: FormData) {
