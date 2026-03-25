@@ -314,19 +314,6 @@ function ConjecturalRequirementsInner() {
     }
   });
   
-  useFrontendTool({
-    name: "consoleLog",
-    description: "Display a message in the console",
-    parameters: z.object({
-      message: z.string().describe("The message to display"),
-    }),
-    followUp: false,
-    handler: async ({ message }: { message: string }) => {
-      console.log(message);
-      return { success: true };
-    },
-  }, []);
-
   const paramSchema = z.object({ requirement_ids: z.string().describe("The JSON string containing requirement ids") });
 
   useFrontendTool({
