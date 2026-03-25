@@ -145,6 +145,22 @@ export default function SettingsPanel() {
           </div>
         </div>
 
+        {/* Skeleton: Setting 7 - Model Judge */}
+        <div className="px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                LLM-as-Judge configuration
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Select the AI model used for automated quality evaluation of conjectural requirements
+              </p>
+            </div>
+            {/* Select Skeleton */}
+            <div className="w-36 h-9 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          </div>
+        </div>
+
       </Card>
     );
   }
@@ -353,7 +369,7 @@ export default function SettingsPanel() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-              Model configuration (LLM-as-Judge)
+              LLM-as-Judge configuration
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Select the AI model used for automated quality evaluation of conjectural requirements
