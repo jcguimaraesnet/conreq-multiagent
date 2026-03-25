@@ -73,11 +73,11 @@ export default function SettingsPanel() {
         </div>
 
         {/* Skeleton: Sub-setting 1 */}
-        <div className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
+        <div className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                A brief description of the business need or desired positive impact
+                Human-in-the-Loop for a brief description of the business need
               </h3>
               <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
                 When enabled, a description must be provided before generating requirements
@@ -89,14 +89,14 @@ export default function SettingsPanel() {
         </div>
 
         {/* Skeleton: Sub-setting 2 */}
-        <div className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
+        <div className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                Approve conjectural requirements
+                Human-in-the-Loop for evaluating conjectural requirements
               </h3>
               <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
-                When enabled, conjectural requirements must be explicitly approved or rejected.
+                When enabled, conjectural requirements must be evaluated by the user before proceeding.
               </p>
             </div>
             {/* Small Toggle Skeleton */}
@@ -123,14 +123,14 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        {/* Skeleton: Setting 4 */}
-        <div className="px-6 py-5 border-b border-border-light dark:border-border-dark">
+        {/* Skeleton: Sub-setting - Batch Quantity */}
+        <div className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                Quantity of requirements for batch generation
+              <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                Quantity of requirements per batch
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
                 Number of requirements to generate in batch mode (between 2 and 5)
               </p>
             </div>
@@ -145,14 +145,36 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        {/* Skeleton: Setting 7 - Model Judge */}
-        <div className="px-6 py-5">
+        {/* Skeleton: Setting 5 - Specification Attempts */}
+        <div className="px-6 py-5 border-b border-border-light dark:border-border-dark">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                LLM-as-Judge configuration
+                Specification attempts
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Number of attempts to generate conjectural requirements (between 1 and 3)
+              </p>
+            </div>
+            {/* Number Stepper Skeleton */}
+            <div className="flex items-center border border-border-light dark:border-gray-600 rounded-lg overflow-hidden">
+              <div className="px-4 py-2 min-w-[50px] h-9 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="flex flex-col border-l border-border-light dark:border-gray-600">
+                <div className="px-2 py-1 h-[18px] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                <div className="px-2 py-1 h-[18px] bg-gray-200 dark:bg-gray-700 animate-pulse border-t border-border-light dark:border-gray-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Skeleton: Sub-setting - Model Judge */}
+        <div className="pl-16 pr-6 py-3 bg-gray-50/50 dark:bg-gray-800/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                LLM-as-Judge configuration
+              </h3>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
                 Select the AI model used for automated quality evaluation of conjectural requirements
               </p>
             </div>
@@ -211,7 +233,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* Sub-setting 1: Require Description */}
-      <div id="setting-require-description" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
+      <div id="setting-require-description" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -230,7 +252,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* Sub-setting 2: Require Evaluation */}
-      <div id="setting-require-evaluation" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
+      <div id="setting-require-evaluation" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -285,7 +307,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* Sub-setting: Batch Quantity */}
-      <div id="setting-batch-quantity" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark border-l border-l-primary/30 bg-gray-50/50 dark:bg-gray-800/30">
+      <div id="setting-batch-quantity" className="pl-16 pr-6 py-3 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-gray-800/30">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -364,14 +386,14 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Setting 7: Model Judge */}
-      <div id="setting-model-judge" className="px-6 py-5">
+      {/* Sub-setting: Model Judge */}
+      <div id="setting-model-judge" className="pl-16 pr-6 py-3 bg-gray-50/50 dark:bg-gray-800/30">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">
               LLM-as-Judge configuration
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
               Select the AI model used for automated quality evaluation of conjectural requirements
             </p>
           </div>
