@@ -34,8 +34,14 @@ export default function InterruptFormPositiveImpactDescription({ inputCount, onS
 
   return (
     <div className="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
-      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-        Provide an initial description of the desired positive impact for the conjectural requirement(s).
+      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Provide an initial description of the business need for the conjectural requirement(s).
+      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        Describe the business need as a positive impact or benefit. For example:
+        <span className="italic"> &quot;Reduce customer onboarding time&quot;</span>,
+        <span className="italic"> &quot;Increase order tracking visibility&quot;</span>, or
+        <span className="italic"> &quot;Improve data accuracy in financial reports&quot;</span>.
       </p>
       <form onSubmit={handleSubmit} className="space-y-3">
         {Array.from({ length: inputCount }).map((_, index) => (
@@ -43,7 +49,7 @@ export default function InterruptFormPositiveImpactDescription({ inputCount, onS
             <input
               type="text"
               name={`brief_description${index}`}
-              placeholder={`Enter a initial description of positive impact`}
+              placeholder={`Enter an initial description of the business need`}
               onChange={() => {
                 if (emptyFields.has(index)) {
                   setEmptyFields(prev => {
