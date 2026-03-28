@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -99,34 +99,37 @@ function SingleCard({
     <>
       <div
         onClick={openModal}
-        className="group rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/20 p-3 mt-6 mb-2 relative w-62 shrink-0 h-65 overflow-hidden transition-colors cursor-pointer hover:border-orange-300 dark:hover:border-orange-600">
-        <div className="absolute top-0.5 right-2 p-0.5 text-orange-400">
+        className="group rounded-[10px] border border-gray-700 bg-[#111827] p-3 mt-6 mb-2 relative w-62 shrink-0 h-65 overflow-hidden transition-colors cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:border-gray-500">
+        <div className="absolute top-2 right-2 p-0.5 text-gray-500">
           <Maximize2 className="w-3.5 h-3.5" />
         </div>
         {/* Hover overlay */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-          <span className="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg shadow-lg">
-            Evaluate
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-[10px]">
+          <span className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-lg">
+            Click to evaluate
           </span>
         </div>
         {/* Status badge */}
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-2 left-2 z-10 flex items-center gap-1">
           {isRequirementEvaluated(evaluations[req.requirement_number]) ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-900/40 text-green-300">
               Evaluated
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-yellow-900/40 text-yellow-300">
               Pending
             </span>
           )}
+          <span className="inline-flex items-center rounded-full bg-blue-900 px-2 py-0.5 text-[10px] font-semibold text-blue-200">
+            #{req.attempt}
+          </span>
         </div>
         <div className="flex flex-col items-center h-full">
-          <div className="font-bold text-orange-600 dark:text-orange-400 text-lg mt-7 mb-4 text-center">
+          <div className="font-semibold text-gray-200 text-lg mt-7 mb-4 text-center">
             Conjectural Req #{req.requirement_number}
           </div>
-          <p className="text-lg text-gray-700 dark:text-gray-200 line-clamp-11 text-center">
-            <strong>It is expected that the software system has </strong>
+          <p className="text-sm text-gray-400 line-clamp-11 text-center">
+            <strong className="text-gray-300">It is expected that the software system has </strong>
             {req.desired_behavior}
           </p>
         </div>
@@ -339,9 +342,9 @@ function SingleCard({
   );
 }
 
-const INTRO_TEXT = "Conjectural requirements have been generated. Click on each card to evaluate the requirement, then submit your evaluations.";
+const getIntroText = (attempt: number) =>
+  `📋 A version (attempt #${attempt}) of the conjectural requirements has been generated. Click on card to evaluate the requirement, then submit your evaluations.`;
 const TYPEWRITER_SPEED_MS = 80;
-const INTRO_WORDS = INTRO_TEXT.split(" ");
 const CARD_REVEAL_DELAY_MS = 300;
 
 interface InterruptFormEvaluationProps {
@@ -353,15 +356,21 @@ export default function InterruptFormEvaluation({ requirements, onResolve }: Int
   const [evaluations, setEvaluations] = useState<Evaluations>({});
   const [displayedWords, setDisplayedWords] = useState(0);
   const [visibleCards, setVisibleCards] = useState(0);
-  const textDone = displayedWords >= INTRO_WORDS.length;
+
+  const introWords = useMemo(() => {
+    const attempt = requirements[0]?.attempt ?? 1;
+    return getIntroText(attempt).split(" ");
+  }, [requirements]);
+
+  const textDone = displayedWords >= introWords.length;
   const allCardsVisible = visibleCards >= requirements.length;
 
   // Typewriter effect for intro text (word by word)
   useEffect(() => {
-    if (displayedWords >= INTRO_WORDS.length) return;
+    if (displayedWords >= introWords.length) return;
     const timer = setTimeout(() => setDisplayedWords(w => w + 1), TYPEWRITER_SPEED_MS);
     return () => clearTimeout(timer);
-  }, [displayedWords]);
+  }, [displayedWords, introWords.length]);
 
   // Reveal cards one by one after text finishes
   useEffect(() => {
@@ -410,7 +419,7 @@ export default function InterruptFormEvaluation({ requirements, onResolve }: Int
   return (
     <div className="mt-4 mb-2">
       <p className="text-base text-gray-800 dark:text-gray-200 mb-3">
-        {INTRO_WORDS.slice(0, displayedWords).join(" ")}
+        {introWords.slice(0, displayedWords).join(" ")}
         {!textDone && <span className="inline-block w-0.5 h-4 bg-gray-800 dark:bg-gray-200 align-text-bottom animate-pulse" />}
       </p>
       {textDone && (
@@ -438,7 +447,7 @@ export default function InterruptFormEvaluation({ requirements, onResolve }: Int
             disabled={!allEvaluated}
             className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
-            Submit Evaluations
+            Submit evaluations
           </button>
         </div>
       )}

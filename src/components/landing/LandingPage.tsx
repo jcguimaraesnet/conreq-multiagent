@@ -22,6 +22,7 @@ import {
   Sparkles,
   Network,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -148,17 +149,22 @@ export default function LandingPage() {
             managing ambiguity and assumptions throughout the process.
           </p>
 
-          {/* Hero Image Placeholder */}
-          <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden shadow-sm">
-            <div className="aspect-video flex items-center justify-center">
-              <div className="text-center">
-                <BotMessageSquare className="w-16 h-16 text-primary/40 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">
-                  Application Overview
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Hero Image */}
+          <a
+            href="/diagram-conreq-multiagent.svg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-xl border border-gray-200 bg-gray-50 overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+          >
+            <Image
+              src="/diagram-conreq-multiagent.svg"
+              alt="Application Overview - Conjectural Requirements Multi-Agent Diagram"
+              width={1280}
+              height={720}
+              className="w-full h-auto"
+              priority
+            />
+          </a>
         </section>
 
         {/* Core Components and Key Features */}

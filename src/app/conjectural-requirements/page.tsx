@@ -47,6 +47,7 @@ interface AgentState {
   step3_specification: boolean;
   step4_validation: boolean;
   pending_progress: boolean;
+  progress_message: string;
 }
 
 

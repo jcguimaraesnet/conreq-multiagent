@@ -75,11 +75,25 @@
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent -name *.md -o -name README*)",
       "Bash(grep -r \"create table\\\\|CREATE TABLE\\\\|ALTER TABLE\\\\|ROLE\\\\|role\" /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql --include=*.md)",
       "Bash(find /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/backend -name *conjectural* -type f)",
-      "Bash(grep -r 'CREATE TABLE' /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql)"
+      "Bash(grep -r 'CREATE TABLE' /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist --include=*.sql)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(ls -la /c/repos/ufrj/requirement-conjectural-multiagent/app-multi-agent-conjectural-assist/*.config.*)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",
       "c:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills"
     ]
+  },
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--autoConnect",
+        "--channel=beta"
+      ]
+    }
   }
 }

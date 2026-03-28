@@ -9,9 +9,8 @@ import { type ReactNode } from "react";
 const categories = [
   "This Research",
   "Projects",
-  "Requirements",
-  "AI Agents",
-  "Account & Settings",
+  "Tools",
+  "New Account",
 ];
 
 const faqData = [
@@ -63,28 +62,28 @@ const faqData = [
     ) as ReactNode,
   },
   {
-    category: "Requirements",
-    question: "What are the different requirement statuses?",
+    category: "Tools",
+    question: "How can I display the requirement evaluations chart?",
     answer:
-      "Requirements follow a Kanban workflow with statuses like 'To Do', 'In Progress', and 'Done'. You can drag and drop requirements between columns on the board to update their status as you refine them.",
+      "This tool shows a radar chart in the chatbot area with requirement evaluations from an LLM-as-Judge and/or human evaluators. Try a prompt like: \"Display the evaluations chart for requirement REQ-C999.\"",
   },
   {
-    category: "AI Agents",
-    question: "How do the AI agents work?",
+    category: "Tools",
+    question: "How can I change a requirement status on the Kanban board?",
     answer:
-      "The multi-agent system consists of specialized AI agents that collaborate to help you with requirements engineering. You can interact with them through the chat interface. They can analyze your requirements, suggest improvements, identify gaps, and generate conjectural requirements to address uncertainty.",
+      "This tool moves a requirement from one Kanban column to another and updates its status accordingly. Try a prompt like: \"Change the status of requirement REQ-C999 to done.\"",
   },
   {
-    category: "AI Agents",
-    question: "Can I customize the AI agent behavior?",
+    category: "Tools",
+    question: "How can I open the requirement details popup?",
     answer:
-      "Yes! Go to Settings to configure options like batch mode, the number of requirements generated per batch, and whether brief descriptions are required. These settings allow you to tailor the AI agent behavior to your workflow preferences.",
+      "This tool opens the requirement details popup so you can inspect a specific requirement. Try a prompt like: \"Show the details for requirement REQ-C999.\"",
   },
   {
-    category: "Account & Settings",
-    question: "How do I change my account settings?",
+    category: "New Account",
+    question: "Can other people have accounts in this application?",
     answer:
-      "Click on your profile icon in the top-right corner of the header, or navigate to Settings from the sidebar. From there, you can update your profile information, adjust AI agent preferences, and configure application behavior.",
+      "It depends. New users must be approved by the project administrator and researcher because there are costs associated with using LLM models in the application. Anyone can sign up normally, but after registering they need to contact the project administrator and researcher, provide additional context, and request approval.",
   },
 ];
 
@@ -120,7 +119,7 @@ export default function HelpPage() {
                 setActiveCategory(null);
                 setOpenIndex(null);
               }}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors text-left ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors text-left cursor-pointer ${
                 activeCategory === null
                   ? "bg-primary text-black"
                   : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -135,7 +134,7 @@ export default function HelpPage() {
                   setActiveCategory(category);
                   setOpenIndex(null);
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors text-left ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors text-left cursor-pointer ${
                   activeCategory === category
                     ? "bg-primary text-black"
                     : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -153,7 +152,7 @@ export default function HelpPage() {
                 <div key={index}>
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full flex items-center justify-between py-5 text-left"
+                    className="w-full flex items-center justify-between py-5 text-left cursor-pointer"
                   >
                     <span className="text-base font-medium text-gray-900 dark:text-white pr-4">
                       {faq.question}

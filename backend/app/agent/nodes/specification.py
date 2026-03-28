@@ -61,26 +61,16 @@ def _strip_markdown_fences(raw: str) -> str:
     return raw
 
 
-async def specification_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
-    """
-    Generate conjectural requirement specification.
-
-    1. Retrieves the knowledge graph from the Elicitation/Analysis nodes
-    2. Extracts project summary, domain, stakeholder, and domain entities
-    3. Calls the LLM to generate conjectural requirements based on
-       project summary, business domain, and primary stakeholder
-    4. Stores the results in the state
-    """
-    config = copilotkit_customize_config(config, emit_messages=False)
-    print("Specification node started.")
-
-    # Extract quantity_req_batch from context (same logic as elicitation node)
+async def _task_generate(
+    state: WorkflowState,
+    config: RunnableConfig,
+    data_context: DataContext,
+    model_provider: str,
+) -> dict:
+    """Task: Generate or refine conjectural requirement specifications."""
     context = extract_copilotkit_context(state)
     quantity_req_batch = context['quantity_req_batch']
-    model_provider = context['model']
 
-    # --- Step 1: Retrieve elicitation context from state ---
-    data_context = DataContext.model_validate(state.get("data_context", {}))
     stakeholder = data_context.stakeholder
     domain = data_context.domain
     project_summary = data_context.project_summary
@@ -92,7 +82,6 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
     for cd in data_context.conjectural_data:
         print(f"  [Impact] {cd.raw_positive_impact[:60]} → [Uncertainty] {cd.raw_uncertainty[:60]} → [Hypothesis] {cd.raw_supposition_solution[:80]}")
 
-    # --- Step 3: Call LLM to generate conjectural requirements (one per ConjecturalData) ---
     model = get_model(provider=model_provider, temperature=1)
 
     print(f"[Specification] Generating {quantity_req_batch} conjectural requirement(s)...")
@@ -105,7 +94,6 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
         print(f"[Specification] Generating requirement #{req_num}...")
 
         if spec_attempt == 0:
-            # First attempt: generate from scratch using elicitation/analysis data
             prompt = get_prompt(SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT, data_context.language).format(
                 project_summary=project_summary,
                 domain=domain,
@@ -117,7 +105,6 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
                 language=data_context.language,
             )
         else:
-            # Subsequent attempts: refine based on last requirement + its LLM evaluation
             last_cr = cd.conjectural_requirements[-1]
             prompt = get_prompt(SPECIFICATION_CONJECTURAL_REFINEMENT_PROMPT, data_context.language).format(
                 project_summary=project_summary,
@@ -156,12 +143,42 @@ async def specification_node(state: WorkflowState, config: Optional[RunnableConf
 
     print(f"[Specification] Finished generating conjectural requirements.")
 
-    messages = state.get("messages", [])
+    return {
+        "data_context": data_context.model_dump(),
+        "coordinator_phase": "validation",
+    }
 
-    return Command(
-        update={
-            "messages": messages,
-            "data_context": data_context.model_dump(),
-            "coordinator_phase": "validation",
-        }
-    )
+
+# Task registry: maps task names to handler functions
+SPECIFICATION_TASKS = {
+    "generate": _task_generate,
+}
+
+
+async def specification_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
+    """
+    Specification node with task dispatch.
+
+    Default task (first entry): generate conjectural requirement specifications.
+    """
+    print("Specification node started.")
+    config = copilotkit_customize_config(config, emit_messages=False)
+
+    context = extract_copilotkit_context(state)
+    model_provider = context['model']
+    data_context = DataContext.model_validate(state.get("data_context", {}))
+
+    raw_task = state.get("node_task") or ""
+    task_name = raw_task.split(":", 1)[1] if raw_task.startswith("specification:") else None
+
+    if task_name and task_name in SPECIFICATION_TASKS:
+        handler = SPECIFICATION_TASKS[task_name]
+        print(f"[Specification] Dispatching task: {task_name}")
+    else:
+        handler = SPECIFICATION_TASKS["generate"]
+        print("[Specification] Running default task: generate")
+
+    update = await handler(state, config, data_context, model_provider)
+    if "messages" not in update:
+        update["messages"] = state.get("messages", [])
+    return Command(update=update)

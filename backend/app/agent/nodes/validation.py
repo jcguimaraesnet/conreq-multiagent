@@ -29,30 +29,20 @@ def show_requirements(requirement_ids: str):
     return {"success": True}
 
 
-async def validation_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
-    """
-    Validate the conjectural requirement specification.
-
-    1. Retrieves the conjectural requirements from the knowledge graph
-    2. Calls the LLM to evaluate each requirement on a scale of 1 to 10
-    3. Adds the evaluation response to the messages list
-    """
-    config = copilotkit_customize_config(config, emit_messages=False)
-
-    if config is None:
-        config = RunnableConfig(recursion_limit=25)
-
-    print("Validation node started.")
+async def _task_evaluate(
+    state: WorkflowState,
+    config: RunnableConfig,
+    data_context: DataContext,
+    model_provider: str,
+) -> dict:
+    """Task: Evaluate conjectural requirements (human + LLM-as-Judge)."""
     messages = state.get("messages", [])
-
-    data_context = DataContext.model_validate(state.get("data_context", {}))
 
     context = extract_copilotkit_context(state)
     require_evaluation = context['require_evaluation']
 
     # --- Step 1: Human evaluation (interrupt) ---
     if require_evaluation:
-        # Build requirements list for frontend interrupt
         requirements_list = []
         for i, cd in enumerate(data_context.conjectural_data):
             if not cd.conjectural_requirements:
@@ -75,11 +65,10 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
             "requirements": requirements_list,
         })
 
-        interrupt_message = "✅ **User evaluations** received successfully. Please wait while it is processed."
+        interrupt_message = f"✅ User evaluations for **attempt {state['spec_attempt']}** received successfully. Please wait while it is processed."
         messages = messages + [AIMessage(content=interrupt_message)]
         await copilotkit_emit_message(config, interrupt_message)
 
-        # Parse and store human evaluation data
         try:
             eval_data = json.loads(human_evaluation_response) if isinstance(human_evaluation_response, str) else human_evaluation_response
             evaluations = eval_data.get("evaluations", {})
@@ -112,7 +101,6 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         print("[Validation] Resuming after interrupt — human evaluation already completed.")
 
     # --- Step 2: LLM-as-Judge evaluation ---
-    context = extract_copilotkit_context(state)
     model_judge_provider = context.get("model_judge", "gemini")
     print(f"[Validation] Starting LLM-as-Judge evaluation (provider: {model_judge_provider}) for {len(data_context.conjectural_data)} requirements...")
     judge_model_name = DEFAULT_GEMINI_MODEL if model_judge_provider == "gemini" else DEFAULT_AZURE_OPENAI_JUDGE_MODEL
@@ -160,27 +148,22 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
         state["data_context"] = data_context.model_dump()
         await copilotkit_emit_state(config, state)
 
-
     spec_attempts = context.get("spec_attempts", 3)
     if state.get("spec_attempt", 0) >= spec_attempts:
         data_context.rank_conjectural_requirements()
 
-        # Persist to database and get generated UUIDs
         saved_ids = persist_conjectural_data(context["current_project_id"], data_context, context.get("current_user_id"))
 
-        # message 1
         msg_created_text = "📑 The following **conjectural requirements** were successfully created: " + ", ".join(saved_ids) + "."
         response = AIMessage(content=msg_created_text)
         messages = messages + [response]
         await copilotkit_emit_message(config, msg_created_text)
 
-        # message 3
         msg_graphic_text = "📊 Below is an example of a **chart** for the first requirement generated. For more details on other requirements, go to the reports page."
         response = AIMessage(content=msg_graphic_text)
         messages = messages + [response]
         await copilotkit_emit_message(config, msg_graphic_text)
 
-        # --- Call show_requirements tool (must be LAST in messages) ---
         best_requirement_ids = []
         for entry in data_context.conjectural_data:
             for cr in entry.conjectural_requirements:
@@ -199,18 +182,49 @@ async def validation_node(state: WorkflowState, config: Optional[RunnableConfig]
 
         messages = messages + [tool_response]
 
-        return Command(
-            update={
-                "messages": messages,
-                "data_context": data_context.model_dump(),
-                "coordinator_phase": "done",
-            }
-        )
+        return {
+            "messages": messages,
+            "data_context": data_context.model_dump(),
+            "coordinator_phase": "done",
+        }
     else:
-        return Command(
-            update={
-                "messages": messages,
-                "data_context": data_context.model_dump(),
-                "coordinator_phase": "specification",
-            }
-        )
+        return {
+            "messages": messages,
+            "data_context": data_context.model_dump(),
+            "coordinator_phase": "specification",
+        }
+
+
+# Task registry: maps task names to handler functions
+VALIDATION_TASKS = {
+    "evaluate": _task_evaluate,
+}
+
+
+async def validation_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
+    """
+    Validation node with task dispatch.
+
+    Default task (first entry): evaluate conjectural requirements.
+    """
+    print("Validation node started.")
+    config = copilotkit_customize_config(config, emit_messages=False)
+
+    context = extract_copilotkit_context(state)
+    model_provider = context['model']
+    data_context = DataContext.model_validate(state.get("data_context", {}))
+
+    raw_task = state.get("node_task") or ""
+    task_name = raw_task.split(":", 1)[1] if raw_task.startswith("validation:") else None
+
+    if task_name and task_name in VALIDATION_TASKS:
+        handler = VALIDATION_TASKS[task_name]
+        print(f"[Validation] Dispatching task: {task_name}")
+    else:
+        handler = VALIDATION_TASKS["evaluate"]
+        print("[Validation] Running default task: evaluate")
+
+    update = await handler(state, config, data_context, model_provider)
+    if "messages" not in update:
+        update["messages"] = state.get("messages", [])
+    return Command(update=update)

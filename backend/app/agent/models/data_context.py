@@ -102,6 +102,10 @@ class ConjecturalData(BaseModel):
         default=0,
         description="Similarity percentage (0-100) between user brief description and refined impact (0 when auto-generated)",
     )
+    raw_uncertainty_questions_answers: List[QuestionAnswer] = Field(
+        default_factory=list,
+        description="List of What-If question-answer pairs for uncertainty identification",
+    )
     raw_uncertainty: str = Field(
         default="",
         description="Uncertainty detected for this positive impact",
