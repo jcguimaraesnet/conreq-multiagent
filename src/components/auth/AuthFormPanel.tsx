@@ -12,6 +12,29 @@ import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { signup } from '@/app/auth/actions'
 
+function useServicesReady() {
+  const [backendUp, setBackendUp] = useState(false)
+  const [agentUp, setAgentUp] = useState(false)
+
+  useEffect(() => {
+    let stopped = false
+
+    function poll(url: string, onUp: (v: boolean) => void) {
+      if (stopped) return
+      fetch(url, { cache: 'no-store' })
+        .then((r) => { if (r.ok) onUp(true); else if (!stopped) setTimeout(() => poll(url, onUp), 3000) })
+        .catch(() => { if (!stopped) setTimeout(() => poll(url, onUp), 3000) })
+    }
+
+    poll('/api/health/backend', setBackendUp)
+    poll('/api/health/agent', setAgentUp)
+
+    return () => { stopped = true }
+  }, [])
+
+  return { ready: backendUp && agentUp, backendUp, agentUp }
+}
+
 export default function AuthFormPanel() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
@@ -19,6 +42,7 @@ export default function AuthFormPanel() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [signupSuccess, setSignupSuccess] = useState<string | null>(null)
+  const { ready: servicesReady } = useServicesReady()
 
   // Clear error when switching tabs
   useEffect(() => {
@@ -245,7 +269,7 @@ export default function AuthFormPanel() {
               </div>
 
               {/* Submit */}
-              <Button type="submit" fullWidth disabled={isLoading}>
+              <Button type="submit" fullWidth disabled={isLoading || !servicesReady}>
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -261,6 +285,11 @@ export default function AuthFormPanel() {
                   </span>
                 )}
               </Button>
+              {!servicesReady && (
+                <p className="text-center text-xs text-gray-400 mt-2 animate-pulse">
+                  Backend and agent services are starting up...
+                </p>
+              )}
             </motion.form>
           ) : (
             <motion.form
@@ -363,7 +392,7 @@ export default function AuthFormPanel() {
               </div>
 
               {/* Submit */}
-              <Button type="submit" fullWidth disabled={isLoading}>
+              <Button type="submit" fullWidth disabled={isLoading || !servicesReady}>
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -379,6 +408,11 @@ export default function AuthFormPanel() {
                   </span>
                 )}
               </Button>
+              {!servicesReady && (
+                <p className="text-center text-xs text-gray-400 mt-2 animate-pulse">
+                  Backend and agent services are starting up...
+                </p>
+              )}
             </motion.form>
           )}
         </AnimatePresence>
