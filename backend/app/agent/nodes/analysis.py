@@ -21,12 +21,11 @@ from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext, QuestionAnswer
 from app.agent.utils.context_utils import extract_copilotkit_context
 from app.agent.prompts.factory import get_prompt
-from app.agent.prompts.analysis_contextual_questions_prompt import ANALYSIS_CONTEXTUAL_QUESTIONS_PROMPT
-from app.agent.prompts.analysis_business_need_uncertainty_detection_prompt import ANALYSIS_IMPACT_UNCERTAINTY_DETECTION_PROMPT
-from app.agent.prompts.analysis_conjectural_hypothesis_prompt import ANALYSIS_CONJECTURAL_HYPOTHESIS_PROMPT
-from app.agent.prompts.analysis_synthesize_desired_behavior_prompt import ANALYSIS_SYNTHESIZE_DESIRED_BEHAVIOR_PROMPT
-from app.agent.prompts.analysis_whatif_questions_prompt import ANALYSIS_WHATIF_QUESTIONS_PROMPT
-from app.agent.prompts.analysis_identify_uncertainty_prompt import ANALYSIS_IDENTIFY_UNCERTAINTY_PROMPT
+from app.agent.prompts.c01_analysis_contextual_questions_prompt import ANALYSIS_CONTEXTUAL_QUESTIONS_PROMPT
+from app.agent.prompts.c05_analysis_conjectural_hypothesis_prompt import ANALYSIS_CONJECTURAL_HYPOTHESIS_PROMPT
+from app.agent.prompts.c02_analysis_synthesize_desired_behavior_prompt import ANALYSIS_SYNTHESIZE_DESIRED_BEHAVIOR_PROMPT
+from app.agent.prompts.c03_analysis_whatif_questions_prompt import ANALYSIS_WHATIF_QUESTIONS_PROMPT
+from app.agent.prompts.c04_analysis_identify_uncertainty_prompt import ANALYSIS_IDENTIFY_UNCERTAINTY_PROMPT
 from app.agent.models.knowledge_graph import (
     BusinessUncertainty,
     KnowledgeGraph,
@@ -79,39 +78,6 @@ async def _generate_contextual_questions(
     except (json.JSONDecodeError, Exception) as e:
         print(f"[Analysis] Error generating contextual questions: {e}")
         return [["Unable to generate question."] * 3] * len(impacts)
-
-
-async def _detect_impact_uncertainties(
-    data_context: DataContext,
-    model_provider: str,
-) -> List[str]:
-    """Call the LLM to identify one uncertainty per business need. Returns list of uncertainty strings (index-aligned)."""
-    impacts = [cd.raw_business_need for cd in data_context.conjectural_data]
-    if not impacts:
-        return []
-
-    impacts_text = "\n".join(f"- {pi}" for pi in impacts)
-
-    prompt = get_prompt(ANALYSIS_IMPACT_UNCERTAINTY_DETECTION_PROMPT, data_context.language).format(
-        business_needs=impacts_text,
-        project_summary=data_context.project_summary,
-        domain=data_context.domain,
-        stakeholder=data_context.stakeholder,
-        business_objective=data_context.business_objective,
-        quantity=len(impacts),
-        language=data_context.language,
-    )
-
-    model = get_model(provider=model_provider, temperature=0)
-
-    try:
-        response = await model.ainvoke([HumanMessage(content=prompt)])
-        raw_content = _strip_markdown_fences(extract_text(response.content).strip())
-        return json.loads(raw_content)
-
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"[Analysis] Error detecting impact uncertainties: {e}")
-        return ["Unable to determine uncertainty."] * len(impacts)
 
 
 async def _generate_conjectural_hypotheses(
@@ -238,43 +204,6 @@ async def _identify_uncertainty_from_qa(
     except Exception as e:
         print(f"[Analysis] Error identifying uncertainty: {e}")
         return "Unable to determine uncertainty."
-
-
-async def _detect_ambiguous_terms(
-    entity_names: List[str],
-    domain: str,
-    stakeholder: str,
-    business_objective: str,
-    model_provider: str,
-) -> List[str]:
-    """Call the LLM to identify which entities are ambiguous."""
-    if not entity_names:
-        return []
-
-    entities_text = "\n".join(f"- {entity}" for entity in entity_names)
-
-    prompt = AMBIGUITY_DETECTION_PROMPT.format(
-        entities=entities_text,
-        domain=domain,
-        stakeholder=stakeholder,
-        business_objective=business_objective,
-    )
-
-    model = get_model(provider=model_provider, temperature=0)
-
-    try:
-        response = await model.ainvoke([HumanMessage(content=prompt)])
-        raw_content = _strip_markdown_fences(extract_text(response.content).strip())
-        ambiguous_terms: List[str] = json.loads(raw_content)
-
-        # Validate: only keep terms that actually exist in our entity list
-        entity_set = {e.lower() for e in entity_names}
-        validated = [t for t in ambiguous_terms if t.lower() in entity_set]
-        return validated
-
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"[Analysis] Error detecting ambiguous terms: {e}")
-        return []
 
 
 async def _task_generate_questions(

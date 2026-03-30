@@ -19,7 +19,7 @@ from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext, Evaluation
 from app.agent.utils.context_utils import extract_copilotkit_context
 from app.agent.prompts.factory import get_prompt
-from app.agent.prompts.validation_system_prompt import VALIDATION_SYSTEM_PROMPT
+from app.agent.prompts.e01_validation_system_prompt import VALIDATION_SYSTEM_PROMPT
 from app.services.conjectural_persistence import persist_conjectural_data
 
 

@@ -20,8 +20,8 @@ from app.agent.state import WorkflowState
 from app.agent.utils.context_utils import extract_copilotkit_context
 from app.agent.prompts.factory import get_prompt
 from app.agent.models.data_context import DataContext, ConjecturalRequirement
-from app.agent.prompts.specification_conjectural_specification_prompt import SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT
-from app.agent.prompts.specification_conjectural_refinement_prompt import SPECIFICATION_CONJECTURAL_REFINEMENT_PROMPT
+from app.agent.prompts.d01_specification_conjectural_specification_prompt import SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT
+from app.agent.prompts.d02_specification_conjectural_refinement_prompt import SPECIFICATION_CONJECTURAL_REFINEMENT_PROMPT
 from app.agent.models.knowledge_graph import (
     KnowledgeGraph,
     kg_from_state,

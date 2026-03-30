@@ -26,7 +26,7 @@ from langgraph.types import Command
 
 from app.agent.state import WorkflowState, IntentClassification
 from app.agent.utils.context_utils import extract_copilotkit_context
-from app.agent.prompts.orchestrator_intent_classification_prompt import ORCHESTRATOR_INTENT_CLASSIFICATION_PROMPT
+from app.agent.prompts.a01_orchestrator_intent_classification_prompt import ORCHESTRATOR_INTENT_CLASSIFICATION_PROMPT
 
 
 async def orchestrator_node(state: WorkflowState, config: Optional[RunnableConfig] = None):

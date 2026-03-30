@@ -33,10 +33,10 @@ from app.agent.models.knowledge_graph import (
 )
 from app.agent.models.data_context import DataContext, ConjecturalData, QuestionAnswer
 from app.agent.prompts.factory import get_prompt
-from app.agent.prompts.elicitation_refine_business_need_prompt import ELICITATION_REFINE_BUSINESS_NEED_PROMPT
-from app.agent.prompts.elicitation_generate_business_need_prompt import ELICITATION_GENERATE_BUSINESS_NEED_PROMPT
-from app.agent.prompts.elicitation_answer_contextual_questions_prompt import ELICITATION_ANSWER_CONTEXTUAL_QUESTIONS_PROMPT
-from app.agent.prompts.elicitation_answer_whatif_questions_prompt import ELICITATION_ANSWER_WHATIF_QUESTIONS_PROMPT
+from app.agent.prompts.b01_elicitation_refine_business_need_prompt import ELICITATION_REFINE_BUSINESS_NEED_PROMPT
+from app.agent.prompts.b02_elicitation_generate_business_need_prompt import ELICITATION_GENERATE_BUSINESS_NEED_PROMPT
+from app.agent.prompts.b03_elicitation_answer_contextual_questions_prompt import ELICITATION_ANSWER_CONTEXTUAL_QUESTIONS_PROMPT
+from app.agent.prompts.b04_elicitation_answer_whatif_questions_prompt import ELICITATION_ANSWER_WHATIF_QUESTIONS_PROMPT
 from app.services.embedding_service import (
     generate_embeddings,
     fetch_existing_embeddings,

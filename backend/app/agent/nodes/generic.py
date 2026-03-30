@@ -17,8 +17,8 @@ from copilotkit.langgraph import copilotkit_customize_config, copilotkit_emit_me
 from app.agent.state import WorkflowState
 from app.agent.utils.context_utils import extract_copilotkit_context
 from app.agent.utils.project_data import fetch_project_summary
-from app.agent.prompts.generic_tool_followup_prompt import GENERIC_TOOL_FOLLOWUP_PROMPT
-from app.agent.prompts.generic_response_prompt import GENERIC_RESPONSE_PROMPT
+from app.agent.prompts.f01_generic_tool_followup_prompt import GENERIC_TOOL_FOLLOWUP_PROMPT
+from app.agent.prompts.f02_generic_response_prompt import GENERIC_RESPONSE_PROMPT
 
 async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = None):
     """
