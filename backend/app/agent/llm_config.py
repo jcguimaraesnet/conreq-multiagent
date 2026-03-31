@@ -27,7 +27,7 @@ DEFAULT_GEMINI_MODEL = "gemini-3-pro-preview"
 DEFAULT_GEMINI_FLASH_MODEL = "gemini-2.5-flash"
 DEFAULT_AZURE_OPENAI_MODEL = "gpt-4o"
 DEFAULT_AZURE_OPENAI_JUDGE_MODEL = "gpt-5.4-pro-deployment"
-DEFAULT_AZURE_AI_MODEL = "Llama-3.3-70B-Instruct"
+DEFAULT_AZURE_AI_MODEL = "Llama-3.3-70B-Instruct-deployment"
 
 # ---------------------------------------------------------------------------
 # Per-request provider (set once in orchestrator, read by all nodes)
@@ -91,7 +91,7 @@ def get_model(
             model=model or DEFAULT_AZURE_AI_MODEL,
             base_url=os.environ["AZURE_AI_ENDPOINT"],
             api_key=SecretStr(azure_ai_key) if azure_ai_key else None,
-            temperature=temperature,
+            temperature=temperature
         )
 
     if provider == "gemini":

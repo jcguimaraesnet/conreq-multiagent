@@ -170,8 +170,12 @@ async def _task_evaluate(
                 if cr.ranking == 1 and cr.db_id:
                     best_requirement_ids.append(cr.db_id)
 
-        model_with_tools = get_model(provider=context['model'], temperature=0.1)
-        model_with_tools = model_with_tools.bind_tools([show_requirements, *state.get("tools", [])])
+        # existe limitação do modelo llama-70B: suporta mais de uma tool call no context
+        model_with_tools = get_model(
+            provider="gpt_azure" if context["model"] == "llama_azure" else context["model"],
+            temperature=0.1,
+        )
+        model_with_tools = model_with_tools.bind_tools([*state.get("tools", [])])
 
         tool_response = await model_with_tools.ainvoke(
             [

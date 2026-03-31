@@ -124,6 +124,7 @@ async def _task_generate(
 
         try:
             response = await model.ainvoke([HumanMessage(content=prompt)])
+            print(f"[Specification] Raw LLM response for requirement #{req_num}:\n\n{response.content}\n\n")
             raw_content = _strip_markdown_fences(extract_text(response.content).strip())
             raw_dict: Dict[str, Any] = json.loads(raw_content)
             cr = ConjecturalRequirement.model_validate(raw_dict)

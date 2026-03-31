@@ -34,6 +34,7 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
     context = extract_copilotkit_context(state)
     current_project_id = context['current_project_id']
     model_provider = context['model']
+    provider_param = "gpt_azure" if model_provider == "llama_azure" else model_provider
 
     # Fetch vision document text and requirement counts from Supabase
     project_summary = await fetch_project_summary(current_project_id)
@@ -44,8 +45,9 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
     print(f"Last message from chat: {last_message}")
 
     # Initialize the model with frontend tools
-    model = get_model(provider=model_provider, temperature=1.0)
-    frontend_tools = state.get("tools", [])
+    model = get_model(provider=provider_param, temperature=1.0)
+    all_tools = state.get("tools", [])
+    frontend_tools = all_tools
     if frontend_tools:
         model = model.bind_tools(frontend_tools)
 
@@ -74,7 +76,7 @@ async def generic_node(state: WorkflowState, config: Optional[RunnableConfig] = 
             tool_name = tool_call.get("name", "")
             tool_args = tool_call.get("args", {})
 
-            followup_model = get_model(provider=model_provider, temperature=1.0)
+            followup_model = get_model(provider=provider_param, temperature=1.0)
             followup_prompt = GENERIC_TOOL_FOLLOWUP_PROMPT.format(
                 tool_name=tool_name,
                 tool_args=tool_args,
