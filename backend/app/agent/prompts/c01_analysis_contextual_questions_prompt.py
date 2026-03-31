@@ -1,24 +1,35 @@
 ANALYSIS_CONTEXTUAL_QUESTIONS_PROMPT = {
     "pt-br": """Você é um especialista em engenharia de requisitos de software, com foco em elicitação e refinamento de requisitos.
 
-Para cada declaração de necessidade de negócio listada abaixo, gere exatamente 3 perguntas contextuais que ajudem a esclarecer, detalhar e refinar o comportamento desejado do sistema relacionado a esse impacto. As perguntas devem explorar aspectos como: escopo funcional, restrições, regras de negócio, critérios de aceitação e expectativas do stakeholder.
+# Instrução
+Com base nas informações de contexto abaixo, elabore 3 perguntas contextuais relacionadas a necessidade de negócio.
 
-Contexto:
-- Visão do projeto: {project_summary}
-- Domínio: {domain}
-- Objetivo de negócio: {business_objective}
+# Contexto
 
-Necessidades de negócio:
-{business_needs}
+## Visão do projeto
+{project_summary}
 
-Você DEVE retornar APENAS um array JSON válido (sem markdown, sem explicação). O array deve conter {quantity} sub-arrays, um por necessidade de negócio, na mesma ordem. Cada sub-array deve conter exatamente 3 strings, cada uma sendo uma pergunta contextual concisa (até 250 caracteres).
+## Domínio
+{domain}
 
-Exemplo de formato de resposta para 2 impactos:
-[["Pergunta 1?", "Pergunta 2?", "Pergunta 3?"], ["Pergunta 1?", "Pergunta 2?", "Pergunta 3?"]]
+## Objetivo de negócio
+{business_objective}
 
-IMPORTANTE:
-- Sua resposta DEVE estar no idioma: {language}.
-- NÃO use aspas duplas dentro do texto das perguntas. Se precisar citar algo, use aspas simples.
-- Retorne SOMENTE o array JSON, sem nenhum texto antes ou depois.
+# Necessidade de negócio
+{business_need}
+
+## Diretrizes para elaborar as perguntas contextuais
+- As perguntas devem ser claras, objetivas e específicas dentro do contexto de cada pergunta.
+- As perguntas devem ajudar a esclarecer, detalhar e refinar comportamentos e capacidades funcionais desejadas no sistema.
+- As perguntas devem estar alinhadas com a necessidade de negócio.
+- As perguntas devem explorar aspectos como: escopo funcional, restrições, regras de negócio, critérios de aceitação e expectativas do stakeholder.
+
+## Restrições textuais e formato da resposta
+- Deve retornar APENAS um array JSON válido de strings, contendo exatamente 3 strings, cada uma sendo uma pergunta contextual.
+- Exemlo de formato de resposta: ["Pergunta 1?", "Pergunta 2?", "Pergunta 3?"]
+- Cada resposta deve ter até 300 caracteres
+- Não use markdown. Não dê explicações adicionais além do JSON
+- Sem aspas ao longo do texto da resposta. Se precisar citar algo, use aspas simples
+- IMPORTANTE: Sua resposta DEVE estar no idioma: {language}
 """,
 }

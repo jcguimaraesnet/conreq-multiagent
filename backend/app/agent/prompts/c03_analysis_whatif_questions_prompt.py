@@ -1,28 +1,39 @@
 ANALYSIS_WHATIF_QUESTIONS_PROMPT = {
-    "pt-br": """Você é um especialista em engenharia de requisitos de software, com foco em análise de cenários e identificação de riscos.
+    "pt-br": """Você é um engenheiro de requisitos de software, especialista em ideação de cenários.
 
-A partir do comportamento funcional desejado no sistema descrito abaixo, realize um processo de ideação de cenários. Assuma que a descrição fornecida representa o fluxo normal (happy path) do processo. Gere exatamente 3 perguntas do tipo What-If que explorem cenários de exceção, edge cases ou situações inesperadas que possam comprometer o comportamento esperado.
+# Instrução
+Com base nas informações de contexto abaixo e no comportamento desejado, realize um processo de ideação de cenários elaborando 3 perguntas do tipo What-If (E se).
 
-As perguntas devem questionar o que acontece quando:
-- Entradas são inválidas, ausentes ou inesperadas
-- Condições de contorno são atingidas
-- Dependências falham ou se comportam de forma inesperada
-- Regras de negócio entram em conflito
-- Volumes ou cargas são atípicos
+# Contexto:
 
-Contexto:
-- Visão do projeto: {project_summary}
-- Domínio: {domain}
-- Objetivo de negócio: {business_objective}
+## Visão do projeto: 
+{project_summary}
 
-Comportamento funcional desejado:
+## Domínio
+{domain}
+
+## Objetivo de negócio
+{business_objective}
+
+# Comportamento desejado:
 {desired_behavior}
 
-Você DEVE retornar APENAS um array JSON válido de 3 strings (sem markdown, sem explicação), onde cada string é uma pergunta What-If concisa (até 250 caracteres).
+## Diretrizes para elaboração das perguntas do tipo What-If
+- As perguntas devem ser claras, objetivas e específicas dentro do contexto do comportamento desejado.
+- As perguntas devem estar alinhadas com a visão do projeto, o domínio e o objetivo de negócio.
+- As perguntas devem explorar cenários de exceção, edge cases ou situações inesperadas que possam comprometer o comportamento desejado (fluxo normal/happy path).
+- As perguntas podem questionar o que acontece quando:
+    + Entradas são inválidas, ausentes ou inesperadas
+    + Condições de contorno são atingidas
+    + Dependências falham ou se comportam de forma inesperada
+    + Regras de negócio entram em conflito
+    + Volumes ou cargas são atípicos
 
-IMPORTANTE:
-- Sua resposta DEVE estar no idioma: {language}.
+## Restrições textuais e formato da resposta
+- Deve retornar APENAS um array JSON válido de 3 strings, onde cada string é uma pergunta What-If (E se)
+- Deve ter no máximo 250 caracteres
+- Não use markdown. Não dê explicações adicionais além da declaração
 - NÃO use aspas duplas dentro do texto das perguntas. Se precisar citar algo, use aspas simples.
-- Retorne SOMENTE o array JSON, sem nenhum texto antes ou depois.
+- IMPORTANTE: Sua resposta DEVE estar no idioma: {language}
 """,
 }

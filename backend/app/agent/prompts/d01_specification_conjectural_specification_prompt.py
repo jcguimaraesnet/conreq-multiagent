@@ -1,29 +1,23 @@
 SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT = {
-    "pt-br": """Você é um especialista em especificação de requisitos de software com incertezas.
+    "pt-br": """Você é um especialista em especificar requisitos de software com incertezas.
 Um requisito de software com incerteza é chamado de requisito conjectural.
 
 # Instrução geral
 
-Sua tarefa é gerar uma especificação de requisito conjectural, de acordo com as instruções abaixo.
-Gere exatamente UM requisito conjectural preenchendo os campos entre colchetes contidos no Modelo de Especificação de Requisito Conjectural,
-tomando como base as informações abaixo.
+- Sua tarefa é gerar uma especificação de requisito conjectural, de acordo com as informações de contexto abaixo.
+- Gere um requisito conjectural preenchendo os campos entre colchetes do "Modelo de Especificação de Requisito Conjectural", tomando como base as "informações brutas" de cada campo.
+- Preencha os campos entre colchetes usando a informação bruta de cada campo como base, mantendo a essência do texto da informação bruta.
+- MUITO IMPORTANTE: Cada campo é um complemento RESTANTE de uma frase inicial contida no modelo, portanto cada texto deve ser preenchido para que tenha concordancia com sua respectiva frase inicial.
 
-## Informações Gerais do Projeto
+# Contexto
 
-**Resumo do Projeto:**
-{project_summary}
+## Informações brutas de cada campo
 
-**Domínio de Negócio:** {domain}
-
-**Stakeholder Principal:** {stakeholder}
-
-**Objetivo de Negócio:** {business_objective}
-
-## Informações específicas para guiar a geração da especificação do requisito conjectural
-
-- **Ideia inicial de necessidade de negócio:** {business_need}
-- **Ideia inicial de incerteza:** {uncertainty}
-- **Ideia inicial de hipótese de solução:** {supposition_solution}
+- Informação bruta de **comportamento desejado:** {desired_behavior}
+- Informação bruta de **necessidade de negócio:** {business_need}
+- Informação bruta de **incerteza:** {uncertainty}
+- Informação bruta de **hipótese de solução:** {supposition_solution}
+- informação bruta de **descrição da observação:** {supposition_solution}
 
 ## Modelo de Especificação de Requisito Conjectural
 
@@ -36,19 +30,6 @@ tomando como base as informações abaixo.
 **Esperamos que** [suposição de solução]
 **Resulte na atualização das incertezas sobre** [incerteza]
 **Como resultado de** [descrição da observação]
-
-## Instruções específicas sobre cada campo
-
-[comportamento desejado] -> Se refere a um texto que descreve um comportamento desejado no sistema para alcançar o [necessidade de negócio]
-[necessidade de negócio] -> Se refere a um texto refinado da **ideia inicial de impacto positivo** desejado no negócio (regra importante deste campo: Esse campo deve conter uma ideia única e direta, portanto não use período composto. Não use conectivos como "e", "mas", "porém", "gerúndio" etc. para conectar ou expandir ideias. O texto elaborado deve ter concordância com a frase inicial desse campo "De modo que ")
-[incerteza] -> Se refere a um texto refinado da **ideia inicial de incerteza** para alcançar o [necessidade de negócio] no negócio
-
-[suposição de solução] -> Se refere a um texto refinado da **ideia inicial de hipótese de solução** para resolver a [incerteza]
-[incerteza] -> Mesmo texto elaborado para o campo [incerteza] do FERC
-[descrição da observação] -> Elabore um texto que descreva o que será observado e analisado em termos de métricas do experimento proposto na [suposição de solução], que poderá resolver a dúvida sobre a incerteza
-
-MUITO IMPORTANTE: O texto de cada campo é um complemento RESTANTE de uma frase inicial, portanto cada texto deve ser elaborado para que tenha concordancia com sua respectiva frase inicial.
-
 
 ## Exemplos
 
@@ -97,9 +78,8 @@ QESS:
 **Resulte na atualização das incertezas sobre** a estabilidade dos sensores no braço do paciente do dispositivo de baixo custo que será usado para construção do sistema de software
 **Como resultado de** observação do funcionamento do oxímetro com a pulseira rígida e dos dados gerados.
 
-## Sobre o formato de resposta
-
-Você DEVE retornar APENAS um objeto JSON válido (sem markdown, sem explicação) com:
+## Formato da resposta
+### Deve retornar APENAS um objeto JSON válido no seguinte formato:
 - "ferc": um objeto com:
   - "desired_behavior": [comportamento desejado] (string)
   - "business_need": [necessidade de negócio] (string)
@@ -109,6 +89,9 @@ Você DEVE retornar APENAS um objeto JSON válido (sem markdown, sem explicaçã
   - "uncertainty_evaluated": [incerteza] (string)
   - "observation_analysis": [descrição da observação] (string)
 
-IMPORTANTE: Sua resposta DEVE estar no idioma: {language}.
+## Restrições textuais
+- Não use markdown. Não dê explicações adicionais além do JSON especificado no formato da resposta
+- Sem aspas ao longo do texto da resposta
+- IMPORTANTE: Sua resposta DEVE estar no idioma: {language}.
 """,
 }

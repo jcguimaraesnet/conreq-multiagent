@@ -186,11 +186,11 @@ async def generate_business_needs(
             exclusion_list_text = "\n".join(f"- {item}" for item in exclusion_items)
 
     prompt = get_prompt(ELICITATION_GENERATE_BUSINESS_NEED_PROMPT, data_context.language).format(
-        domain=data_context.domain,
-        stakeholder=data_context.stakeholder,
-        business_objective=data_context.business_objective,
-        project_summary=data_context.project_summary,
         quantity=candidate_count,
+        project_summary=data_context.project_summary,
+        domain=data_context.domain,
+        business_objective=data_context.business_objective,
+        stakeholder=data_context.stakeholder,
         exclusion_list=exclusion_list_text,
         language=data_context.language,
     )
@@ -443,7 +443,11 @@ async def _answer_whatif_questions(
         try:
             response = await model.ainvoke([HumanMessage(content=prompt)])
             raw = _strip_markdown_fences(extract_text(response.content).strip())
-            answers: List[str] = json.loads(raw)
+            try:
+                answers: List[str] = json.loads(raw)
+            except json.JSONDecodeError:
+                # Try extracting just the first valid JSON value (ignores trailing text)
+                answers, _ = json.JSONDecoder().raw_decode(raw)
             all_answers.append(answers)
         except (json.JSONDecodeError, Exception) as e:
             print(f"[Elicitation] Error answering What-If questions: {e}")

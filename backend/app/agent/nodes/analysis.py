@@ -44,22 +44,16 @@ def _strip_markdown_fences(raw: str) -> str:
 
 
 async def _generate_contextual_questions(
+    cd: "ConjecturalData",
     data_context: DataContext,
     model_provider: str,
-) -> List[List[str]]:
-    """Call the LLM to generate 3 contextual questions per business need. Returns list of lists of question strings (index-aligned)."""
-    impacts = [cd.raw_business_need for cd in data_context.conjectural_data]
-    if not impacts:
-        return []
-
-    impacts_text = "\n".join(f"- {pi}" for pi in impacts)
-
+) -> List[str]:
+    """Call the LLM to generate 3 contextual questions for a single business need."""
     prompt = get_prompt(ANALYSIS_CONTEXTUAL_QUESTIONS_PROMPT, data_context.language).format(
-        business_needs=impacts_text,
+        business_need=cd.raw_business_need,
         project_summary=data_context.project_summary,
         domain=data_context.domain,
         business_objective=data_context.business_objective,
-        quantity=len(impacts),
         language=data_context.language,
     )
 
@@ -71,13 +65,11 @@ async def _generate_contextual_questions(
         try:
             return json.loads(raw_content)
         except json.JSONDecodeError:
-            # Attempt to fix unescaped double quotes inside strings by replacing them with single quotes
             fixed = re.sub(r'(?<=\w)"(?=\w)', "'", raw_content)
             return json.loads(fixed)
-
     except (json.JSONDecodeError, Exception) as e:
         print(f"[Analysis] Error generating contextual questions: {e}")
-        return [["Unable to generate question."] * 3] * len(impacts)
+        return ["Unable to generate question."] * 3
 
 
 async def _generate_conjectural_hypotheses(
@@ -129,11 +121,11 @@ async def _synthesize_desired_behavior(
     )
 
     prompt = get_prompt(ANALYSIS_SYNTHESIZE_DESIRED_BEHAVIOR_PROMPT, data_context.language).format(
-        business_need=cd.raw_business_need,
-        questions_answers=qa_text,
         project_summary=data_context.project_summary,
         domain=data_context.domain,
         business_objective=data_context.business_objective,
+        business_need=cd.raw_business_need,
+        questions_answers=qa_text,
         language=data_context.language,
     )
 
@@ -188,11 +180,12 @@ async def _identify_uncertainty_from_qa(
     )
 
     prompt = get_prompt(ANALYSIS_IDENTIFY_UNCERTAINTY_PROMPT, data_context.language).format(
-        desired_behavior=cd.raw_desired_behavior,
-        questions_answers=qa_text,
         project_summary=data_context.project_summary,
         domain=data_context.domain,
         business_objective=data_context.business_objective,
+        business_need=cd.raw_business_need,
+        desired_behavior=cd.raw_desired_behavior,
+        questions_answers=qa_text,
         language=data_context.language,
     )
 
@@ -215,8 +208,8 @@ async def _task_generate_questions(
     """Task: Generate contextual questions per business need, then pause for Elicitation to answer."""
     print(f"[Analysis] Elicitation context loaded — {len(data_context.conjectural_data)} business need(s)")
 
-    questions_list = await _generate_contextual_questions(data_context, model_provider)
-    for idx, (cd, questions) in enumerate(zip(data_context.conjectural_data, questions_list), start=1):
+    for idx, cd in enumerate(data_context.conjectural_data, start=1):
+        questions = await _generate_contextual_questions(cd, data_context, model_provider)
         cd.raw_desired_behavior_questions_answers = [
             QuestionAnswer(question=q) for q in questions
         ]

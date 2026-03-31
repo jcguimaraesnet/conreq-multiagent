@@ -14,7 +14,8 @@
       "Skill(update-config:*)",
       "WebSearch",
       "WebFetch(domain:www.npmjs.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Read(//backend/app/agent/**)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

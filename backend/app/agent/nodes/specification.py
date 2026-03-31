@@ -95,10 +95,9 @@ async def _task_generate(
 
         if spec_attempt == 0:
             prompt = get_prompt(SPECIFICATION_CONJECTURAL_SPECIFICATION_PROMPT, data_context.language).format(
-                project_summary=project_summary,
                 domain=domain,
-                stakeholder=stakeholder,
                 business_objective=business_objective,
+                desired_behavior=cd.raw_desired_behavior,
                 business_need=cd.raw_business_need,
                 uncertainty=cd.raw_uncertainty,
                 supposition_solution=cd.raw_supposition_solution,
