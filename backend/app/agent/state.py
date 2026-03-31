@@ -97,7 +97,7 @@ class WorkflowState(CopilotKitState):
     coordinator_phase: Optional[str]  # "elicitation" | "analysis" | "specification" | "validation" | "done"
 
     # Task dispatch for multi-turn dialogues between nodes
-    node_task: Optional[str]  # e.g. "elicitation:answer_questions", "analysis:synthesize_and_continue"
+    node_task: Optional[str]  # e.g. "elicitation:answer_contextual_questions_from_business_need", "analysis:generate_desired_behavior_and_whatif_questions"
 
     # Progress message displayed in the frontend step progress overlay
     progress_message: Optional[str]

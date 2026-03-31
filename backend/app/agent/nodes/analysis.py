@@ -6,16 +6,15 @@ identifies ambiguous terms via an LLM call, computes a non-ambiguity
 metric, and stores the results back in the knowledge graph and state.
 """
 
-import asyncio
 import json
 import re
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
 from langchain_core.runnables.config import RunnableConfig
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage
 from app.agent.llm_config import get_model, extract_text, LLMProvider
 from langgraph.types import Command
-from copilotkit.langgraph import copilotkit_emit_state, copilotkit_customize_config
+from copilotkit.langgraph import copilotkit_customize_config
 
 from app.agent.state import WorkflowState
 from app.agent.models.data_context import DataContext, ConjecturalData, QuestionAnswer
@@ -26,12 +25,6 @@ from app.agent.prompts.c05_analysis_conjectural_hypothesis_prompt import ANALYSI
 from app.agent.prompts.c02_analysis_synthesize_desired_behavior_prompt import ANALYSIS_SYNTHESIZE_DESIRED_BEHAVIOR_PROMPT
 from app.agent.prompts.c03_analysis_whatif_questions_prompt import ANALYSIS_WHATIF_QUESTIONS_PROMPT
 from app.agent.prompts.c04_analysis_identify_uncertainty_prompt import ANALYSIS_IDENTIFY_UNCERTAINTY_PROMPT
-from app.agent.models.knowledge_graph import (
-    BusinessUncertainty,
-    KnowledgeGraph,
-    kg_from_state,
-    kg_to_state,
-)
 
 
 def _strip_markdown_fences(raw: str) -> str:
@@ -208,7 +201,7 @@ async def _task_generate_contextual_questions_from_business_need(
     return {
         "data_context": data_context.model_dump(),
         "coordinator_phase": "elicitation",
-        "node_task": "elicitation:answer_questions",
+        "node_task": "elicitation:answer_contextual_questions_from_business_need",
     }
 
 
@@ -237,7 +230,7 @@ async def _task_generate_desired_behavior_and_whatif_questions(
     return {
         "data_context": data_context.model_dump(),
         "coordinator_phase": "elicitation",
-        "node_task": "elicitation:answer_whatif_questions",
+        "node_task": "elicitation:answer_whatif_questions_from_desired_behavior",
     }
 
 

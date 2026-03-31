@@ -272,7 +272,7 @@ async def _answer_contextual_questions(
     return all_answers
 
 
-async def _task_answer_questions(
+async def _task_answer_contextual_questions_from_business_need(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
@@ -339,7 +339,7 @@ async def _answer_whatif_questions(
     return all_answers
 
 
-async def _task_answer_whatif_questions(
+async def _task_answer_whatif_questions_from_desired_behavior(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
@@ -452,8 +452,8 @@ async def _task_generate_business_needs(
 # Task registry: maps task names to handler functions
 ELICITATION_TASKS = {
     "generate_business_needs": _task_generate_business_needs,
-    "answer_questions": _task_answer_questions,
-    "answer_whatif_questions": _task_answer_whatif_questions,
+    "answer_contextual_questions_from_business_need": _task_answer_contextual_questions_from_business_need,
+    "answer_whatif_questions_from_desired_behavior": _task_answer_whatif_questions_from_desired_behavior,
 }
 
 

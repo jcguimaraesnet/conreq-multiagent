@@ -32,8 +32,8 @@ PHASE_MESSAGES = {
 
 # Progress messages for multi-turn dialogue tasks
 TASK_MESSAGES = {
-    "elicitation:answer_questions": "Answering contextual questions...",
-    "elicitation:answer_whatif_questions": "Answering What-If questions...",
+    "elicitation:answer_contextual_questions_from_business_need": "Answering contextual questions...",
+    "elicitation:answer_whatif_questions_from_desired_behavior": "Answering What-If questions...",
     "analysis:generate_desired_behavior_and_whatif_questions": "Synthesizing desired behavior...",
     "analysis:generate_uncertainty_and_supposition_solution": "Identifying uncertainties...",
 }
