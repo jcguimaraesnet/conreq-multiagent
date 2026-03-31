@@ -34,8 +34,8 @@ PHASE_MESSAGES = {
 TASK_MESSAGES = {
     "elicitation:answer_questions": "Answering contextual questions...",
     "elicitation:answer_whatif_questions": "Answering What-If questions...",
-    "analysis:synthesize_and_generate_whatif": "Synthesizing desired behavior...",
-    "analysis:identify_uncertainty_and_continue": "Identifying uncertainties...",
+    "analysis:generate_desired_behavior_and_whatif_questions": "Synthesizing desired behavior...",
+    "analysis:generate_uncertainty_and_supposition_solution": "Identifying uncertainties...",
 }
 
 

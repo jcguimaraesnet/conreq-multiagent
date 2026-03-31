@@ -10,11 +10,11 @@ relationships, serialized for downstream nodes.
 import asyncio
 import json
 from difflib import SequenceMatcher
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
 from langchain_core.runnables.config import RunnableConfig
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from app.agent.llm_config import get_model, extract_text
+from app.agent.llm_config import get_model, extract_text, LLMProvider
 from langgraph.types import Command
 from copilotkit.langgraph import copilotkit_emit_message, copilotkit_emit_state, copilotkit_customize_config
 from langgraph.types import Command, interrupt
@@ -54,16 +54,6 @@ PROCESSING_MODE = "quick"
 
 
 
-def _format_requirements(existing_requirements: List[Dict[str, Any]]) -> str:
-    """Format requirements list as readable text for prompts."""
-    if not existing_requirements:
-        return "No existing requirements available."
-    return "\n".join(
-        f"- [{r.get('requirement_id', 'N/A')}] ({r.get('type', 'N/A')}) {r.get('description', '')}"
-        for r in existing_requirements
-    )
-
-
 def _strip_markdown_fences(raw: str) -> str:
     """Remove markdown code fences from LLM response if present."""
     if raw.startswith("```"):
@@ -81,7 +71,7 @@ def _compute_similarity(text_a: str, text_b: str) -> float:
 async def refine_business_needs(
     brief_descriptions: List[str],
     data_context: "DataContext",
-    model_provider: str,
+    model_provider: LLMProvider,
     project_id: Optional[str] = None,
 ) -> tuple[List[str], List[int]]:
     """
@@ -157,7 +147,7 @@ async def refine_business_needs(
 async def generate_business_needs(
     quantity: int,
     data_context: "DataContext",
-    model_provider: str,
+    model_provider: LLMProvider,
     project_id: Optional[str] = None,
 ) -> List[str]:
     """
@@ -242,117 +232,10 @@ async def generate_business_needs(
     return [candidates[i] for i in selected_indices]
 
 
-KNOWN_KNOWNS_BATCH_SIZE = 10
-
-
-async def _build_known_knowns_batch(
-    batch_entities: List[str],
-    project_summary: str,
-    batch_number: int,
-    total_batches: int,
-    model_provider: str,
-) -> List[Dict[str, str]]:
-    """Process a single batch of entities for Known Knowns mapping."""
-    entities_text = "\n".join(f"- {entity}" for entity in batch_entities)
-
-    prompt = KNOWN_KNOWNS_SYSTEM_PROMPT.format(
-        entities=entities_text,
-        project_summary=project_summary,
-    )
-
-    model = get_model(provider=model_provider, temperature=0)
-
-    try:
-        print(f"  [Known Knowns] Batch {batch_number}/{total_batches} — {len(batch_entities)} entities")
-        response = await model.ainvoke([HumanMessage(content=prompt)])
-        raw_content = _strip_markdown_fences(extract_text(response.content).strip())
-        known_knowns: List[Dict[str, str]] = json.loads(raw_content)
-        print(f"  [Known Knowns] Batch {batch_number}/{total_batches} — returned {len(known_knowns)} entities")
-        return known_knowns
-
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"  [Known Knowns] Batch {batch_number}/{total_batches} error: {e}")
-        return [{"entity": entity, "meaning": "NOT_DEFINED"} for entity in batch_entities]
-
-
-async def build_known_knowns(
-    domain_entities: List[str],
-    project_summary: str,
-    model_provider: str,
-    batch_size: int = KNOWN_KNOWNS_BATCH_SIZE,
-) -> List[Dict[str, str]]:
-    """
-    Use LLM to define meanings for all domain entities based on the project summary.
-    Processes in batches to keep prompts small. Returns a Known Knowns mapping.
-    """
-    if not domain_entities:
-        return []
-
-    batches = [
-        domain_entities[i:i + batch_size]
-        for i in range(0, len(domain_entities), batch_size)
-    ]
-    total_batches = len(batches)
-
-    print(f"[Known Knowns] {len(domain_entities)} entities → {total_batches} batch(es) of up to {batch_size}")
-
-    all_known_knowns: List[Dict[str, str]] = []
-    for idx, batch in enumerate(batches, start=1):
-        batch_result = await _build_known_knowns_batch(
-            batch, project_summary,
-            batch_number=idx, total_batches=total_batches,
-            model_provider=model_provider,
-        )
-        all_known_knowns.extend(batch_result)
-
-    print(f"[Known Knowns] All batches completed — {len(all_known_knowns)} entities processed")
-    return all_known_knowns
-
-
-async def build_unknown_knowns(
-    undefined_entities: List[str],
-    stakeholder: str,
-    domain: str,
-    project_summary: str,
-    existing_requirements: List[Dict[str, Any]],
-    model_provider: str,
-) -> List[Dict[str, str]]:
-    """
-    Simulate a stakeholder persona to articulate meanings for entities
-    that were not defined from the documents alone (Unknown Knowns).
-    """
-    if not undefined_entities:
-        return []
-
-    entities_text = "\n".join(f"- {entity}" for entity in undefined_entities)
-
-    prompt = UNKNOWN_KNOWNS_SYSTEM_PROMPT.format(
-        stakeholder=stakeholder,
-        domain=domain,
-        entities=entities_text,
-        project_summary=project_summary,
-        requirements=_format_requirements(existing_requirements),
-    )
-
-    model = get_model(provider=model_provider, temperature=0)
-
-    try:
-        response = await model.ainvoke([HumanMessage(content=prompt)])
-        raw_content = _strip_markdown_fences(extract_text(response.content).strip())
-        unknown_knowns: List[Dict[str, str]] = json.loads(raw_content)
-        return unknown_knowns
-
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"Error building unknown_knowns mapping: {e}")
-        return [
-            {"entity": entity, "meaning": "NOT_INFERRED"}
-            for entity in undefined_entities
-        ]
-
 
 async def _answer_contextual_questions(
     data_context: DataContext,
-    model_provider: str,
+    model_provider: LLMProvider,
 ) -> List[List[str]]:
     """Call the LLM to answer contextual questions for each business need. Returns list of lists of answer strings (index-aligned)."""
     all_answers: List[List[str]] = []
@@ -393,7 +276,7 @@ async def _task_answer_questions(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
-    model_provider: str,
+    model_provider: LLMProvider,
 ) -> dict:
     """Task: Answer contextual questions generated by Analysis."""
     print(f"[Elicitation] Answering contextual questions for {len(data_context.conjectural_data)} business need(s)")
@@ -409,13 +292,13 @@ async def _task_answer_questions(
     return {
         "data_context": data_context.model_dump(),
         "coordinator_phase": "analysis",
-        "node_task": "analysis:synthesize_and_generate_whatif",
+        "node_task": "analysis:generate_desired_behavior_and_whatif_questions",
     }
 
 
 async def _answer_whatif_questions(
     data_context: DataContext,
-    model_provider: str,
+    model_provider: LLMProvider,
 ) -> List[List[str]]:
     """Call the LLM to answer What-If questions for each desired behavior. Returns list of lists of answer strings (index-aligned)."""
     all_answers: List[List[str]] = []
@@ -460,7 +343,7 @@ async def _task_answer_whatif_questions(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
-    model_provider: str,
+    model_provider: LLMProvider,
 ) -> dict:
     """Task: Answer What-If questions generated by Analysis for uncertainty identification."""
     print(f"[Elicitation] Answering What-If questions for {len(data_context.conjectural_data)} business need(s)")
@@ -476,7 +359,7 @@ async def _task_answer_whatif_questions(
     return {
         "data_context": data_context.model_dump(),
         "coordinator_phase": "analysis",
-        "node_task": "analysis:identify_uncertainty_and_continue",
+        "node_task": "analysis:generate_uncertainty_and_supposition_solution",
     }
 
 
@@ -484,7 +367,7 @@ async def _task_generate_business_needs(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
-    model_provider: str,
+    model_provider: LLMProvider,
 ) -> dict:
     """Task: Generate or refine business need statements (default full flow)."""
     context = extract_copilotkit_context(state)

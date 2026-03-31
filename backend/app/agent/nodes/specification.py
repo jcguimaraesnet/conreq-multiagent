@@ -12,7 +12,7 @@ from typing import Optional, List, Dict, Any
 
 from langchain_core.runnables.config import RunnableConfig
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from app.agent.llm_config import get_model, extract_text
+from app.agent.llm_config import get_model, extract_text, LLMProvider
 from langgraph.types import Command
 from copilotkit.langgraph import copilotkit_emit_state, copilotkit_customize_config
 
@@ -65,7 +65,7 @@ async def _task_generate(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
-    model_provider: str,
+    model_provider: LLMProvider,
 ) -> dict:
     """Task: Generate or refine conjectural requirement specifications."""
     context = extract_copilotkit_context(state)

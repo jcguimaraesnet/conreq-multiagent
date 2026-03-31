@@ -187,7 +187,7 @@ async def _identify_uncertainty_from_qa(
         return "Unable to determine uncertainty."
 
 
-async def _task_generate_questions(
+async def _task_generate_contextual_questions_from_business_need(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
@@ -212,7 +212,7 @@ async def _task_generate_questions(
     }
 
 
-async def _task_synthesize_and_generate_whatif(
+async def _task_generate_desired_behavior_and_whatif_questions(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
@@ -241,7 +241,7 @@ async def _task_synthesize_and_generate_whatif(
     }
 
 
-async def _task_identify_uncertainty_and_continue(
+async def _task_generate_uncertainty_and_supposition_solution(
     state: WorkflowState,
     config: RunnableConfig,
     data_context: DataContext,
@@ -269,9 +269,9 @@ async def _task_identify_uncertainty_and_continue(
 
 # Task registry: maps task names to handler functions
 ANALYSIS_TASKS = {
-    "generate_questions": _task_generate_questions,
-    "synthesize_and_generate_whatif": _task_synthesize_and_generate_whatif,
-    "identify_uncertainty_and_continue": _task_identify_uncertainty_and_continue,
+    "generate_contextual_questions_from_business_need": _task_generate_contextual_questions_from_business_need,
+    "generate_desired_behavior_and_whatif_questions": _task_generate_desired_behavior_and_whatif_questions,
+    "generate_uncertainty_and_supposition_solution": _task_generate_uncertainty_and_supposition_solution,
 }
 
 
@@ -296,7 +296,7 @@ async def analysis_node(state: WorkflowState, config: Optional[RunnableConfig] =
         handler = ANALYSIS_TASKS[task_name]
         print(f"[Analysis] Dispatching task: {task_name}")
     else:
-        handler = ANALYSIS_TASKS["generate_questions"]
+        handler = ANALYSIS_TASKS["generate_contextual_questions_from_business_need"]
         print("[Analysis] Running default task: generate_questions")
 
     update = await handler(state, config, data_context, model_provider)
