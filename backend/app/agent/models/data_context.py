@@ -166,8 +166,8 @@ class DataContext(BaseModel):
             sorted_indices = sorted(
                 range(len(cd.conjectural_requirements)),
                 key=lambda idx: (
-                    cd.conjectural_requirements[idx].llm_evaluation.overall_score
-                    if cd.conjectural_requirements[idx].llm_evaluation else 0.0
+                    ev.overall_score
+                    if (ev := cd.conjectural_requirements[idx].llm_evaluation) else 0.0
                 ),
                 reverse=True,
             )
