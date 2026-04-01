@@ -38,7 +38,7 @@ jobs:
           --build-arg NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }} \
           --build-arg NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }} \
           --build-arg LANGGRAPH_DEPLOYMENT_URL=${{ vars.LANGGRAPH_DEPLOYMENT_URL }} \
-          --build-arg ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }} \
+          --build-arg ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }} \ 
           --build-arg RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
           .
           docker push acrconreq.azurecr.io/web:${{ github.sha }}
