@@ -73,7 +73,7 @@ export default function ProjectsTable({
               <th className="px-4 py-4 text-xs font-semibold uppercase tracking-wider w-24 text-center">ID</th>
               <th className="px-4 py-4 text-xs font-semibold uppercase tracking-wider w-1/2">Title</th>
               <th className="px-4 py-4 text-xs font-semibold uppercase tracking-wider">Author</th>
-              <th className="px-4 py-4 text-xs font-semibold uppercase tracking-wider">Created At</th>
+              <th className="px-4 py-4 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Created At</th>
               <th id="table-actions-header" className="px-4 py-4 text-xs font-semibold uppercase tracking-wider text-center">Actions</th>
             </tr>
           </thead>
