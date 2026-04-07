@@ -68,20 +68,15 @@ else
 	echo -e "${YELLOW}Comando 'sg' indisponivel. Rode manualmente: newgrp docker${NC}"
 fi
 
-step 10 "Verificando se o Docker responde"
-if docker ps >/dev/null 2>&1; then
-	docker ps
-else
-	echo -e "${YELLOW}Docker nao respondeu neste momento.${NC}"
-fi
-
-step 11 "Iniciando Docker se necessario"
-if docker ps >/dev/null 2>&1; then
+step 10 "Iniciando Docker se necessario"
+if sg docker -c 'docker ps' >/dev/null 2>&1; then
 	echo -e "${YELLOW}Docker ja esta rodando.${NC}"
 else
 	cmd sudo service docker start
-	docker ps
 fi
+
+step 11 "Verificando se o Docker responde"
+sg docker -c 'docker ps'
 
 step 12 "Adicionando repositorio NodeSource para Node.js 22"
 echo -e "${YELLOW}>> curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -${NC}"
