@@ -88,7 +88,7 @@ O app suporta dois modos de banco de dados, controlados pelas variáveis de ambi
 
 ```bash
 # 1. Subir instância local
-npx supabase start
+npx supabase start --debug
 
 # 2. na raiz do projeto - aplicar migration + seed no banco local
 # vai no diretório /supabase/migrations e /supabase/seed.sql e aplica sqls

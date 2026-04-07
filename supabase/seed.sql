@@ -29,7 +29,7 @@ VALUES (
         'authenticated',
         'authenticated',
         'admin@cos.ufrj.br',
-        crypt ('senha123', gen_salt ('bf')),
+        extensions.crypt ('senha123', extensions.gen_salt ('bf')),
         now(),
         now(),
         now(),

@@ -14,13 +14,15 @@ services:
       - pnpm-store:/home/vscode/.local/share/pnpm/store
       - uv-cache:/home/vscode/.cache/uv
     network_mode: host
-    user: "1000:1000"
     command: >
       bash -c "
-        cd /workspace &&
-        pnpm config set store-dir /home/vscode/.local/share/pnpm/store &&
-        pnpm install &&
-        cd backend && uv sync
+        chown -R 1000:1000 /home/vscode/.local/share/pnpm/store /home/vscode/.cache/uv &&
+        su vscode -c '
+          cd /workspace &&
+          pnpm config set store-dir /home/vscode/.local/share/pnpm/store &&
+          pnpm install &&
+          cd backend && uv sync
+        '
       "
 
   backend:
