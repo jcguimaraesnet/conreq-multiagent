@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.local.example
+!.env.local.local-example
+!backend/.env.example
+!backend/.env.local.example
 
 # arquivo de suporte
 .ready

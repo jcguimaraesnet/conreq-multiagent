@@ -1,6 +1,34 @@
+from dataclasses import dataclass
+from typing import Any
+
 from supabase import create_client, Client
 from supabase._async.client import create_client as create_async_client, AsyncClient
 from app.config import get_settings
+
+
+@dataclass
+class _EmptyResponse:
+    """Placeholder for PostgREST 204 (No Content) responses."""
+    data: Any = None
+    count: Any = None
+
+
+def safe_maybe_single_execute(query):
+    """Execute a query that uses maybe_single(), handling PostgREST 204 responses.
+
+    Local Supabase (PostgREST) returns HTTP 204 when maybe_single() finds no row,
+    which causes postgrest-py to either raise an exception or return None.
+    This wrapper handles both cases and returns a consistent empty response.
+    """
+    try:
+        result = query.execute()
+        if result is None:
+            return _EmptyResponse()
+        return result
+    except Exception as e:
+        if "204" in str(e) or "Missing response" in str(e):
+            return _EmptyResponse()
+        raise
 
 
 def get_supabase_client() -> Client:

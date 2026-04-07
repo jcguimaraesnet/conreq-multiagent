@@ -104,12 +104,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json();
 
-      // The backend returns defaults if no settings are saved,
-      // but we can detect if user has saved settings by checking if the response
-      // came from the database (non-default) or not. Since the backend always returns
-      // valid settings, we'll consider them as "saved" if the fetch succeeded.
-      // A more precise approach: we check if the backend returned stored data.
-      // For now, we'll do a simple heuristic: if we get data back, assume saved.
+      const isSaved = data.is_saved === true;
       const loadedSettings: UserSettings = {
         require_brief_description: data.require_brief_description,
         require_evaluation: data.require_evaluation,
@@ -122,12 +117,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
       // Update module-level cache
       cachedSettings = loadedSettings;
-      cachedHasSaved = true;
+      cachedHasSaved = isSaved;
       cachedUserId = user.id;
       fetchedForUser.current = user.id;
 
       setSettings(loadedSettings);
-      setHasSavedSettings(true);
+      setHasSavedSettings(isSaved);
     } catch (err) {
       console.error('Error loading settings:', err);
       setError('Failed to load settings');

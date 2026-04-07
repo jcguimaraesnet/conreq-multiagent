@@ -9,7 +9,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.routers.auth_utils import get_user_id_from_header
-from app.services.supabase_client import get_supabase_client
+from app.services.supabase_client import get_supabase_client, safe_maybe_single_execute
 
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -23,6 +23,7 @@ class UserSettingsResponse(BaseModel):
     spec_attempts: int
     model: str
     model_judge: str
+    is_saved: bool = False
 
 
 class UserSettingsUpdate(BaseModel):
@@ -58,16 +59,17 @@ async def get_settings(authorization: Optional[str] = Header(None)):
     supabase = get_supabase_client()
 
     try:
-        result = supabase.table("settings")\
-            .select(SETTINGS_FIELDS)\
-            .eq("user_id", user_id)\
-            .maybe_single()\
-            .execute()
+        result = safe_maybe_single_execute(
+            supabase.table("settings")
+            .select(SETTINGS_FIELDS)
+            .eq("user_id", user_id)
+            .maybe_single()
+        )
 
         if result.data:
-            return result.data
+            return {**result.data, "is_saved": True}
 
-        return DEFAULT_SETTINGS
+        return {**DEFAULT_SETTINGS, "is_saved": False}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch settings: {str(e)}")
@@ -93,7 +95,7 @@ async def update_settings(
             raise HTTPException(status_code=500, detail="Failed to save settings")
 
         row = result.data[0]
-        return {k: row[k] for k in UserSettingsResponse.model_fields}
+        return {k: row[k] for k in UserSettingsResponse.model_fields if k != "is_saved"} | {"is_saved": True}
 
     except HTTPException:
         raise

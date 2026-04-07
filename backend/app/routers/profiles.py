@@ -9,7 +9,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.routers.auth_utils import get_user_id_from_header
-from app.services.supabase_client import get_supabase_client
+from app.services.supabase_client import get_supabase_client, safe_maybe_single_execute
 
 
 router = APIRouter(prefix="/profiles", tags=["profiles"])
@@ -64,11 +64,12 @@ async def get_onboarding_status(authorization: Optional[str] = Header(None)):
     supabase = get_supabase_client()
 
     try:
-        result = supabase.table("profiles")\
-            .select(ONBOARDING_COLUMNS)\
-            .eq("id", user_id)\
-            .maybe_single()\
-            .execute()
+        result = safe_maybe_single_execute(
+            supabase.table("profiles")
+            .select(ONBOARDING_COLUMNS)
+            .eq("id", user_id)
+            .maybe_single()
+        )
 
         row = result.data
         return OnboardingStatusResponse(

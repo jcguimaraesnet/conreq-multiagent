@@ -70,6 +70,58 @@ CopilotKit > ThemeProvider > AuthProvider > ProjectProvider > RequirementsProvid
 - **Novas páginas**: usar `AppLayout` como wrapper e `PageTitle` para o título
 - **Dark mode**: novos componentes devem incluir classes `dark:` para suporte a tema escuro
 
+## Banco de Dados Local (Supabase Local)
+
+O app suporta dois modos de banco de dados, controlados pelas variáveis de ambiente:
+
+| Modo | Quando usar | Env files |
+|------|-------------|-----------|
+| **Supabase Cloud** | Deploy na Azure, dev padrão | `backend/.env` + `.env.local` (valores padrão) |
+| **Supabase Local** | Dev offline, testes isolados | Copiar de `backend/.env.local.example` + `.env.local.local-example` |
+
+### Pré-requisitos para modo local
+
+- Docker Desktop instalado e rodando
+- Supabase CLI (`npx supabase` funciona sem instalação global)
+
+### Setup inicial (uma vez)
+
+```bash
+# 1. Logar no Supabase CLI
+npx supabase login
+
+# 2. Linkar ao projeto cloud (pede senha do banco)
+npx supabase link --project-ref wmysvvoiiesvttpynpfy
+
+# 3. Subir instância local
+npx supabase start
+
+# 4. Capturar schema completo do cloud como migration
+npx supabase db pull
+
+# 5. Aplicar migration + seed no banco local
+npx supabase db reset
+```
+
+### Comandos do Supabase Local
+
+```bash
+npx supabase start       # sobe banco local (requer Docker)
+npx supabase stop        # para banco local
+npx supabase status      # mostra URLs e keys locais
+npx supabase status -o env  # mostra keys no formato JWT (usar ANON_KEY e SERVICE_ROLE_KEY para os .env)
+npx supabase db reset    # recria banco local do zero (aplica migrations + seed)
+```
+
+**Importante**: usar `npx supabase status -o env` para obter as keys JWT (`ANON_KEY` e `SERVICE_ROLE_KEY`). O comando sem `-o env` mostra keys no formato `sb_publishable_`/`sb_secret_` que **não funciona** com a lib Python.
+
+### URLs locais
+
+- **API**: http://127.0.0.1:54321
+- **Studio** (UI): http://127.0.0.1:54323
+- **Inbucket** (emails de teste): http://127.0.0.1:54324
+- **Database**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
 ## Comandos úteis
 
 ```bash
