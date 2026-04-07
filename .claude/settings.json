@@ -26,7 +26,14 @@
       "Skill(update-config:*)",
       "Bash(uv sync:*)",
       "Bash(uv run:*)",
-      "Bash(PYTHONIOENCODING=utf-8 uv run langgraph dev --help)"
+      "Bash(PYTHONIOENCODING=utf-8 uv run langgraph dev --help)",
+      "Bash(PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -c \"\\\\d auth.users\")",
+      "Bash(wsl -e bash -c \"PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -c '\\\\d auth.users'\")",
+      "Bash(wsl -e bash -c \"docker exec supabase_db_app-multi-agent-conjectural-assist psql -U postgres -d postgres -c '\\\\d auth.users'\")",
+      "Bash(wsl -e bash -c \"docker exec supabase_db_app-multi-agent-conjectural-assist psql -U postgres -d postgres -c '\\\\d auth.identities'\")",
+      "Bash(wsl -e bash -c \"docker exec supabase_db_app-multi-agent-conjectural-assist psql -U postgres -d postgres -c \\\\\"SELECT id, email, encrypted_password, is_sso_user, is_anonymous, email_confirmed_at, confirmed_at FROM auth.users WHERE email='admin@cos.ufrj.br'\\\\\"\")",
+      "Bash(wsl -e bash -c \"docker exec supabase_db_app-multi-agent-conjectural-assist psql -U postgres -d postgres -c \\\\\"SELECT id, user_id, provider, provider_id, identity_data FROM auth.identities WHERE user_id='a0000000-0000-0000-0000-000000000001'\\\\\"\")",
+      "Bash(wsl -e bash -c \"docker logs supabase_auth_app-multi-agent-conjectural-assist --tail 50\")"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

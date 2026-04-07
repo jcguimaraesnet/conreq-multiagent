@@ -87,10 +87,10 @@ O app suporta dois modos de banco de dados, controlados pelas variáveis de ambi
 ### Setup inicial (uma vez)
 
 ```bash
-# 1. Subir instância local
+# 1. na raiz do projeto - inicia instância local
 npx supabase start --debug
 
-# 2. na raiz do projeto - aplicar migration + seed no banco local
+# 2. na raiz do projeto - recria banco e aplicar migration + seed
 # vai no diretório /supabase/migrations e /supabase/seed.sql e aplica sqls
 npx supabase db reset
 

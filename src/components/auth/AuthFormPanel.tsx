@@ -63,7 +63,7 @@ export default function AuthFormPanel() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError(error.message)
+      setError(error.message || JSON.stringify(error))
       setIsLoading(false)
       return
     }
