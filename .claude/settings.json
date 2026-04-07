@@ -24,7 +24,9 @@
       "WebFetch(domain:www.npmjs.com)",
       "WebSearch",
       "Skill(update-config:*)",
-      "Bash(uv sync:*)"
+      "Bash(uv sync:*)",
+      "Bash(uv run:*)",
+      "Bash(PYTHONIOENCODING=utf-8 uv run langgraph dev --help)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

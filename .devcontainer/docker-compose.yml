@@ -43,4 +43,4 @@ services:
     env_file:
       - ../backend/.env # ou ../.env se ficar na raiz
     user: "vscode"
-    command: /bin/sh -c "while [ ! -f /workspace/.ready ]; do sleep 3; done && cd backend && uv run langgraph dev --port 8123 --host 0.0.0.0 --no-browser"
+    command: /bin/sh -c "while [ ! -f /workspace/.ready ]; do sleep 3; done && cd backend && uv run langgraph dev --port 8123 --host 0.0.0.0 --no-browser --n-jobs-per-worker 10"
