@@ -23,7 +23,8 @@
       "WebFetch(domain:selfrefine.info)",
       "WebFetch(domain:www.npmjs.com)",
       "WebSearch",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(uv sync:*)"
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",

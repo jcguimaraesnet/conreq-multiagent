@@ -23,14 +23,6 @@ from app.agent.state import WorkflowState
 from app.agent.tools import generate_task_steps_generative_ui
 from app.agent.utils.context_utils import extract_copilotkit_context
 from app.agent.utils.project_data import fetch_project_context_fields
-from app.agent.utils.nlp_entity_extractor import extract_domain_entities, extract_entity_relations
-from app.agent.models.knowledge_graph import (
-    EntityNode,
-    EntityRelation,
-    KnowledgeGraph,
-    kg_to_state,
-    to_networkx,
-)
 from app.agent.models.data_context import DataContext, ConjecturalData, QuestionAnswer
 from app.agent.prompts.factory import get_prompt
 from app.agent.prompts.b01_elicitation_refine_business_need_prompt import ELICITATION_REFINE_BUSINESS_NEED_PROMPT

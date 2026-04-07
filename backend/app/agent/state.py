@@ -76,9 +76,6 @@ class WorkflowState(CopilotKitState):
     # Serialized from DataContext Pydantic model via .model_dump()
     data_context: Dict[str, Any]
 
-    # Domain knowledge graph: entities (nodes), relations (edges), stakeholder, domain
-    # Serialized from KnowledgeGraph Pydantic model via kg_to_state()
-    knowledge_graph: Dict[str, Any]
 
     # Ambiguity analysis results from the analysis node
     ambiguous_terms: List[str]
