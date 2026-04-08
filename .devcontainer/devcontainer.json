@@ -1,5 +1,5 @@
 {
-  "name": "SMA Conjectural Assist",
+  "name": "CONREQ Multi-Agent",
   "dockerComposeFile": "docker-compose.yml",
   "service": "backend",
   "workspaceFolder": "/workspace",

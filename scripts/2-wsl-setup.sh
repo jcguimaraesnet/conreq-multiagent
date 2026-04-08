@@ -100,7 +100,7 @@ echo -e "${YELLOW}1 - SAIA da sessão atual e reinicie o WSL no PowerShell/CMD:$
 echo -e "${YELLOW}    wsl --shutdown${NC}"
 echo -e "${YELLOW}    wsl${NC}"
 echo -e "${YELLOW}2 - clonar repo (exemplo):${NC}"
-echo -e "${YELLOW}    git clone https://github.com/jcguimaraesnet/app-multi-agent-conjectural-assist.git${NC}"
+echo -e "${YELLOW}    git clone https://github.com/jcguimaraesnet/conreq-multiagent.git${NC}"
 echo -e "${YELLOW}3 - montar .env.local e backend/.env${NC}"
 echo -e "${YELLOW}4 - executar o supabase na raiz do projeto:${NC}"
 echo -e "${YELLOW}    npx supabase start${NC}"
