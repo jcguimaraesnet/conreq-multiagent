@@ -42,11 +42,14 @@ services:
       init:
         condition: service_completed_successfully
     restart: unless-stopped
+    labels:
+      - conreq_service=backend
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+        labels: "conreq_service"
 
   frontend:
     build:
@@ -65,11 +68,14 @@ services:
       init:
         condition: service_completed_successfully
     restart: unless-stopped
+    labels:
+      - conreq_service=frontend
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+        labels: "conreq_service"
 
   agent:
     build:
@@ -90,11 +96,14 @@ services:
       init:
         condition: service_completed_successfully
     restart: unless-stopped
+    labels:
+      - conreq_service=agent
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+        labels: "conreq_service"
 
   # --- Logging infrastructure ---
 
