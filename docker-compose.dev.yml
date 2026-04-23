@@ -143,6 +143,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./config/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./config/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - fluent-bit-state:/fluent-bit/state
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -152,3 +153,4 @@ volumes:
   pnpm-store:
   uv-cache:
   es-data:
+  fluent-bit-state:
