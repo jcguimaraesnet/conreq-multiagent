@@ -84,6 +84,14 @@ uv run langgraph dev --port 8123 --no-browser
 pnpm dev:agent
 ```
 
+### 4. Configuração ELK
+
+1. Entre no localhost:5601.
+2. Clique em Explore on my own.
+3. Na tela inicial, clique no link Stack Management.
+4. No menu, clique em Kibana -> Saved Objects.
+5. Clique em Import e selecione o arquivo exportado no diretório elk do repositório.
+
 
 ## 🔗 Links
 
