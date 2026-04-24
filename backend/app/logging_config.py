@@ -35,8 +35,22 @@ class _PlainTextFormatter(logging.Formatter):
         return super().format(record)
 
 
+_configured = False
+
+
 def setup_logging(service: str = "backend") -> None:
-    """Configure all loggers to emit plain text to stdout."""
+    """Configure all loggers to emit plain text to stdout.
+
+    Idempotent: the first caller wins. This matters because the agent's
+    graph module calls setup_logging(service="agent") on import, and the
+    backend's main.py imports that module transitively — without this guard
+    the backend's `[backend]` label gets overwritten to `[agent]`.
+    """
+    global _configured
+    if _configured:
+        return
+    _configured = True
+
     level = os.environ.get("LOG_LEVEL", "INFO").upper()
 
     formatter = _PlainTextFormatter(
