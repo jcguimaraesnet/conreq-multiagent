@@ -194,6 +194,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pypdf2" },
     { name = "python-dotenv" },
+    { name = "python-json-logger" },
     { name = "python-multipart" },
     { name = "supabase" },
     { name = "uvicorn", extra = ["standard"] },
@@ -217,6 +218,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.12.0" },
     { name = "pypdf2", specifier = ">=3.0.1" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "python-json-logger", specifier = ">=3.0.0" },
     { name = "python-multipart", specifier = ">=0.0.22" },
     { name = "supabase", specifier = ">=2.27.3" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.40.0" },
@@ -1075,7 +1077,7 @@ wheels = [
 
 [[package]]
 name = "langgraph"
-version = "1.0.9"
+version = "1.0.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
@@ -1085,14 +1087,14 @@ dependencies = [
     { name = "pydantic" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dc/63/69373a6721f30026ffa462a62084b11ed4bb5a201d1672366e13a89532f3/langgraph-1.0.9.tar.gz", hash = "sha256:feac2729faba7d3c325bef76f240d7d7f66b02d2cbf4fdb1ed7d0cc83f963651", size = 502800, upload-time = "2026-02-19T18:19:45.228Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/92/14df6fefba28c10caf1cb05aa5b8c7bf005838fe32a86d903b6c7cc4018d/langgraph-1.0.10.tar.gz", hash = "sha256:73bd10ee14a8020f31ef07e9cd4c1a70c35cc07b9c2b9cd637509a10d9d51e29", size = 511644, upload-time = "2026-02-27T21:04:38.743Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/a2/562a6c2430085c2c29b23c1e1d12233bf41a64e9a9832eda7573af3666cf/langgraph-1.0.9-py3-none-any.whl", hash = "sha256:bce0d1f3e9a20434215a2a818395a58aedfc11c87bd6b52706c0db5c05ec44ec", size = 158150, upload-time = "2026-02-19T18:19:43.913Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/60/260e0c04620a37ba8916b712766c341cc5fc685dabc6948c899494bbc2ae/langgraph-1.0.10-py3-none-any.whl", hash = "sha256:7c298bef4f6ea292fcf9824d6088fe41a6727e2904ad6066f240c4095af12247", size = 160920, upload-time = "2026-02-27T21:04:35.932Z" },
 ]
 
 [[package]]
 name = "langgraph-api"
-version = "0.7.71"
+version = "0.8.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
@@ -1100,6 +1102,7 @@ dependencies = [
     { name = "grpcio" },
     { name = "grpcio-health-checking" },
     { name = "grpcio-tools" },
+    { name = "httptools", marker = "sys_platform != 'win32'" },
     { name = "httpx" },
     { name = "jsonschema-rs" },
     { name = "langchain-core" },
@@ -1121,11 +1124,13 @@ dependencies = [
     { name = "truststore" },
     { name = "uuid-utils" },
     { name = "uvicorn" },
+    { name = "uvloop", marker = "sys_platform != 'win32'" },
     { name = "watchfiles" },
+    { name = "zstandard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/e6/aacb265f134f60ac641fc68872120da91da88e7ea6cddc7694fccb6cb2f8/langgraph_api-0.7.71.tar.gz", hash = "sha256:8d245b9529f6569070dd0cb3602812cf6af3a013d1cda9822f0cf191397cf2d0", size = 632830, upload-time = "2026-03-13T21:01:53.917Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/7a/a355ceb2d9eb804d9a0e74f3620a4578a397d00f12d748e4d876a105ea11/langgraph_api-0.8.1.tar.gz", hash = "sha256:51249d71c29d153c8e64aa1f3ff2717d8364d8d4ee500461a1b2fb7974f72237", size = 671799, upload-time = "2026-04-23T20:01:38.598Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/66/e7c02cafbd7a158b22d3ffdc82566a32983b72a531bd90fc15fdad49a8c8/langgraph_api-0.7.71-py3-none-any.whl", hash = "sha256:e4e97d88b20e9b375110e8861a1dabe56a14322bb1acd3ed93f591e56a1e6c47", size = 530622, upload-time = "2026-03-13T21:01:52.591Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/fe/7d5d68ce387902f752432e68ec34e60da93232b2c00cb5fa7464da03d16f/langgraph_api-0.8.1-py3-none-any.whl", hash = "sha256:36f5cba9db7b2db1d8571298ef741622aa0423443e4cff000dd04a38cb2ef769", size = 558980, upload-time = "2026-04-23T20:01:36.905Z" },
 ]
 
 [[package]]
@@ -1143,22 +1148,24 @@ wheels = [
 
 [[package]]
 name = "langgraph-cli"
-version = "0.4.14"
+version = "0.4.24"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
+    { name = "httpx" },
     { name = "langgraph-sdk" },
+    { name = "pathspec" },
+    { name = "python-dotenv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/6a/c9e73635933b722e4fca31fbf49dbe23eb06efde459b3aabf5a2a6d192e5/langgraph_cli-0.4.14.tar.gz", hash = "sha256:ba6bc715651d85ba94d14d6c53db87b4bf478cf45d61a28af9c8dee629f3cf1f", size = 857457, upload-time = "2026-03-02T21:27:19.189Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/77/34ebed84736dacbf164617794c15cd9271c18773cf32eeb7086c8b7b6dfd/langgraph_cli-0.4.24.tar.gz", hash = "sha256:8f05f0aec38a5da3cb0e7250123530e83c0179d74be0021050bc5cd36ac0dafb", size = 1027613, upload-time = "2026-04-22T18:49:30.921Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e1/29/25fb20e2f2f5733edd52a5c7735a397a71763bdda05a74d1398221a49a41/langgraph_cli-0.4.14-py3-none-any.whl", hash = "sha256:42ad7e56b512a3c260b205f7623d2e2cc0b245463961810fcc44482200374b4b", size = 42116, upload-time = "2026-03-02T21:27:18.042Z" },
+    { url = "https://files.pythonhosted.org/packages/12/89/c5b09ad2dffb411987529f32e81fe318ccef3c2fdff2442e7c25b05b108c/langgraph_cli-0.4.24-py3-none-any.whl", hash = "sha256:aaf4dbecd752391c1489864da3a8e0af08e6bb0684d6516007617ce0abe9404d", size = 75486, upload-time = "2026-04-22T18:49:29.888Z" },
 ]
 
 [package.optional-dependencies]
 inmem = [
     { name = "langgraph-api" },
     { name = "langgraph-runtime-inmem" },
-    { name = "python-dotenv" },
 ]
 
 [[package]]
@@ -1176,7 +1183,7 @@ wheels = [
 
 [[package]]
 name = "langgraph-runtime-inmem"
-version = "0.26.0"
+version = "0.28.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "blockbuster" },
@@ -1187,22 +1194,22 @@ dependencies = [
     { name = "starlette" },
     { name = "structlog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/01/3a6265341cf4d7f6550543ec6917d8eb4a0cfba5fbe2669497a631762304/langgraph_runtime_inmem-0.26.0.tar.gz", hash = "sha256:b9c587d1339320a2a54a570a21aecaf59eebc4be07cef1d8a5b035f3f2c61d6a", size = 110402, upload-time = "2026-02-24T00:22:31.938Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/49/daf02ad6b9accd858a0e165d8beb94e5378fad12c17b29f8228d7a596be0/langgraph_runtime_inmem-0.28.0.tar.gz", hash = "sha256:e02536508b5c154f18a24240663af7c2389f43cb4fbbac995a2717b4cfe40d2f", size = 115393, upload-time = "2026-04-23T19:49:38.872Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/b2/69cb16fc83b94449ee6e80c73b8c522da59ef1f52714e06c3cff1e27eab8/langgraph_runtime_inmem-0.26.0-py3-none-any.whl", hash = "sha256:cd91fd9783be5aecb99888fd3aa0d6677ea74d973fbb306acd566c9323cbc7c1", size = 44241, upload-time = "2026-02-24T00:22:30.815Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/b1/b600e38260da97f2d71a041b2730f97f51bb2ce62a98230a7fac5fc3ca02/langgraph_runtime_inmem-0.28.0-py3-none-any.whl", hash = "sha256:26adc3bf115eba0b52532d18a13a297631454bc9f2a0e1f9b77060583ba81fdf", size = 47625, upload-time = "2026-04-23T19:49:37.869Z" },
 ]
 
 [[package]]
 name = "langgraph-sdk"
-version = "0.3.5"
+version = "0.3.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "orjson" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/60/2b/2dae368ac76e315197f07ab58077aadf20833c226fbfd450d71745850314/langgraph_sdk-0.3.5.tar.gz", hash = "sha256:64669e9885a908578eed921ef9a8e52b8d0cd38db1e3e5d6d299d4e6f8830ac0", size = 177470, upload-time = "2026-02-10T16:56:09.18Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0e/db/77a45127dddcfea5e4256ba916182903e4c31dc4cfca305b8c386f0a9e53/langgraph_sdk-0.3.13.tar.gz", hash = "sha256:419ca5663eec3cec192ad194ac0647c0c826866b446073eb40f384f950986cd5", size = 196360, upload-time = "2026-04-07T20:34:18.766Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/d5/a14d957c515ba7a9713bf0f03f2b9277979c403bc50f829bdfd54ae7dc9e/langgraph_sdk-0.3.5-py3-none-any.whl", hash = "sha256:bcfa1dcbddadb604076ce46f5e08969538735e5ac47fa863d4fac5a512dab5c9", size = 70851, upload-time = "2026-02-10T16:56:07.983Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/ef/64d64e9f8eea47ce7b939aa6da6863b674c8d418647813c20111645fcc62/langgraph_sdk-0.3.13-py3-none-any.whl", hash = "sha256:aee09e345c90775f6de9d6f4c7b847cfc652e49055c27a2aed0d981af2af3bd0", size = 96668, upload-time = "2026-04-07T20:34:17.866Z" },
 ]
 
 [[package]]
@@ -1704,6 +1711,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pathspec"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2e/17/9c3094b822982b9f1ea666d8580ce59000f61f87c1663556fb72031ad9ec/pathspec-1.1.0.tar.gz", hash = "sha256:f5d7c555da02fd8dde3e4a2354b6aba817a89112fa8f333f7917a2a4834dd080", size = 133918, upload-time = "2026-04-23T01:46:22.298Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/c9/8eed0486f074e9f1ca7f8ce5ad663e65f12fdab344028d658fa1b03d35e0/pathspec-1.1.0-py3-none-any.whl", hash = "sha256:574b128f7456bd899045ccd142dd446af7e6cfd0072d63ad73fbc55fbb4aaa42", size = 56264, upload-time = "2026-04-23T01:46:20.606Z" },
+]
+
+[[package]]
 name = "pdfminer-six"
 version = "20251230"
 source = { registry = "https://pypi.org/simple" }
@@ -2195,6 +2211,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f0/26/19cadc79a718c5edbec86fd4919a6b6d3f681039a2f6d66d14be94e75fb9/python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6", size = 44221, upload-time = "2025-10-26T15:12:10.434Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/1b/a298b06749107c305e1fe0f814c6c74aea7b2f1e10989cb30f544a1b3253/python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61", size = 21230, upload-time = "2025-10-26T15:12:09.109Z" },
+]
+
+[[package]]
+name = "python-json-logger"
+version = "4.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f7/ff/3cc9165fd44106973cd7ac9facb674a65ed853494592541d339bdc9a30eb/python_json_logger-4.1.0.tar.gz", hash = "sha256:b396b9e3ed782b09ff9d6e4f1683d46c83ad0d35d2e407c09a9ebbf038f88195", size = 17573, upload-time = "2026-03-29T04:39:56.805Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/be/0631a861af4d1c875f096c07d34e9a63639560a717130e7a87cbc82b7e3f/python_json_logger-4.1.0-py3-none-any.whl", hash = "sha256:132994765cf75bf44554be9aa49b06ef2345d23661a96720262716438141b6b2", size = 15021, upload-time = "2026-03-29T04:39:55.266Z" },
 ]
 
 [[package]]
