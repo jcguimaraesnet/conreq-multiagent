@@ -7,10 +7,12 @@ const logger = pino({
   transport: {
     target: "pino-pretty",
     options: {
-      colorize: true,
-      translateTime: "SYS:yyyy-mm-dd HH:MM:ss",
-      ignore: "pid,hostname,service",
-      messageFormat: "[{service}] {msg}",
+      colorize: false,
+      translateTime: false,
+      ignore: "pid,hostname,time,level,service",
+      hideObject: true,
+      messageFormat: "{msg}",
+      singleLine: true,
     },
   },
 });
