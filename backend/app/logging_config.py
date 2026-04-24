@@ -1,26 +1,24 @@
 """
-Centralized JSON logging configuration.
+Centralized plain-text logging configuration.
 
 Shared by both the FastAPI backend and the LangGraph agent.
 Each service calls setup_logging(service=...) once at startup,
-producing structured JSON lines to stdout that Fluent Bit collects.
+producing human-readable lines to stdout. Fluent Bit collects the
+Docker json-file wrapper and ships the raw line to Elasticsearch.
 """
 
 import logging
 import sys
 import os
 
-from pythonjsonlogger.json import JsonFormatter
-
 
 def setup_logging(service: str = "backend") -> None:
-    """Configure all loggers to emit JSON to stdout."""
+    """Configure all loggers to emit plain text to stdout."""
     level = os.environ.get("LOG_LEVEL", "INFO").upper()
 
-    formatter = JsonFormatter(
-        fmt="%(asctime)s %(levelname)s %(name)s %(message)s",
-        rename_fields={"asctime": "timestamp", "levelname": "level"},
-        static_fields={"service": service},
+    formatter = logging.Formatter(
+        fmt=f"%(asctime)s %(levelname)-8s [{service}] %(name)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     handler = logging.StreamHandler(sys.stdout)
