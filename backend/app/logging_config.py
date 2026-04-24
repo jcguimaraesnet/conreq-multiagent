@@ -53,10 +53,7 @@ def setup_logging(service: str = "backend") -> None:
 
     level = os.environ.get("LOG_LEVEL", "INFO").upper()
 
-    formatter = _PlainTextFormatter(
-        fmt=f"%(asctime)s %(levelname)-8s [{service}] %(name)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    formatter = _PlainTextFormatter(fmt="%(message)s")
 
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
