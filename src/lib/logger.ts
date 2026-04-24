@@ -4,12 +4,15 @@ const logger = pino({
   level: process.env.LOG_LEVEL || "info",
   base: { service: "frontend" },
   timestamp: pino.stdTimeFunctions.isoTime,
-  ...(process.env.LOG_PRETTY === "true" && {
-    transport: {
-      target: "pino-pretty",
-      options: { colorize: true, translateTime: "SYS:HH:MM:ss" },
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      translateTime: "SYS:yyyy-mm-dd HH:MM:ss",
+      ignore: "pid,hostname,service",
+      messageFormat: "[{service}] {msg}",
     },
-  }),
+  },
 });
 
 export default logger;

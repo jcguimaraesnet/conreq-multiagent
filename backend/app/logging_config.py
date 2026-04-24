@@ -12,11 +12,34 @@ import sys
 import os
 
 
+class _PlainTextFormatter(logging.Formatter):
+    """Plain-text formatter that also flattens structlog event_dicts.
+
+    Structlog configured with `ProcessorFormatter.wrap_for_formatter` expects the
+    stdlib handler to use `ProcessorFormatter`; when it doesn't, the event_dict
+    leaks through as `record.msg` and renders as an ugly Python dict repr.
+    We detect that case and flatten it to `event key=value key=value`.
+    """
+
+    _DROP_KEYS = {"event", "timestamp", "level", "logger"}
+
+    def format(self, record: logging.LogRecord) -> str:
+        if isinstance(record.msg, dict):
+            payload = dict(record.msg)
+            event = payload.pop("event", "")
+            for k in ("timestamp", "level", "logger"):
+                payload.pop(k, None)
+            kvs = " ".join(f"{k}={v}" for k, v in payload.items())
+            record.msg = f"{event} {kvs}".strip()
+            record.args = None
+        return super().format(record)
+
+
 def setup_logging(service: str = "backend") -> None:
     """Configure all loggers to emit plain text to stdout."""
     level = os.environ.get("LOG_LEVEL", "INFO").upper()
 
-    formatter = logging.Formatter(
+    formatter = _PlainTextFormatter(
         fmt=f"%(asctime)s %(levelname)-8s [{service}] %(name)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
