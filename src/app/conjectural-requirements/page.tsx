@@ -358,7 +358,13 @@ function ConjecturalRequirementsInner() {
     render: ({ status, result }) => {
       if (status !== ToolCallStatus.Complete || !result) return null;
 
-      const parsed = typeof result === 'string' ? JSON.parse(result) : result;
+      let parsed: { evaluations?: ConjecturalEvaluation[]; requirementId?: string | null } | null;
+      try {
+        parsed = typeof result === 'string' ? JSON.parse(result) : result;
+      } catch (err) {
+        console.error('[useFrontendTool] Failed to parse result as JSON', { result, error: err });
+        return null;
+      }
       const evaluations: ConjecturalEvaluation[] = parsed?.evaluations ?? [];
       const requirementId: string | null = parsed?.requirementId ?? null;
 
@@ -384,7 +390,13 @@ function ConjecturalRequirementsInner() {
     render: ({ status, result }) => {
       if (status !== ToolCallStatus.Complete || !result) return null;
 
-      const parsed = typeof result === 'string' ? JSON.parse(result) : result;
+      let parsed: { evaluations?: ConjecturalEvaluation[]; requirementId?: string | null } | null;
+      try {
+        parsed = typeof result === 'string' ? JSON.parse(result) : result;
+      } catch (err) {
+        console.error('[useFrontendTool] Failed to parse result as JSON', { result, error: err });
+        return null;
+      }
       const evaluations: ConjecturalEvaluation[] = parsed?.evaluations ?? [];
       const requirementId: string | null = parsed?.requirementId ?? null;
 
