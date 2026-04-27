@@ -210,6 +210,7 @@ export default function SettingsPanel() {
             <option value="gpt">GPT 5 Family</option>
             <option value="gpt_azure">GPT 5 Family (Azure)</option>
             <option value="llama_azure">Llama 70B (Azure)</option>
+            <option value="model_local">Local (Ollama/Qwen 14B)</option>
           </select>
         </div>
       </div>

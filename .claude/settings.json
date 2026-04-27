@@ -37,7 +37,9 @@
     ],
     "additionalDirectories": [
       "C:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist\\.claude\\skills",
-      "c:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist"
+      "c:\\repos\\ufrj\\requirement-conjectural-multiagent\\app-multi-agent-conjectural-assist",
+      "c:\\repos\\ufrj\\conreq-multiagent\\.claude\\plans",
+      "C:\\repos\\ufrj\\conreq-multiagent\\.claude\\plans"
     ]
   },
   "plansDirectory": ".claude/plans",

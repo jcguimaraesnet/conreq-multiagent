@@ -214,3 +214,32 @@ swap=2GB
 | `scripts/wsl-setup.sh` | Setup único do WSL2 |
 | `scripts/dev.sh` | Levanta Supabase + app services |
 | `scripts/dev-stop.sh` | Para tudo |
+
+## LLM Providers
+
+O agent LangGraph suporta múltiplos providers, configurados em `backend/app/agent/llm_config.py`. O usuário escolhe o provider ativo pela UI (Settings → LLM configuration), persistido por usuário no Supabase.
+
+| Provider (value) | Modelo padrão | Onde roda | Env vars obrigatórias |
+|---|---|---|---|
+| `gemini` | `gemini-3-pro-preview` | Google AI API | `GEMINI_API_KEY` |
+| `gpt` | `gpt-4o` | OpenAI API | `OPENAI_API_KEY` |
+| `gpt_azure` | deployment Azure | Azure OpenAI | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT_NAME` |
+| `llama_azure` | `Llama-3.3-70B-Instruct-deployment` | Azure AI Foundry | `AZURE_AI_ENDPOINT`, `AZURE_AI_API_KEY` |
+| `model_local` | `qwen2.5:14b-instruct` | **Dev local apenas** — Ollama em VM GPU externa | `MODEL_LOCAL_ENDPOINT` |
+
+Provider separado para "judge" (LLM-as-Judge na validação) em Settings → LLM-as-Judge configuration. Aceita apenas `gemini` ou `gpt_azure`.
+
+### Provider `model_local` (dev only)
+
+Provider exclusivamente para desenvolvimento e testes acadêmicos. **Não** está configurado no workflow de deploy ([.github/workflows/conreq-multiagent-azure-workflow.yml](.github/workflows/conreq-multiagent-azure-workflow.yml)) — o Container App de produção não define `MODEL_LOCAL_ENDPOINT`, então escolher esse provider em prod falha na hora da chamada ao Ollama.
+
+Setup de referência (VM dedicada na Azure):
+
+1. Criar VM GPU (ex: `Standard_NC4as_T4_v3` — T4 16GB VRAM). Requer quota da família NC.
+2. Instalar NVIDIA driver via extensão `NvidiaGpuDriverLinux` do Azure.
+3. Instalar Ollama (`curl -fsSL https://ollama.com/install.sh | sh`) e configurar `OLLAMA_HOST=0.0.0.0:11434` no systemd override.
+4. Baixar o modelo: `ollama pull qwen2.5:14b-instruct`.
+5. No dev local, abrir túnel SSH: `ssh -N -L 11434:localhost:11434 azureuser@<IP_DA_VM>`.
+6. Em `backend/.env`: `MODEL_LOCAL_ENDPOINT=http://localhost:11434/v1`.
+
+Deallocar a VM quando não estiver em uso (`az vm deallocate`) — evita cobrança de compute (~US$ 0.52/h). Trocar de modelo é só `ollama pull <outro>` na VM + ajustar `DEFAULT_MODEL_LOCAL` em `llm_config.py` (ou passar `model=` na chamada).
