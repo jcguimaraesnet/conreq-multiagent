@@ -105,21 +105,19 @@ function DisplayCard({ req }: { req: RequirementItem }) {
             <div className="flex gap-2 px-6 pt-4">
               <button
                 onClick={() => setActiveTab("ferc")}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === "ferc"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === "ferc"
                     ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                  }`}
               >
                 FERC
               </button>
               <button
                 onClick={() => setActiveTab("qess")}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  activeTab === "qess"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === "qess"
                     ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                  }`}
               >
                 QESS
               </button>
@@ -250,10 +248,11 @@ function CustomInput({ inProgress, onSend }: { inProgress: boolean; onSend: (tex
         }}
       />
       <div className="flex items-center justify-between">
-        <Button disabled={inProgress || !text.trim()} 
-        onClick={() => { 
-          onSend(text); 
-          setText(""); }}>Send</Button>
+        <Button disabled={inProgress || !text.trim()}
+          onClick={() => {
+            onSend(text);
+            setText("");
+          }}>Send</Button>
         {agent.isRunning && <StepProgress status="InProgress" state={agent.state} />}
       </div>
     </div>
@@ -296,10 +295,10 @@ function ConjecturalRequirementsInner() {
     render: ({ event, resolve }) => {
       const quantity_req_batch = JSON.parse(event.value).quantity_req_batch || settings.quantity_req_batch;
       return (
-              <InterruptFormBusinessNeedDescription
-                inputCount={quantity_req_batch}
-                onSubmit={resolve}
-              />
+        <InterruptFormBusinessNeedDescription
+          inputCount={quantity_req_batch}
+          onSubmit={resolve}
+        />
       )
     }
   });
@@ -308,13 +307,13 @@ function ConjecturalRequirementsInner() {
     agentId: "conreq-multiagent",
     enabled: (event) => JSON.parse(event.value).type === "hitl_req_approve",
     render: ({ event, resolve }) => {
-            const requirements: RequirementItem[] = JSON.parse(event.value).requirements || [];
-            return (
-              <InterruptFormEvaluation requirements={requirements} onResolve={resolve} />
-            );
+      const requirements: RequirementItem[] = JSON.parse(event.value).requirements || [];
+      return (
+        <InterruptFormEvaluation requirements={requirements} onResolve={resolve} />
+      );
     }
   });
-  
+
   const paramSchema = z.object({ requirement_ids: z.string().describe("The JSON string containing requirement ids") });
 
   useFrontendTool({
@@ -322,7 +321,14 @@ function ConjecturalRequirementsInner() {
     followUp: false,
     parameters: paramSchema,
     handler: async ({ requirement_ids }) => {
-      const ids: string[] = JSON.parse(requirement_ids);
+      let ids: string[];
+      try {
+        ids = JSON.parse(requirement_ids);
+      } catch {
+        console.log('[useFrontendTool] Failed to parse requirement_ids as JSON, falling back to regex extraction', { requirement_ids });
+        // Less capable LLMs may return single-quoted arrays — extract UUIDs via regex as fallback
+        ids = requirement_ids.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi) ?? [];
+      }
 
       //step 1: Fetch each requirement by ID in parallel
       const results = await Promise.allSettled(
@@ -668,14 +674,14 @@ function ConjecturalRequirementsInner() {
 export default function ConjecturalRequirementsPage() {
   useConfigureSuggestions({
     suggestions: [
-        {
-          title: "Generate conjectural requirements",
-          message: "Generate conjectural requirements for the current project.",
-        },
-        {
-          title: "Quantity conjectural",
-          message: "How many conjectural requirements are there in the current project?",
-        },
+      {
+        title: "Generate conjectural requirements",
+        message: "Generate conjectural requirements for the current project.",
+      },
+      {
+        title: "Quantity conjectural",
+        message: "How many conjectural requirements are there in the current project?",
+      },
     ],
     available: "always",
   });
